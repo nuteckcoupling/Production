@@ -1,2 +1,0 @@
-ALTER TABLE cutters
-  ADD COLUMN IF NOT EXISTS lead_angle DECIMAL(6,2) DEFAULT NULL AFTER cutter_type;
