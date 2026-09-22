@@ -1,0 +1,8 @@
+backups/
+*.zip
+*.log
+node_modules/
+react-source/node_modules/
+.env
+.env.*
+!.env.example

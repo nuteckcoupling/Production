@@ -1,0 +1,2 @@
+ALTER TABLE cutters
+  ADD COLUMN IF NOT EXISTS rpm_stroke VARCHAR(50) DEFAULT NULL AFTER lead_angle;
