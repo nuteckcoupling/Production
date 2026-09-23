@@ -1,14 +1,13 @@
 <?php
-require "config.php";
-require "auth.php";
+require __DIR__ . "/bootstrap.php";
 
-$data = json_decode(file_get_contents("php://input"), true) ?? [];
+$data = json_input();
 $username = strtolower(trim($data['username'] ?? ''));
 $password = (string)($data['password'] ?? '');
 
 if ($username === '' || $password === '') {
     http_response_code(400);
-    echo json_encode(['error' => 'Username and Password / PIN are required']);
+    json_response(['error' => 'Username and Password / PIN are required']);
     exit;
 }
 
@@ -25,7 +24,7 @@ $user = $stmt->get_result()->fetch_assoc();
 
 if (!$user || !password_verify($password, $user['password_hash'])) {
     http_response_code(401);
-    echo json_encode(['error' => 'Invalid username or Password / PIN']);
+    json_response(['error' => 'Invalid username or Password / PIN']);
     exit;
 }
 
@@ -42,7 +41,7 @@ $update = $conn->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
 $update->bind_param("i", $_SESSION['user']['id']);
 $update->execute();
 
-echo json_encode(['success' => true, 'user' => $_SESSION['user']]);
+json_response(['success' => true, 'user' => $_SESSION['user']]);
 
 $update->close();
 $stmt->close();

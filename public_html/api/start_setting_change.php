@@ -1,9 +1,8 @@
 <?php
-require "config.php";
-require "auth.php";
+require __DIR__ . "/bootstrap.php";
 $user = require_operator_supervisor();
 
-$data = json_decode(file_get_contents("php://input"), true) ?? [];
+$data = json_input();
 $job_id = filter_var($data['job_id'] ?? null, FILTER_VALIDATE_INT);
 $new_part_id = filter_var($data['new_part_id'] ?? null, FILTER_VALIDATE_INT);
 $new_cutter_id = empty($data['new_cutter_id']) ? null : filter_var($data['new_cutter_id'], FILTER_VALIDATE_INT);
@@ -15,13 +14,13 @@ $remarks = trim($data['remarks'] ?? '');
 
 if (!$job_id || !$new_part_id || $new_component === '' || $reason === '') {
     http_response_code(400);
-    echo json_encode(['error' => 'Job, new part, component and reason are required']);
+    json_response(['error' => 'Job, new part, component and reason are required']);
     exit;
 }
 if ($new_cutter_id === false || strlen($new_component) > 50 || strlen($new_drg_no) > 100
     || strlen($new_operation) > 150 || strlen($reason) > 150 || strlen($remarks) > 255) {
     http_response_code(400);
-    echo json_encode(['error' => 'Invalid or too-long setting details']);
+    json_response(['error' => 'Invalid or too-long setting details']);
     exit;
 }
 
@@ -31,7 +30,7 @@ foreach ($quantity_fields as $field) {
     $raw = $data[$field] ?? 0;
     if (filter_var($raw, FILTER_VALIDATE_INT) === false || (int)$raw < 0) {
         http_response_code(400);
-        echo json_encode(['error' => 'Production quantities must be whole numbers of zero or more']);
+        json_response(['error' => 'Production quantities must be whole numbers of zero or more']);
         exit;
     }
     $values[$field] = (int)$raw;
@@ -39,7 +38,7 @@ foreach ($quantity_fields as $field) {
 $accounted_qty = $values['ok_qty'] + $values['mc_reject_qty'] + $values['rm_defect_qty'] + $values['rework_qty'];
 if ($accounted_qty > $values['total_qty']) {
     http_response_code(400);
-    echo json_encode(['error' => 'OK + Reject + Defect + Rework cannot exceed Total Qty']);
+    json_response(['error' => 'OK + Reject + Defect + Rework cannot exceed Total Qty']);
     exit;
 }
 
@@ -130,22 +129,22 @@ try {
     $insert->close();
 
     $conn->commit();
-    echo json_encode(['success' => true, 'change_id' => (int)$change_id, 'job_id' => (int)$job_id,
+    json_response(['success' => true, 'change_id' => (int)$change_id, 'job_id' => (int)$job_id,
         'status' => 'In Progress']);
 } catch (mysqli_sql_exception $error) {
     $conn->rollback();
     if ($error->getCode() === 1062) {
         http_response_code(409);
-        echo json_encode(['error' => 'A setting change is already in progress on this machine']);
+        json_response(['error' => 'A setting change is already in progress on this machine']);
     } else {
         http_response_code(500);
-        echo json_encode(['error' => 'Unable to start setting change']);
+        json_response(['error' => 'Unable to start setting change']);
     }
 } catch (RuntimeException $error) {
     $conn->rollback();
     $code = $error->getCode();
     http_response_code(in_array($code, [400, 403, 404, 409], true) ? $code : 400);
-    echo json_encode(['error' => $error->getMessage()]);
+    json_response(['error' => $error->getMessage()]);
 }
 $conn->close();
 ?>

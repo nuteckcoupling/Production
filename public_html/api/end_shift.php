@@ -1,9 +1,8 @@
 <?php
-require "config.php";
-require "auth.php";
+require __DIR__ . "/bootstrap.php";
 $user = require_operator_supervisor();
 
-$data = json_decode(file_get_contents("php://input"), true) ?? [];
+$data = json_input();
 $job_id = filter_var($data['job_id'] ?? null, FILTER_VALIDATE_INT);
 $allowed_outcomes = ['Continue Next Shift', 'Job Completed', 'Job Stopped'];
 $allowed_machine_statuses = ['Running', 'Idle', 'Breakdown'];
@@ -14,7 +13,7 @@ if (!$job_id || !in_array($data['job_outcome'] ?? '', $allowed_outcomes, true)
     || !in_array($data['machine_status'] ?? '', $allowed_machine_statuses, true)
     || !in_array($data['issue_code'] ?? '', $allowed_issues, true)) {
     http_response_code(400);
-    echo json_encode(['error' => 'Invalid End Shift details']);
+    json_response(['error' => 'Invalid End Shift details']);
     exit;
 }
 
@@ -24,7 +23,7 @@ foreach ($quantity_fields as $field) {
     $raw = $data[$field] ?? 0;
     if (filter_var($raw, FILTER_VALIDATE_INT) === false || (int)$raw < 0) {
         http_response_code(400);
-        echo json_encode(['error' => 'Quantities and downtime must be whole numbers of zero or more']);
+        json_response(['error' => 'Quantities and downtime must be whole numbers of zero or more']);
         exit;
     }
     $values[$field] = (int)$raw;
@@ -33,7 +32,7 @@ foreach ($quantity_fields as $field) {
 $accounted_qty = $values['ok_qty'] + $values['mc_reject_qty'] + $values['rm_defect_qty'] + $values['rework_qty'];
 if ($accounted_qty > $values['total_qty']) {
     http_response_code(400);
-    echo json_encode(['error' => 'OK + Reject + Defect + Rework cannot exceed Total Qty']);
+    json_response(['error' => 'OK + Reject + Defect + Rework cannot exceed Total Qty']);
     exit;
 }
 
@@ -120,17 +119,17 @@ try {
     $updateJob->close();
 
     $conn->commit();
-    echo json_encode(['success' => true, 'job_id' => (int)$job_id, 'status' => $new_status,
+    json_response(['success' => true, 'job_id' => (int)$job_id, 'status' => $new_status,
         'cumulative_ok_qty' => $new_cumulative]);
 } catch (RuntimeException $error) {
     $conn->rollback();
     $code = $error->getCode();
     http_response_code(in_array($code, [403, 404, 409], true) ? $code : 400);
-    echo json_encode(['error' => $error->getMessage()]);
+    json_response(['error' => $error->getMessage()]);
 } catch (Throwable $error) {
     $conn->rollback();
     http_response_code(500);
-    echo json_encode(['error' => 'Unable to end shift']);
+    json_response(['error' => 'Unable to end shift']);
 }
 
 $conn->close();

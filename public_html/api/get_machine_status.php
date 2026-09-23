@@ -1,12 +1,11 @@
 <?php
-require "config.php";
-require "auth.php";
+require __DIR__ . "/bootstrap.php";
 require_auth();
 
 $machine_id = isset($_GET['machine_id']) ? (int)$_GET['machine_id'] : 0;
 if ($machine_id <= 0) {
     http_response_code(400);
-    echo json_encode(['error' => 'Invalid machine']);
+    json_response(['error' => 'Invalid machine']);
     exit;
 }
 
@@ -32,13 +31,13 @@ $row = $stmt->get_result()->fetch_assoc();
 
 if (!$row) {
     http_response_code(404);
-    echo json_encode(['error' => 'Machine not found']);
+    json_response(['error' => 'Machine not found']);
     exit;
 }
 
 $row['id'] = (int)$row['id'];
 $row['job_id'] = $row['job_id'] === null ? null : (int)$row['job_id'];
-echo json_encode($row);
+json_response($row);
 
 $stmt->close();
 $conn->close();

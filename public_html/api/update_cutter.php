@@ -1,9 +1,8 @@
 <?php
-require "config.php";
-require "auth.php";
+require __DIR__ . "/bootstrap.php";
 require_operator_supervisor();
 
-$data = json_decode(file_get_contents("php://input"), true) ?? [];
+$data = json_input();
 $id = filter_var($data['id'] ?? null, FILTER_VALIDATE_INT);
 $cutter_num = trim($data['cutter_num'] ?? '');
 $cutter_type = trim($data['cutter_type'] ?? '');
@@ -14,17 +13,17 @@ $status = $data['status'] ?? 'Active';
 
 if (!$id || $cutter_num === '') {
     http_response_code(400);
-    echo json_encode(['error' => 'Valid cutter and Cutter Number are required']);
+    json_response(['error' => 'Valid cutter and Cutter Number are required']);
     exit;
 }
 if (!in_array($status, ['Active', 'Not Active'], true)) {
     http_response_code(400);
-    echo json_encode(['error' => 'Invalid cutter status']);
+    json_response(['error' => 'Invalid cutter status']);
     exit;
 }
 if ($lead_angle !== '' && !is_numeric($lead_angle)) {
     http_response_code(400);
-    echo json_encode(['error' => 'Lead Angle must be a number']);
+    json_response(['error' => 'Lead Angle must be a number']);
     exit;
 }
 $lead_angle_value = $lead_angle === '' ? null : $lead_angle;
@@ -34,7 +33,7 @@ $check->bind_param("si", $cutter_num, $id);
 $check->execute();
 if ($check->get_result()->num_rows > 0) {
     http_response_code(409);
-    echo json_encode(['error' => 'Cutter Number already exists']);
+    json_response(['error' => 'Cutter Number already exists']);
     exit;
 }
 $check->close();
@@ -51,19 +50,19 @@ try {
         $exists->execute();
         if ($exists->get_result()->num_rows === 0) {
             http_response_code(404);
-            echo json_encode(['error' => 'Cutter not found']);
+            json_response(['error' => 'Cutter not found']);
             exit;
         }
         $exists->close();
     }
-    echo json_encode(['success' => true, 'id' => (int)$id]);
+    json_response(['success' => true, 'id' => (int)$id]);
 } catch (mysqli_sql_exception $error) {
     if ($error->getCode() === 1062) {
         http_response_code(409);
-        echo json_encode(['error' => 'Cutter Number already exists']);
+        json_response(['error' => 'Cutter Number already exists']);
     } else {
         http_response_code(500);
-        echo json_encode(['error' => 'Unable to update cutter']);
+        json_response(['error' => 'Unable to update cutter']);
     }
 }
 $stmt->close();

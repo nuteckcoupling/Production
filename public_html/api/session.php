@@ -1,9 +1,8 @@
 <?php
-header("Content-Type: application/json");
-require "auth.php";
+require __DIR__ . "/auth.php";
 
 $user = current_user();
-echo json_encode([
+json_response([
     'authenticated' => $user !== null,
     'user' => $user
 ]);

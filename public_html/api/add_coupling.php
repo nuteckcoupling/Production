@@ -1,22 +1,21 @@
 <?php
-require "config.php";
-require "auth.php";
+require __DIR__ . "/bootstrap.php";
 require_operator_supervisor();
 
-$data = json_decode(file_get_contents("php://input"), true);
+$data = json_input();
 $coupling_type = $data['coupling_type'] ?? '';
 $part_name = strtoupper(trim($data['part_name'] ?? ''));
 $allowed_types = ['GC Gear Coupling', 'NA Gear Coupling', 'Roller Chain Coupling', 'Gear', 'Sprocket'];
 
 if (!in_array($coupling_type, $allowed_types, true)) {
     http_response_code(400);
-    echo json_encode(["error" => "Select a valid Coupling Range"]);
+    json_response(["error" => "Select a valid Coupling Range"]);
     exit;
 }
 
 if ($part_name === '') {
     http_response_code(400);
-    echo json_encode(["error" => "Coupling Code / Part Name is required"]);
+    json_response(["error" => "Coupling Code / Part Name is required"]);
     exit;
 }
 
@@ -25,7 +24,7 @@ $check->bind_param("s", $part_name);
 $check->execute();
 if ($check->get_result()->num_rows > 0) {
     http_response_code(409);
-    echo json_encode(["error" => "Coupling Code already exists"]);
+    json_response(["error" => "Coupling Code already exists"]);
     exit;
 }
 $check->close();
@@ -60,20 +59,20 @@ try {
 
     $conn->commit();
     http_response_code(201);
-    echo json_encode(["success" => true, "id" => $part_id]);
+    json_response(["success" => true, "id" => $part_id]);
 } catch (mysqli_sql_exception $error) {
     $conn->rollback();
     if ($error->getCode() === 1062) {
         http_response_code(409);
-        echo json_encode(["error" => "Coupling Code already exists"]);
+        json_response(["error" => "Coupling Code already exists"]);
     } else {
         http_response_code(500);
-        echo json_encode(["error" => "Unable to save coupling"]);
+        json_response(["error" => "Unable to save coupling"]);
     }
 } catch (Throwable $error) {
     $conn->rollback();
     http_response_code(500);
-    echo json_encode(["error" => "Unable to save coupling"]);
+    json_response(["error" => "Unable to save coupling"]);
 }
 
 $conn->close();

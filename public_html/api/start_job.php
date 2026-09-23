@@ -1,14 +1,13 @@
 <?php
-require "config.php";
-require "auth.php";
+require __DIR__ . "/bootstrap.php";
 $user = require_operator_supervisor();
 
-$data = json_decode(file_get_contents("php://input"), true) ?? [];
+$data = json_input();
 $required = ['entry_date', 'shift', 'machine_id', 'coupling_type', 'part_id', 'component'];
 foreach ($required as $field) {
     if (empty($data[$field])) {
         http_response_code(400);
-        echo json_encode(['error' => "Missing required field: $field"]);
+        json_response(['error' => "Missing required field: $field"]);
         exit;
     }
 }
@@ -16,7 +15,7 @@ foreach ($required as $field) {
 $allowed_shifts = ['1', '2', '3', 'Day Shift', 'Night Shift'];
 if (!in_array($data['shift'], $allowed_shifts, true)) {
     http_response_code(400);
-    echo json_encode(['error' => 'Invalid shift']);
+    json_response(['error' => 'Invalid shift']);
     exit;
 }
 $shift_hours_map = ['1' => 14, '2' => 12, '3' => 12, 'Day Shift' => 12, 'Night Shift' => 12];
@@ -25,7 +24,7 @@ $shift_hours = $shift_hours_map[$data['shift']];
 $date = DateTime::createFromFormat('Y-m-d', $data['entry_date']);
 if (!$date || $date->format('Y-m-d') !== $data['entry_date']) {
     http_response_code(400);
-    echo json_encode(['error' => 'Invalid date']);
+    json_response(['error' => 'Invalid date']);
     exit;
 }
 
@@ -43,7 +42,7 @@ $machineCheck->bind_param("i", $machine_id);
 $machineCheck->execute();
 if ($machineCheck->get_result()->num_rows !== 1) {
     http_response_code(400);
-    echo json_encode(['error' => 'Select a valid active machine']);
+    json_response(['error' => 'Select a valid active machine']);
     exit;
 }
 $machineCheck->close();
@@ -53,7 +52,7 @@ $partCheck->bind_param("is", $part_id, $data['coupling_type']);
 $partCheck->execute();
 if ($partCheck->get_result()->num_rows !== 1) {
     http_response_code(400);
-    echo json_encode(['error' => 'Selected part does not belong to the selected coupling range']);
+    json_response(['error' => 'Selected part does not belong to the selected coupling range']);
     exit;
 }
 $partCheck->close();
@@ -63,7 +62,7 @@ $componentCheck->bind_param("is", $part_id, $component);
 $componentCheck->execute();
 if ($componentCheck->get_result()->num_rows !== 1) {
     http_response_code(400);
-    echo json_encode(['error' => 'Selected component is not available for this part']);
+    json_response(['error' => 'Selected component is not available for this part']);
     exit;
 }
 $componentCheck->close();
@@ -74,7 +73,7 @@ if ($cutter_id !== null) {
     $cutterCheck->execute();
     if ($cutterCheck->get_result()->num_rows !== 1) {
         http_response_code(400);
-        echo json_encode(['error' => 'Select a valid active cutter']);
+        json_response(['error' => 'Select a valid active cutter']);
         exit;
     }
     $cutterCheck->close();
@@ -122,7 +121,7 @@ try {
 
     $conn->commit();
     http_response_code(201);
-    echo json_encode([
+    json_response([
         'success' => true,
         'job_id' => $job_id,
         'shift_id' => $shift_id,
@@ -133,10 +132,10 @@ try {
     $conn->rollback();
     if ($error->getCode() === 1062) {
         http_response_code(409);
-        echo json_encode(['error' => 'Machine already has an active job']);
+        json_response(['error' => 'Machine already has an active job']);
     } else {
         http_response_code(500);
-        echo json_encode(['error' => 'Unable to start job']);
+        json_response(['error' => 'Unable to start job']);
     }
 }
 

@@ -1,9 +1,8 @@
 <?php
-require "config.php";
-require "auth.php";
+require __DIR__ . "/bootstrap.php";
 $user = require_operator_supervisor();
 
-$data = json_decode(file_get_contents("php://input"), true) ?? [];
+$data = json_input();
 $job_id = filter_var($data['job_id'] ?? null, FILTER_VALIDATE_INT);
 $new_cutter_id = filter_var($data['new_cutter_id'] ?? null, FILTER_VALIDATE_INT);
 $reason = trim($data['reason'] ?? '');
@@ -11,12 +10,12 @@ $remarks = trim($data['remarks'] ?? '');
 
 if (!$job_id || !$new_cutter_id || $reason === '') {
     http_response_code(400);
-    echo json_encode(['error' => 'Job, new cutter and reason are required']);
+    json_response(['error' => 'Job, new cutter and reason are required']);
     exit;
 }
 if (strlen($reason) > 150 || strlen($remarks) > 255) {
     http_response_code(400);
-    echo json_encode(['error' => 'Reason or remarks are too long']);
+    json_response(['error' => 'Reason or remarks are too long']);
     exit;
 }
 
@@ -71,23 +70,23 @@ try {
     $insert->close();
 
     $conn->commit();
-    echo json_encode(['success' => true, 'change_id' => (int)$change_id, 'job_id' => (int)$job_id,
+    json_response(['success' => true, 'change_id' => (int)$change_id, 'job_id' => (int)$job_id,
         'new_cutter_id' => (int)$new_cutter_id, 'new_cutter_num' => $newCutter['cutter_num'],
         'status' => 'In Progress']);
 } catch (mysqli_sql_exception $error) {
     $conn->rollback();
     if ($error->getCode() === 1062) {
         http_response_code(409);
-        echo json_encode(['error' => 'A cutter change is already in progress']);
+        json_response(['error' => 'A cutter change is already in progress']);
     } else {
         http_response_code(500);
-        echo json_encode(['error' => 'Unable to start cutter change']);
+        json_response(['error' => 'Unable to start cutter change']);
     }
 } catch (RuntimeException $error) {
     $conn->rollback();
     $code = $error->getCode();
     http_response_code(in_array($code, [400, 403, 404, 409], true) ? $code : 400);
-    echo json_encode(['error' => $error->getMessage()]);
+    json_response(['error' => $error->getMessage()]);
 }
 $conn->close();
 ?>

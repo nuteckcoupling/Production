@@ -1,13 +1,12 @@
 <?php
-require "config.php";
-require "auth.php";
+require __DIR__ . "/bootstrap.php";
 require_operator_supervisor();
 
-$data = json_decode(file_get_contents("php://input"), true) ?? [];
+$data = json_input();
 $id = filter_var($data['id'] ?? null, FILTER_VALIDATE_INT);
 if (!$id) {
     http_response_code(400);
-    echo json_encode(['error' => 'Valid cutter is required']);
+    json_response(['error' => 'Valid cutter is required']);
     exit;
 }
 
@@ -22,7 +21,7 @@ try {
     if (!$cutter) {
         $conn->rollback();
         http_response_code(404);
-        echo json_encode(['error' => 'Cutter not found']);
+        json_response(['error' => 'Cutter not found']);
         exit;
     }
 
@@ -35,11 +34,11 @@ try {
     $message = 'Cutter moved to Trash. Production history remains safe.';
 
     $conn->commit();
-    echo json_encode(['success' => true, 'id' => (int)$id, 'action' => $action, 'message' => $message]);
+    json_response(['success' => true, 'id' => (int)$id, 'action' => $action, 'message' => $message]);
 } catch (Throwable $error) {
     $conn->rollback();
     http_response_code(500);
-    echo json_encode(['error' => 'Unable to delete cutter']);
+    json_response(['error' => 'Unable to delete cutter']);
 }
 $conn->close();
 ?>

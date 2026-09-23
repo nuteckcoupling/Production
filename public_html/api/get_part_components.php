@@ -1,12 +1,11 @@
 <?php
-require "config.php";
-require "auth.php";
+require __DIR__ . "/bootstrap.php";
 require_auth();
 
 $part_id = isset($_GET['part_id']) ? (int)$_GET['part_id'] : 0;
 if ($part_id <= 0) {
     http_response_code(400);
-    echo json_encode(["error" => "Invalid part"]);
+    json_response(["error" => "Invalid part"]);
     exit;
 }
 
@@ -18,7 +17,7 @@ $rows = [];
 while ($row = $result->fetch_assoc()) {
     $rows[] = $row;
 }
-echo json_encode($rows);
+json_response($rows);
 $stmt->close();
 $conn->close();
 ?>

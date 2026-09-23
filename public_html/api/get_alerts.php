@@ -1,6 +1,5 @@
 <?php
-require "config.php";
-require "auth.php";
+require __DIR__ . "/bootstrap.php";
 require_auth();
 
 $handover_overdue_minutes = 30;
@@ -106,7 +105,7 @@ usort($alerts, function ($a, $b) {
     return $severity !== 0 ? $severity : $b['elapsed_minutes'] <=> $a['elapsed_minutes'];
 });
 
-echo json_encode([
+json_response([
     'alerts' => $alerts,
     'counts' => [
         'total' => count($alerts),

@@ -1,6 +1,5 @@
 <?php
-require "config.php";
-require "auth.php";
+require __DIR__ . "/bootstrap.php";
 require_auth();
 
 $trash = ($_GET['trash'] ?? '') === '1';
@@ -11,6 +10,6 @@ $rows = [];
 while ($row = $result->fetch_assoc()) {
     $rows[] = $row;
 }
-echo json_encode($rows);
+json_response($rows);
 $conn->close();
 ?>

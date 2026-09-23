@@ -1,9 +1,8 @@
 <?php
-require "config.php";
-require "auth.php";
+require __DIR__ . "/bootstrap.php";
 $user = require_operator_supervisor();
 
-$data = json_decode(file_get_contents("php://input"), true) ?? [];
+$data = json_input();
 $job_id = filter_var($data['job_id'] ?? null, FILTER_VALIDATE_INT);
 $shift_date = $data['shift_date'] ?? '';
 $shift = $data['shift'] ?? '';
@@ -13,7 +12,7 @@ $shift_hours_map = ['1' => 14, '2' => 12, '3' => 12, 'Day Shift' => 12, 'Night S
 $date = DateTime::createFromFormat('Y-m-d', $shift_date);
 if (!$job_id || !$date || $date->format('Y-m-d') !== $shift_date || !in_array($shift, $allowed_shifts, true)) {
     http_response_code(400);
-    echo json_encode(['error' => 'Valid job, date and shift are required']);
+    json_response(['error' => 'Valid job, date and shift are required']);
     exit;
 }
 
@@ -67,27 +66,27 @@ try {
     $updateJob->close();
 
     $conn->commit();
-    echo json_encode(['success' => true, 'job_id' => (int)$job_id, 'shift_id' => (int)$shift_id,
+    json_response(['success' => true, 'job_id' => (int)$job_id, 'shift_id' => (int)$shift_id,
         'status' => 'Running', 'operator_name' => $user['operator_name'] ?? $user['username'],
         'shift' => $shift, 'shift_hours' => $shift_hours]);
 } catch (RuntimeException $error) {
     $conn->rollback();
     $code = $error->getCode();
     http_response_code(in_array($code, [403, 404, 409], true) ? $code : 400);
-    echo json_encode(['error' => $error->getMessage()]);
+    json_response(['error' => $error->getMessage()]);
 } catch (mysqli_sql_exception $error) {
     $conn->rollback();
     if ($error->getCode() === 1062) {
         http_response_code(409);
-        echo json_encode(['error' => 'Handover was already accepted']);
+        json_response(['error' => 'Handover was already accepted']);
     } else {
         http_response_code(500);
-        echo json_encode(['error' => 'Unable to accept handover']);
+        json_response(['error' => 'Unable to accept handover']);
     }
 } catch (Throwable $error) {
     $conn->rollback();
     http_response_code(500);
-    echo json_encode(['error' => 'Unable to accept handover']);
+    json_response(['error' => 'Unable to accept handover']);
 }
 
 $conn->close();

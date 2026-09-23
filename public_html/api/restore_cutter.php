@@ -1,13 +1,12 @@
 <?php
-require "config.php";
-require "auth.php";
+require __DIR__ . "/bootstrap.php";
 require_operator_supervisor();
 
-$data = json_decode(file_get_contents("php://input"), true) ?? [];
+$data = json_input();
 $id = filter_var($data['id'] ?? null, FILTER_VALIDATE_INT);
 if (!$id) {
     http_response_code(400);
-    echo json_encode(['error' => 'Valid cutter is required']);
+    json_response(['error' => 'Valid cutter is required']);
     exit;
 }
 
@@ -18,13 +17,13 @@ try {
     $stmt->execute();
     if ($stmt->affected_rows !== 1) {
         http_response_code(404);
-        echo json_encode(['error' => 'Deleted cutter not found']);
+        json_response(['error' => 'Deleted cutter not found']);
     } else {
-        echo json_encode(['success' => true, 'id' => (int)$id, 'message' => 'Cutter restored as Active.']);
+        json_response(['success' => true, 'id' => (int)$id, 'message' => 'Cutter restored as Active.']);
     }
 } catch (Throwable $error) {
     http_response_code(500);
-    echo json_encode(['error' => 'Unable to restore cutter']);
+    json_response(['error' => 'Unable to restore cutter']);
 }
 $stmt->close();
 $conn->close();

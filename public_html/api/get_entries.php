@@ -1,6 +1,5 @@
 <?php
-require "config.php";
-require "auth.php";
+require __DIR__ . "/bootstrap.php";
 require_auth();
 
 $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
@@ -22,6 +21,6 @@ $rows = [];
 while ($row = $result->fetch_assoc()) {
     $rows[] = $row;
 }
-echo json_encode($rows);
+json_response($rows);
 $conn->close();
 ?>

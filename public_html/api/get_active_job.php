@@ -1,12 +1,11 @@
 <?php
-require "config.php";
-require "auth.php";
+require __DIR__ . "/bootstrap.php";
 $user = require_auth();
 
 $job_id = filter_input(INPUT_GET, 'job_id', FILTER_VALIDATE_INT);
 if (!$job_id) {
     http_response_code(400);
-    echo json_encode(['error' => 'Valid job_id is required']);
+    json_response(['error' => 'Valid job_id is required']);
     exit;
 }
 
@@ -64,7 +63,7 @@ $stmt->close();
 
 if (!$job) {
     http_response_code(404);
-    echo json_encode(['error' => 'Job not found']);
+    json_response(['error' => 'Job not found']);
     exit;
 }
 
@@ -119,6 +118,6 @@ $job['can_accept_handover'] = ($user['role'] ?? '') === 'Operator/Supervisor'
     && $job['status'] === 'Handover Pending'
     && $job['shift_id'] === null;
 
-echo json_encode($job);
+json_response($job);
 $conn->close();
 ?>

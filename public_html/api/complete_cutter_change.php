@@ -1,13 +1,12 @@
 <?php
-require "config.php";
-require "auth.php";
+require __DIR__ . "/bootstrap.php";
 $user = require_operator_supervisor();
 
-$data = json_decode(file_get_contents("php://input"), true) ?? [];
+$data = json_input();
 $job_id = filter_var($data['job_id'] ?? null, FILTER_VALIDATE_INT);
 if (!$job_id) {
     http_response_code(400);
-    echo json_encode(['error' => 'Valid job is required']);
+    json_response(['error' => 'Valid job is required']);
     exit;
 }
 $operator_id = (int)$user['operator_id'];
@@ -52,17 +51,17 @@ try {
     $durationStmt->close();
 
     $conn->commit();
-    echo json_encode(['success' => true, 'change_id' => $change_id, 'job_id' => (int)$job_id,
+    json_response(['success' => true, 'change_id' => $change_id, 'job_id' => (int)$job_id,
         'new_cutter_id' => $new_cutter_id, 'downtime_min' => $downtime, 'status' => 'Completed']);
 } catch (RuntimeException $error) {
     $conn->rollback();
     $code = $error->getCode();
     http_response_code(in_array($code, [403, 404, 409], true) ? $code : 400);
-    echo json_encode(['error' => $error->getMessage()]);
+    json_response(['error' => $error->getMessage()]);
 } catch (Throwable $error) {
     $conn->rollback();
     http_response_code(500);
-    echo json_encode(['error' => 'Unable to complete cutter change']);
+    json_response(['error' => 'Unable to complete cutter change']);
 }
 $conn->close();
 ?>

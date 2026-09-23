@@ -1,6 +1,5 @@
 <?php
-require "config.php";
-require "auth.php";
+require __DIR__ . "/bootstrap.php";
 require_auth();
 
 $period = $_GET['period'] ?? 'daily';
@@ -11,7 +10,7 @@ if ($period === 'daily') {
     $date = $value !== '' ? DateTime::createFromFormat('!Y-m-d', $value) : clone $today;
     if (!$date || $date->format('Y-m-d') !== ($value !== '' ? $value : $today->format('Y-m-d'))) {
         http_response_code(400);
-        echo json_encode(['error' => 'Invalid daily report date']);
+        json_response(['error' => 'Invalid daily report date']);
         exit;
     }
     $start = clone $date;
@@ -21,7 +20,7 @@ if ($period === 'daily') {
     $date = $value !== '' ? DateTime::createFromFormat('!Y-m-d', $value) : clone $today;
     if (!$date || $date->format('Y-m-d') !== ($value !== '' ? $value : $today->format('Y-m-d'))) {
         http_response_code(400);
-        echo json_encode(['error' => 'Invalid weekly report date']);
+        json_response(['error' => 'Invalid weekly report date']);
         exit;
     }
     $start = clone $date;
@@ -34,7 +33,7 @@ if ($period === 'daily') {
     $date = DateTime::createFromFormat('!Y-m', $monthValue);
     if (!$date || $date->format('Y-m') !== $monthValue) {
         http_response_code(400);
-        echo json_encode(['error' => 'Invalid monthly report month']);
+        json_response(['error' => 'Invalid monthly report month']);
         exit;
     }
     $start = clone $date;
@@ -43,7 +42,7 @@ if ($period === 'daily') {
     $label = $date->format('F Y');
 } else {
     http_response_code(400);
-    echo json_encode(['error' => 'Invalid report period']);
+    json_response(['error' => 'Invalid report period']);
     exit;
 }
 
@@ -57,7 +56,7 @@ $couplingFilter = trim($_GET['coupling_type'] ?? '');
 $allowedShifts = ['', '1', '2', '3', 'Day Shift', 'Night Shift'];
 if (!in_array($shiftFilter, $allowedShifts, true)) {
     http_response_code(400);
-    echo json_encode(['error' => 'Invalid shift filter']);
+    json_response(['error' => 'Invalid shift filter']);
     exit;
 }
 $stmt = $conn->prepare("SELECT
@@ -149,7 +148,7 @@ foreach ($machines as $machine) {
 $totals['achievement_percent'] = $totals['planned_qty'] > 0
     ? round(($totals['ok_qty'] / $totals['planned_qty']) * 100, 1) : 0;
 
-echo json_encode([
+json_response([
     'period' => $period,
     'period_label' => $label,
     'start_date' => $startDate,

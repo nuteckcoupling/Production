@@ -1,9 +1,8 @@
 <?php
-require "config.php";
-require "auth.php";
+require __DIR__ . "/bootstrap.php";
 $authenticated_user = require_operator_supervisor();
 
-$data = json_decode(file_get_contents("php://input"), true);
+$data = json_input();
 
 if (($authenticated_user['role'] ?? '') === 'Operator/Supervisor') {
     $data['operator_id'] = $authenticated_user['operator_id'];
@@ -14,7 +13,7 @@ $required = ["entry_date","shift","machine_id","operator_id","coupling_type","pa
 foreach ($required as $field) {
     if (empty($data[$field])) {
         http_response_code(400);
-        echo json_encode(["error" => "Missing required field: $field"]);
+        json_response(["error" => "Missing required field: $field"]);
         exit;
     }
 }
@@ -22,7 +21,7 @@ foreach ($required as $field) {
 $allowed_shifts = ['1', '2', '3', 'Day Shift', 'Night Shift'];
 if (!in_array($data['shift'], $allowed_shifts, true)) {
     http_response_code(400);
-    echo json_encode(["error" => "Invalid shift"]);
+    json_response(["error" => "Invalid shift"]);
     exit;
 }
 $shift_hours_map = ['1' => 14, '2' => 12, '3' => 12, 'Day Shift' => 12, 'Night Shift' => 12];
@@ -41,7 +40,7 @@ $allowed_issue_codes = [
 $issue_code = $data['issue_code'] ?? '';
 if (!in_array($issue_code, $allowed_issue_codes, true)) {
     http_response_code(400);
-    echo json_encode(["error" => "Invalid Issue / Code"]);
+    json_response(["error" => "Invalid Issue / Code"]);
     exit;
 }
 
@@ -50,7 +49,7 @@ $partCheck->bind_param("is", $data['part_id'], $data['coupling_type']);
 $partCheck->execute();
 if ($partCheck->get_result()->num_rows !== 1) {
     http_response_code(400);
-    echo json_encode(["error" => "Selected part does not belong to the selected coupling range"]);
+    json_response(["error" => "Selected part does not belong to the selected coupling range"]);
     exit;
 }
 $partCheck->close();
@@ -60,7 +59,7 @@ $componentCheck->bind_param("is", $data['part_id'], $data['component']);
 $componentCheck->execute();
 if ($componentCheck->get_result()->num_rows !== 1) {
     http_response_code(400);
-    echo json_encode(["error" => "Selected component is not available for this part"]);
+    json_response(["error" => "Selected component is not available for this part"]);
     exit;
 }
 $componentCheck->close();
@@ -117,10 +116,10 @@ $stmt->bind_param(
 );
 
 if ($stmt->execute()) {
-    echo json_encode(["success" => true, "id" => $stmt->insert_id]);
+    json_response(["success" => true, "id" => $stmt->insert_id]);
 } else {
     http_response_code(500);
-    echo json_encode(["error" => $stmt->error]);
+    json_response(["error" => $stmt->error]);
 }
 
 $stmt->close();

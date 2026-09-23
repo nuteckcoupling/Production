@@ -1,6 +1,5 @@
 <?php
-header("Content-Type: application/json");
-require "auth.php";
+require __DIR__ . "/auth.php";
 
 $_SESSION = [];
 if (ini_get('session.use_cookies')) {
@@ -9,5 +8,5 @@ if (ini_get('session.use_cookies')) {
 }
 session_destroy();
 
-echo json_encode(['success' => true]);
+json_response(['success' => true]);
 ?>
