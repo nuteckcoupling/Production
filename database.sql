@@ -379,3 +379,35 @@ CREATE TABLE IF NOT EXISTS weekly_plans (
   FOREIGN KEY (part_id) REFERENCES parts(id),
   FOREIGN KEY (created_by_user_id) REFERENCES users(id)
 );
+
+-- Locked monthly ISO snapshots generated only from weekly_plans.
+-- They remain independent from production jobs and production reporting.
+CREATE TABLE IF NOT EXISTS monthly_plans (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  plan_month DATE NOT NULL UNIQUE,
+  status ENUM('Draft','Locked') NOT NULL DEFAULT 'Draft',
+  created_by_user_id INT NOT NULL,
+  locked_by_user_id INT DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  locked_at DATETIME DEFAULT NULL,
+  FOREIGN KEY (created_by_user_id) REFERENCES users(id),
+  FOREIGN KEY (locked_by_user_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS monthly_plan_items (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  monthly_plan_id INT NOT NULL,
+  machine_id INT NOT NULL,
+  shift VARCHAR(30) NOT NULL,
+  part_id INT NOT NULL,
+  operation VARCHAR(150) NOT NULL,
+  planned_qty INT UNSIGNED NOT NULL,
+  weekly_line_count INT UNSIGNED NOT NULL DEFAULT 0,
+  UNIQUE KEY unique_monthly_plan_line (monthly_plan_id, machine_id, shift, part_id, operation),
+  KEY idx_monthly_plan_items_plan (monthly_plan_id),
+  KEY idx_monthly_plan_items_machine (machine_id),
+  FOREIGN KEY (monthly_plan_id) REFERENCES monthly_plans(id) ON DELETE CASCADE,
+  FOREIGN KEY (machine_id) REFERENCES machines(id),
+  FOREIGN KEY (part_id) REFERENCES parts(id)
+);

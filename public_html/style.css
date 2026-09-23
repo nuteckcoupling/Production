@@ -207,6 +207,13 @@ body { margin: 0; font-family: -apple-system, Segoe UI, Roboto, Arial, sans-seri
 .weekly-plan-filter { display: grid; gap: 5px; color: #475569; font-size: 12px; font-weight: 600; }
 .weekly-plan-filter input { padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-size: 14px; }
 tfoot th { border-top: 2px solid #cbd5e1; background: #f8fafc; }
+.monthly-plan-controls { margin-bottom: 18px; }
+.monthly-plan-note { margin: 13px 0 0; color: #64748b; font-size: 12px; }
+.monthly-plan-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 18px; }
+.monthly-plan-summary div { padding: 13px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; }
+.monthly-plan-summary span { display: block; color: #64748b; font-size: 10px; text-transform: uppercase; }
+.monthly-plan-summary strong { display: block; margin-top: 4px; font-size: 18px; }
+
 
 .card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
 
@@ -274,6 +281,7 @@ th { background: #f8f9fb; font-weight: 600; }
   .report-filter-row input, .report-filter-row select { min-width: 0; width: 100%; }
   .report-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .grid { grid-template-columns: 1fr; }
+  .monthly-plan-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media print {
@@ -298,4 +306,14 @@ th { background: #f8f9fb; font-weight: 600; }
   body.weekly-plan-print .weekly-plan-print-area { margin: 0; padding: 0; box-shadow: none; }
   body.weekly-plan-print .weekly-plan-print-area table { font-size: 9px; }
   body.weekly-plan-print .weekly-plan-print-area th, body.weekly-plan-print .weekly-plan-print-area td { padding: 5px; white-space: normal; }
+  body.monthly-plan-print #reportModule { display: none !important; }
+  body.monthly-plan-print #monthlyPlanModule, body.monthly-plan-print #monthlyPlanModule * { visibility: visible; }
+  body.monthly-plan-print #monthlyPlanModule { display: block !important; position: absolute; inset: 0; width: 100%; }
+  body.monthly-plan-print #monthlyPlanModule > .report-header,
+  body.monthly-plan-print .monthly-plan-controls,
+  body.monthly-plan-print #monthlyPlanMessage,
+  body.monthly-plan-print .monthly-plan-summary { display: none !important; }
+  body.monthly-plan-print .monthly-plan-print-area { margin: 0; padding: 0; box-shadow: none; }
+  body.monthly-plan-print .monthly-plan-print-area table { font-size: 10px; }
+  body.monthly-plan-print .monthly-plan-print-area th, body.monthly-plan-print .monthly-plan-print-area td { padding: 6px; white-space: normal; }
 }

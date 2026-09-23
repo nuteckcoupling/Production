@@ -10,6 +10,7 @@ CURRENT FEATURES
 - Start Job, End Shift and operator handover workflow
 - Cutter and setting change workflow
 - Independent Weekly Plan ISO records with CSV/Excel and Print/Save PDF output
+- Monthly ISO snapshots generated from Weekly Plans with final locking
 - Cutter and coupling management
 - Machine-wise daily, weekly and monthly production reports
 - CSV/Excel download and Print/Save PDF report output
@@ -40,6 +41,7 @@ CPANEL DEPLOYMENT
 WEEKLY PLAN ISO NOTE
 --------------------
 - Weekly Plan records are documentation only and do not affect jobs, Daily Entry, dashboard, or production reports.
+- Monthly Plan is generated only from Weekly Plans and remains separate from production data.
 
 5. Upload everything inside public_html/ to the domain's public_html directory.
 6. Visit the production domain and test login, dashboard and production workflow.
