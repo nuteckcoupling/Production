@@ -23,6 +23,7 @@
     const activeJobModule = document.getElementById('activeJobModule');
     const weeklyPlanModule = document.getElementById('weeklyPlanModule');
     const monthlyPlanModule = document.getElementById('monthlyPlanModule');
+    const shiftManagementModule = document.getElementById('shiftManagementModule');
     const reportModule = document.getElementById('reportModule');
     const cutterModule = document.getElementById('cutterModule');
     const couplingModule = document.getElementById('couplingModule');
@@ -30,6 +31,7 @@
     const navDaily = document.getElementById('navDaily');
     const navWeeklyPlan = document.getElementById('navWeeklyPlan');
     const navMonthlyPlan = document.getElementById('navMonthlyPlan');
+    const navShiftManagement = document.getElementById('navShiftManagement');
     const navReports = document.getElementById('navReports');
     const navCutter = document.getElementById('navCutter');
     const navCoupling = document.getElementById('navCoupling');
@@ -41,6 +43,7 @@
     let machineCheckSequence = 0;
     let currentReportPeriod = 'daily';
     let currentReportData = null;
+    let activeShifts = [];
     let showCutterTrash = false;
 
     document.getElementById('reportDailyDate').value = today;
@@ -49,8 +52,8 @@
 
 
     function switchModule(moduleName) {
-      const modules = { dashboard: dashboardModule, daily: dailyModule, active: activeJobModule, weeklyPlan: weeklyPlanModule, monthlyPlan: monthlyPlanModule, reports: reportModule, cutter: cutterModule, coupling: couplingModule };
-      const navItems = { dashboard: navDashboard, daily: navDaily, weeklyPlan: navWeeklyPlan, monthlyPlan: navMonthlyPlan, reports: navReports, cutter: navCutter, coupling: navCoupling };
+      const modules = { dashboard: dashboardModule, daily: dailyModule, active: activeJobModule, weeklyPlan: weeklyPlanModule, monthlyPlan: monthlyPlanModule, shiftManagement: shiftManagementModule, reports: reportModule, cutter: cutterModule, coupling: couplingModule };
+      const navItems = { dashboard: navDashboard, daily: navDaily, weeklyPlan: navWeeklyPlan, monthlyPlan: navMonthlyPlan, shiftManagement: navShiftManagement, reports: navReports, cutter: navCutter, coupling: navCoupling };
       Object.entries(modules).forEach(([name, element]) => element.classList.toggle('hidden', name !== moduleName));
       Object.entries(navItems).forEach(([name, element]) => {
         const active = name === moduleName;
@@ -60,6 +63,7 @@
       if (moduleName === 'dashboard') loadMachineDashboard();
       if (moduleName === 'weeklyPlan') initializeWeeklyPlan();
       if (moduleName === 'monthlyPlan') initializeMonthlyPlan();
+      if (moduleName === 'shiftManagement') loadShiftManagement();
       if (moduleName === 'reports' && !currentReportData) loadProductionReport();
       if (moduleName === 'cutter') loadCutters();
       if (moduleName === 'coupling') loadCouplings();

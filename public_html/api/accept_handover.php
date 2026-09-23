@@ -6,11 +6,10 @@ $data = json_input();
 $job_id = filter_var($data['job_id'] ?? null, FILTER_VALIDATE_INT);
 $shift_date = $data['shift_date'] ?? '';
 $shift = $data['shift'] ?? '';
-$allowed_shifts = ['1', '2', '3', 'Day Shift', 'Night Shift'];
-$shift_hours_map = ['1' => 14, '2' => 12, '3' => 12, 'Day Shift' => 12, 'Night Shift' => 12];
+$shift_master = find_shift($conn, trim($shift));
 
 $date = DateTime::createFromFormat('Y-m-d', $shift_date);
-if (!$job_id || !$date || $date->format('Y-m-d') !== $shift_date || !in_array($shift, $allowed_shifts, true)) {
+if (!$job_id || !$date || $date->format('Y-m-d') !== $shift_date || !$shift_master) {
     http_response_code(400);
     json_response(['error' => 'Valid job, date and shift are required']);
     exit;
@@ -18,7 +17,7 @@ if (!$job_id || !$date || $date->format('Y-m-d') !== $shift_date || !in_array($s
 
 $operator_id = (int)$user['operator_id'];
 $user_id = (int)$user['id'];
-$shift_hours = $shift_hours_map[$shift];
+$shift_hours = (float)$shift_master['shift_hours'];
 
 try {
     $conn->begin_transaction();
@@ -51,7 +50,7 @@ try {
     $shiftStmt = $conn->prepare("INSERT INTO job_shifts
         (job_id, shift_date, shift, shift_hours, operator_id, started_at, status, started_by_user_id)
         VALUES (?, ?, ?, ?, ?, NOW(), 'Running', ?)");
-    $shiftStmt->bind_param("issiii", $job_id, $shift_date, $shift, $shift_hours, $operator_id, $user_id);
+    $shiftStmt->bind_param("issdii", $job_id, $shift_date, $shift, $shift_hours, $operator_id, $user_id);
     $shiftStmt->execute();
     $shift_id = $shiftStmt->insert_id;
     $shiftStmt->close();

@@ -72,12 +72,13 @@ foreach (['id', 'machine_id', 'part_id', 'planned_qty', 'cumulative_ok_qty', 'pe
 }
 $job['cutter_id'] = $job['cutter_id'] === null ? null : (int)$job['cutter_id'];
 $job['shift_id'] = $job['shift_id'] === null ? null : (int)$job['shift_id'];
-$job['shift_hours'] = $job['shift_hours'] === null ? null : (int)$job['shift_hours'];
-foreach (['last_shift_id', 'last_shift_hours', 'last_total_qty', 'last_ok_qty', 'last_mc_reject_qty',
+$job['shift_hours'] = $job['shift_hours'] === null ? null : (float)$job['shift_hours'];
+foreach (['last_shift_id', 'last_total_qty', 'last_ok_qty', 'last_mc_reject_qty',
     'last_rm_defect_qty', 'last_rework_qty', 'last_downtime_min'] as $field) {
     $job[$field] = $job[$field] === null ? null : (int)$job[$field];
 }
 $job['cutter_change_id'] = $job['cutter_change_id'] === null ? null : (int)$job['cutter_change_id'];
+$job['last_shift_hours'] = $job['last_shift_hours'] === null ? null : (float)$job['last_shift_hours'];
 $job['old_cutter_id'] = $job['old_cutter_id'] === null ? null : (int)$job['old_cutter_id'];
 $job['new_cutter_id'] = $job['new_cutter_id'] === null ? null : (int)$job['new_cutter_id'];
 $job['cutter_change_elapsed_minutes'] = $job['cutter_change_elapsed_minutes'] === null ? null : (int)$job['cutter_change_elapsed_minutes'];

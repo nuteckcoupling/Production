@@ -18,8 +18,7 @@
           <label>Week End<input type="date" id="weeklyPlanWeekEnd" disabled /></label>
           <label>Machine<select name="machine_id" id="weeklyPlanMachine" required><option value="">-- select --</option></select></label>
           <label>Shift<select name="shift" id="weeklyPlanShift" required>
-            <option value="">-- select --</option><option value="1">Shift 1</option><option value="2">Shift 2</option>
-            <option value="3">Shift 3</option><option value="Day Shift">Day Shift</option><option value="Night Shift">Night Shift</option>
+            <option value="">-- select --</option>
           </select></label>
           <label>Part Name<select name="part_id" id="weeklyPlanPart" required><option value="">-- select --</option></select></label>
           <label>Operation<input type="text" name="operation" id="weeklyPlanOperation" required placeholder="e.g. Hobbing" /></label>

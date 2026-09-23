@@ -50,15 +50,16 @@
     }
 
     function updateShiftHours() {
-      const hours = { '1': 14, '2': 12, '3': 12, 'Day Shift': 12, 'Night Shift': 12 };
-      shiftHoursInput.value = hours[shiftSelect.value] || '';
+      const option = shiftSelect.selectedOptions[0];
+      shiftHoursInput.value = option?.dataset.hours || '';
     }
 
     shiftSelect.addEventListener('change', updateShiftHours);
 
     function updateHandoverShiftHours() {
-      const hours = { '1': 14, '2': 12, '3': 12, 'Day Shift': 12, 'Night Shift': 12 };
-      document.getElementById('handover_shift_hours').value = hours[document.getElementById('handover_shift').value] || '';
+      const select = document.getElementById('handover_shift');
+      const option = select.selectedOptions[0];
+      document.getElementById('handover_shift_hours').value = option?.dataset.hours || '';
     }
 
     document.getElementById('handover_shift').addEventListener('change', updateHandoverShiftHours);

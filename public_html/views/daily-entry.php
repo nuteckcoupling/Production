@@ -17,18 +17,14 @@
 
           <label>
             Shift
-            <select name="shift" id="shift">
-              <option value="1">Shift 1 — 8:00 AM to 10:30 PM</option>
-              <option value="2">Shift 2 — 8:00 AM to 8:00 PM</option>
-              <option value="3">Shift 3 — 8:00 PM to 8:00 AM</option>
-              <option value="Day Shift">Day Shift</option>
-              <option value="Night Shift">Night Shift</option>
+            <select name="shift" id="shift" required>
+              <option value="">-- select --</option>
             </select>
           </label>
 
           <label>
             Shift Hours
-            <input type="number" name="shift_hours" id="shift_hours" value="14" readonly />
+            <input type="number" name="shift_hours" id="shift_hours" step="0.01" readonly />
           </label>
 
           <label>

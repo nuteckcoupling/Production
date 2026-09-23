@@ -23,3 +23,28 @@
       select.innerHTML = '<option value="">-- select --</option>';
       return fetchData(`${API}/get_cutters.php`, 'cutter_id', c => `<option value="${c.id}">${c.cutter_num}</option>`);
     }
+
+    function refreshShiftOptions() {
+      return fetch(API + '/get_shifts.php')
+        .then(async response => {
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || 'Unable to load shifts.');
+          return data;
+        })
+        .then(shifts => {
+          activeShifts = shifts;
+          [
+            ['shift', '-- select --'],
+            ['handover_shift', '-- select --'],
+            ['weeklyPlanShift', '-- select --'],
+            ['reportShift', 'All Shifts']
+          ].forEach(([id, firstLabel]) => {
+            const select = document.getElementById(id);
+            const previous = select.value;
+            select.innerHTML = '<option value="">' + firstLabel + '</option>';
+            shifts.forEach(shift => select.insertAdjacentHTML('beforeend',
+              '<option value="' + escapeHtml(shift.code) + '" data-hours="' + Number(shift.shift_hours) + '">' + escapeHtml(shift.label) + '</option>'));
+            if ([...select.options].some(option => option.value === previous)) select.value = previous;
+          });
+        });
+    }

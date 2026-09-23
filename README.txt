@@ -11,6 +11,7 @@ CURRENT FEATURES
 - Cutter and setting change workflow
 - Independent Weekly Plan ISO records with CSV/Excel and Print/Save PDF output
 - Monthly ISO snapshots generated from Weekly Plans with final locking
+- Admin-only Shift Management with automatic hours and safe deactivate rules
 - Cutter and coupling management
 - Machine-wise daily, weekly and monthly production reports
 - CSV/Excel download and Print/Save PDF report output
@@ -50,6 +51,10 @@ IMPORTANT DATABASE NOTE
 -----------------------
 - database.sql is for a fresh installation.
 - Do not import it over an existing production database without taking a backup.
+
+SHIFT MANAGEMENT
+----------------
+- Only Admin can add, edit, delete unused shifts, or deactivate shifts with history.
 - Existing production records are not included in this repository file.
 
 PLANNED QTY AUTO-FILL

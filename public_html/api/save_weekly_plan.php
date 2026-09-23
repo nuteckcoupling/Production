@@ -13,7 +13,7 @@ $planned_qty = filter_var($data['planned_qty'] ?? null, FILTER_VALIDATE_INT);
 $priority = $data['priority'] ?? 'Normal';
 $status = $data['status'] ?? 'Draft';
 $remarks = trim($data['remarks'] ?? '');
-$allowed_shifts = ['1', '2', '3', 'Day Shift', 'Night Shift'];
+$shift_master = find_shift($conn, $shift);
 
 $date = DateTime::createFromFormat('Y-m-d', $week_start);
 if (!$date || $date->format('Y-m-d') !== $week_start) {
@@ -22,7 +22,7 @@ if (!$date || $date->format('Y-m-d') !== $week_start) {
 if (!$machine_id || !$part_id || $operation === '' || !$planned_qty || $planned_qty < 1) {
     json_error('Machine, Part, Operation and Planned Quantity are required', 400);
 }
-if (!in_array($shift, $allowed_shifts, true)) {
+if (!$shift_master) {
     json_error('Select a valid Shift', 400);
 }
 if (!in_array($priority, ['Low', 'Normal', 'High', 'Urgent'], true)) {

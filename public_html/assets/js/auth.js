@@ -29,6 +29,9 @@
       document.querySelectorAll('.operator-only').forEach(element => {
         element.classList.toggle('hidden', user.role !== 'Operator/Supervisor');
       });
+      document.querySelectorAll('.admin-only').forEach(element => {
+        element.classList.toggle('hidden', user.role !== 'Admin');
+      });
 
       machineSelect.innerHTML = '<option value="">-- select --</option>';
       document.getElementById('operator_id').innerHTML = '<option value="">-- select --</option>';
@@ -38,9 +41,11 @@
       const reportOperatorLoad = fetchData(`${API}/get_operators.php`, 'reportOperator', o => `<option value="${o.id}">${o.name}</option>`);
       const partsLoad = fetchParts();
       const cutterLoad = refreshDailyCutters();
-      updateShiftHours();
+      const shiftLoad = refreshShiftOptions();
       setStartJobFieldsEnabled(false);
-      Promise.all([machineLoad, operatorLoad, reportMachineLoad, reportOperatorLoad, partsLoad, cutterLoad]).then(() => {
+      Promise.all([machineLoad, operatorLoad, reportMachineLoad, reportOperatorLoad, partsLoad, cutterLoad, shiftLoad]).then(() => {
+        updateShiftHours();
+        updateHandoverShiftHours();
         populateReportParts();
         applyOperatorAccess();
         switchModule('dashboard');

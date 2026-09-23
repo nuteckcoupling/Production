@@ -12,12 +12,7 @@ $sql = "SELECT
               ELSE COALESCE(j.status, 'Available')
             END AS runtime_status,
             j.id AS job_id,
-            CASE j.current_shift
-              WHEN '1' THEN 'Shift 1'
-              WHEN '2' THEN 'Shift 2'
-              WHEN '3' THEN 'Shift 3'
-              ELSE j.current_shift
-            END AS current_shift,
+            COALESCE(sm.name, j.current_shift) AS current_shift,
             j.component,
             j.operation,
             j.planned_qty,
@@ -33,6 +28,7 @@ $sql = "SELECT
             sc.id AS setting_change_id
         FROM machines m
         LEFT JOIN production_jobs j
+        LEFT JOIN shifts sm ON sm.code = j.current_shift
           ON j.machine_id = m.id
          AND j.status IN ('Running', 'Handover Pending', 'Breakdown', 'Stopped')
         LEFT JOIN operators o ON o.id = j.current_operator_id

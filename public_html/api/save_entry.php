@@ -18,14 +18,11 @@ foreach ($required as $field) {
     }
 }
 
-$allowed_shifts = ['1', '2', '3', 'Day Shift', 'Night Shift'];
-if (!in_array($data['shift'], $allowed_shifts, true)) {
-    http_response_code(400);
-    json_response(["error" => "Invalid shift"]);
-    exit;
+$shift_master = find_shift($conn, trim($data['shift']));
+if (!$shift_master) {
+    json_error('Select a valid active shift', 400);
 }
-$shift_hours_map = ['1' => 14, '2' => 12, '3' => 12, 'Day Shift' => 12, 'Night Shift' => 12];
-$shift_hours = $shift_hours_map[$data['shift']];
+$shift_hours = (float)$shift_master['shift_hours'];
 
 $allowed_issue_codes = [
     '',
@@ -92,7 +89,7 @@ $downtime_min = $data['downtime_min'] === "" ? 0 : (int)$data['downtime_min'];
 $drg_no = isset($data['drg_no']) ? $data['drg_no'] : '';
 
 $stmt->bind_param(
-    "ssiiiisssiiiiiiisiss",
+    "ssdiiisssiiiiiiisiss",
     $data['entry_date'],
     $data['shift'],
     $shift_hours,

@@ -197,11 +197,35 @@ CREATE TABLE IF NOT EXISTS cutters (
   KEY idx_cutters_deleted_at (deleted_at)
 );
 
+CREATE TABLE IF NOT EXISTS shifts (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  code VARCHAR(30) NOT NULL UNIQUE,
+  name VARCHAR(100) NOT NULL,
+  start_time TIME NOT NULL,
+  end_time TIME NOT NULL,
+  shift_hours DECIMAL(5,2) NOT NULL,
+  status ENUM('Active','Inactive') NOT NULL DEFAULT 'Active',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+INSERT INTO shifts (code, name, start_time, end_time, shift_hours, status) VALUES
+('1','Shift 1','08:00:00','22:30:00',14.50,'Active'),
+('2','Shift 2','08:00:00','20:00:00',12.00,'Active'),
+('3','Shift 3','20:00:00','08:00:00',12.00,'Active'),
+('Day Shift','Day Shift','08:00:00','20:00:00',12.00,'Active'),
+('Night Shift','Night Shift','20:00:00','08:00:00',12.00,'Active')
+ON DUPLICATE KEY UPDATE
+  name = VALUES(name),
+  start_time = VALUES(start_time),
+  end_time = VALUES(end_time),
+  shift_hours = VALUES(shift_hours);
+
 CREATE TABLE IF NOT EXISTS daily_entries (
   id INT AUTO_INCREMENT PRIMARY KEY,
   entry_date DATE NOT NULL,
-  shift ENUM('1','2','3','Day Shift','Night Shift') NOT NULL,
-  shift_hours TINYINT UNSIGNED NOT NULL DEFAULT 12,
+  shift VARCHAR(30) NOT NULL,
+  shift_hours DECIMAL(5,2) NOT NULL DEFAULT 12,
   machine_id INT NOT NULL,
   operator_id INT NOT NULL,
   part_id INT NOT NULL,
@@ -262,7 +286,7 @@ CREATE TABLE IF NOT EXISTS job_shifts (
   job_id INT NOT NULL,
   shift_date DATE NOT NULL,
   shift VARCHAR(30) NOT NULL,
-  shift_hours TINYINT UNSIGNED NOT NULL,
+  shift_hours DECIMAL(5,2) NOT NULL,
   operator_id INT NOT NULL,
   started_at DATETIME NOT NULL,
   ended_at DATETIME DEFAULT NULL,

@@ -82,7 +82,7 @@ try {
     $newShiftStmt = $conn->prepare("INSERT INTO job_shifts
         (job_id, shift_date, shift, shift_hours, operator_id, started_at, status, started_by_user_id)
         VALUES (?, ?, ?, ?, ?, NOW(), 'Running', ?)");
-    $newShiftStmt->bind_param("issiii", $new_job_id, $change['shift_date'], $change['shift'],
+    $newShiftStmt->bind_param("issdii", $new_job_id, $change['shift_date'], $change['shift'],
         $change['shift_hours'], $operator_id, $user_id);
     $newShiftStmt->execute();
     $new_shift_id = $newShiftStmt->insert_id;

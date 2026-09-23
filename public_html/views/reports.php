@@ -21,7 +21,7 @@
           <label id="weeklyReportFilter" class="hidden">Select Any Week Date<input type="date" id="reportWeeklyDate" /></label>
           <label id="monthlyReportFilter" class="hidden">Report Month<input type="month" id="reportMonthlyDate" /></label>
           <label>Machine<select id="reportMachine"><option value="">All Machines</option></select></label>
-          <label>Shift<select id="reportShift"><option value="">All Shifts</option><option value="1">Shift 1</option><option value="2">Shift 2</option><option value="3">Shift 3</option><option value="Day Shift">Day Shift</option><option value="Night Shift">Night Shift</option></select></label>
+          <label>Shift<select id="reportShift"><option value="">All Shifts</option></select></label>
           <label>Operator<select id="reportOperator"><option value="">All Operators</option></select></label>
           <label>Coupling Range<select id="reportCoupling"><option value="">All Ranges</option><option value="GC Gear Coupling">GC Gear Coupling</option><option value="NA Gear Coupling">NA Gear Coupling</option><option value="Roller Chain Coupling">Roller Chain Coupling</option><option value="Gear">Gear</option><option value="Sprocket">Sprocket</option></select></label>
           <label>Part Name<select id="reportPart"><option value="">All Parts</option></select></label>

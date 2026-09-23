@@ -53,11 +53,11 @@ $operatorId = filter_var($_GET['operator_id'] ?? 0, FILTER_VALIDATE_INT) ?: 0;
 $partId = filter_var($_GET['part_id'] ?? 0, FILTER_VALIDATE_INT) ?: 0;
 $shiftFilter = trim($_GET['shift'] ?? '');
 $couplingFilter = trim($_GET['coupling_type'] ?? '');
-$allowedShifts = ['', '1', '2', '3', 'Day Shift', 'Night Shift'];
-if (!in_array($shiftFilter, $allowedShifts, true)) {
-    http_response_code(400);
-    json_response(['error' => 'Invalid shift filter']);
-    exit;
+if ($shiftFilter !== '') {
+    $shiftCheck = find_shift($conn, $shiftFilter, false);
+    if (!$shiftCheck) {
+        json_error('Invalid shift filter', 400);
+    }
 }
 $stmt = $conn->prepare("SELECT
         s.id AS shift_id, s.shift_date, s.shift, s.shift_hours, s.total_qty, s.ok_qty,
