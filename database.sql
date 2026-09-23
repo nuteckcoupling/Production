@@ -307,6 +307,7 @@ CREATE TABLE IF NOT EXISTS job_cutter_changes (
   FOREIGN KEY (job_id) REFERENCES production_jobs(id),
   FOREIGN KEY (shift_id) REFERENCES job_shifts(id),
   FOREIGN KEY (old_cutter_id) REFERENCES cutters(id),
+
   FOREIGN KEY (new_cutter_id) REFERENCES cutters(id),
   FOREIGN KEY (started_by_user_id) REFERENCES users(id),
   FOREIGN KEY (completed_by_user_id) REFERENCES users(id)
@@ -352,4 +353,29 @@ CREATE TABLE IF NOT EXISTS job_setting_changes (
   FOREIGN KEY (new_job_id) REFERENCES production_jobs(id),
   FOREIGN KEY (started_by_user_id) REFERENCES users(id),
   FOREIGN KEY (completed_by_user_id) REFERENCES users(id)
+);
+
+-- Independent ISO planning records. These records do not drive production jobs,
+-- Daily Entry, the machine dashboard, or production reports.
+CREATE TABLE IF NOT EXISTS weekly_plans (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  week_start DATE NOT NULL,
+  week_end DATE NOT NULL,
+  machine_id INT NOT NULL,
+  shift VARCHAR(30) NOT NULL,
+  part_id INT NOT NULL,
+  operation VARCHAR(150) NOT NULL,
+  planned_qty INT UNSIGNED NOT NULL,
+  priority ENUM('Low','Normal','High','Urgent') NOT NULL DEFAULT 'Normal',
+  remarks VARCHAR(255) DEFAULT NULL,
+  status ENUM('Draft','Final') NOT NULL DEFAULT 'Draft',
+  created_by_user_id INT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY unique_weekly_plan_line (week_start, machine_id, shift, part_id, operation),
+  KEY idx_weekly_plans_week (week_start),
+  KEY idx_weekly_plans_machine (machine_id),
+  FOREIGN KEY (machine_id) REFERENCES machines(id),
+  FOREIGN KEY (part_id) REFERENCES parts(id),
+  FOREIGN KEY (created_by_user_id) REFERENCES users(id)
 );

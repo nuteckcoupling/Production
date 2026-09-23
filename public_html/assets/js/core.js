@@ -21,11 +21,13 @@
     const dashboardModule = document.getElementById('dashboardModule');
     const dailyModule = document.getElementById('dailyModule');
     const activeJobModule = document.getElementById('activeJobModule');
+    const weeklyPlanModule = document.getElementById('weeklyPlanModule');
     const reportModule = document.getElementById('reportModule');
     const cutterModule = document.getElementById('cutterModule');
     const couplingModule = document.getElementById('couplingModule');
     const navDashboard = document.getElementById('navDashboard');
     const navDaily = document.getElementById('navDaily');
+    const navWeeklyPlan = document.getElementById('navWeeklyPlan');
     const navReports = document.getElementById('navReports');
     const navCutter = document.getElementById('navCutter');
     const navCoupling = document.getElementById('navCoupling');
@@ -45,8 +47,8 @@
 
 
     function switchModule(moduleName) {
-      const modules = { dashboard: dashboardModule, daily: dailyModule, active: activeJobModule, reports: reportModule, cutter: cutterModule, coupling: couplingModule };
-      const navItems = { dashboard: navDashboard, daily: navDaily, reports: navReports, cutter: navCutter, coupling: navCoupling };
+      const modules = { dashboard: dashboardModule, daily: dailyModule, active: activeJobModule, weeklyPlan: weeklyPlanModule, reports: reportModule, cutter: cutterModule, coupling: couplingModule };
+      const navItems = { dashboard: navDashboard, daily: navDaily, weeklyPlan: navWeeklyPlan, reports: navReports, cutter: navCutter, coupling: navCoupling };
       Object.entries(modules).forEach(([name, element]) => element.classList.toggle('hidden', name !== moduleName));
       Object.entries(navItems).forEach(([name, element]) => {
         const active = name === moduleName;
@@ -54,6 +56,7 @@
         element.toggleAttribute('aria-current', active);
       });
       if (moduleName === 'dashboard') loadMachineDashboard();
+      if (moduleName === 'weeklyPlan') initializeWeeklyPlan();
       if (moduleName === 'reports' && !currentReportData) loadProductionReport();
       if (moduleName === 'cutter') loadCutters();
       if (moduleName === 'coupling') loadCouplings();

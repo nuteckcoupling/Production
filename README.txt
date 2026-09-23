@@ -9,6 +9,7 @@ CURRENT FEATURES
 - Live machine dashboard and automatic alerts
 - Start Job, End Shift and operator handover workflow
 - Cutter and setting change workflow
+- Independent Weekly Plan ISO records with CSV/Excel and Print/Save PDF output
 - Cutter and coupling management
 - Machine-wise daily, weekly and monthly production reports
 - CSV/Excel download and Print/Save PDF report output
@@ -36,6 +37,10 @@ CPANEL DEPLOYMENT
 2. Add the user to the database with ALL PRIVILEGES.
 3. In phpMyAdmin, select the empty database and import database.sql once.
 4. Update public_html/api/config.php with the hosting database credentials.
+WEEKLY PLAN ISO NOTE
+--------------------
+- Weekly Plan records are documentation only and do not affect jobs, Daily Entry, dashboard, or production reports.
+
 5. Upload everything inside public_html/ to the domain's public_html directory.
 6. Visit the production domain and test login, dashboard and production workflow.
 
