@@ -80,7 +80,9 @@
         .catch(err => console.error('Error loading planned quantity', err));
     }
 
-    function operationForMachineCode(machineCode) {
+    function operationForMachine(machineCode, defaultOperation = '') {
+      const savedOperation = String(defaultOperation || '').trim();
+      if (savedOperation && savedOperation.toUpperCase() !== 'OTHER') return savedOperation;
       const code = String(machineCode || '').trim().toUpperCase();
       if (code.startsWith('HOB')) return 'Hobbing';
       if (code.startsWith('SHP')) return 'Shaping';
@@ -90,10 +92,10 @@
       return '';
     }
 
-    function configureOperationControl(selectId, inputId, machineCode) {
+    function configureOperationControl(selectId, inputId, machineCode, defaultOperation = '') {
       const select = document.getElementById(selectId);
       const input = document.getElementById(inputId);
-      const automaticOperation = operationForMachineCode(machineCode);
+      const automaticOperation = operationForMachine(machineCode, defaultOperation);
       select.innerHTML = automaticOperation
         ? '<option value="' + automaticOperation + '">' + automaticOperation + '</option><option value="Other">Other</option>'
         : '<option value="">-- no automatic operation --</option><option value="Other">Other</option>';
@@ -120,7 +122,7 @@
 
     function updateStartOperationForMachine() {
       const selectedOption = machineSelect.options[machineSelect.selectedIndex];
-      configureOperationControl('operation_select', 'operation', selectedOption?.dataset.code || '');
+      configureOperationControl('operation_select', 'operation', selectedOption?.dataset.code || '', selectedOption?.dataset.operation || '');
     }
 
     document.getElementById('operation_select').addEventListener('change', () => {

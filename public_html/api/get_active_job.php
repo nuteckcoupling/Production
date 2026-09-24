@@ -11,6 +11,7 @@ if (!$job_id) {
 
 $stmt = $conn->prepare("SELECT
         j.id, j.status, j.machine_id, m.code AS machine_code, m.name AS machine_name,
+        m.default_operation AS machine_default_operation,
         j.part_id, p.coupling_type, p.part_name, j.component, j.drg_no, j.operation,
         j.cutter_id, c.cutter_num, j.planned_qty, j.cumulative_ok_qty,
         GREATEST(j.planned_qty - j.cumulative_ok_qty, 0) AS pending_qty,

@@ -18,6 +18,33 @@
         .catch(err => console.error('Error loading parts', err));
     }
 
+    function refreshMachineOptions() {
+      return fetch(API + '/get_machines.php')
+        .then(async response => {
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || 'Unable to load machines.');
+          return data;
+        })
+        .then(machines => {
+          [
+            ['machine_id', '-- select --', true, true],
+            ['reportMachine', 'All Machines', false, true],
+            ['weeklyPlanMachine', '-- select --', false, typeof weeklyPlanInitialized !== 'undefined' && weeklyPlanInitialized]
+          ].forEach(([id, firstLabel, includeOperation, enabled]) => {
+            if (!enabled) return;
+            const select = document.getElementById(id);
+            if (!select) return;
+            const previous = select.value;
+            select.innerHTML = '<option value="">' + firstLabel + '</option>';
+            machines.forEach(machine => {
+              const operation = includeOperation ? ' data-operation="' + escapeHtml(machine.default_operation) + '"' : '';
+              select.insertAdjacentHTML('beforeend', '<option value="' + Number(machine.id) + '" data-code="' + escapeHtml(machine.code) + '"' + operation + '>' + escapeHtml(machine.code) + ' — ' + escapeHtml(machine.name) + '</option>');
+            });
+            if ([...select.options].some(option => option.value === previous)) select.value = previous;
+          });
+        });
+    }
+
     function refreshDailyCutters() {
       const select = document.getElementById('cutter_id');
       select.innerHTML = '<option value="">-- select --</option>';

@@ -5,25 +5,26 @@ CREATE TABLE IF NOT EXISTS machines (
   id INT AUTO_INCREMENT PRIMARY KEY,
   code VARCHAR(30) NOT NULL UNIQUE,
   name VARCHAR(100) NOT NULL,
+  default_operation VARCHAR(150) NOT NULL,
   status ENUM('Active','Inactive') DEFAULT 'Active'
 );
 
-INSERT INTO machines (code, name) VALUES
-('HOB/01','Hobbing Machine 01'),
-('HOB/02','Hobbing Machine 02'),
-('HOB/03','Hobbing Machine 03'),
-('HOB/04','Hobbing Machine 04'),
-('HOB/05','Hobbing Machine 05'),
-('HOB/06','Hobbing Machine 06'),
-('SHP/01','Shaping Machine 01'),
-('SHP/02','Shaping Machine 02'),
-('SHP/03','Shaping Machine 03'),
-('SHP/04','Shaping Machine 04'),
-('SHP/05','Shaping Machine 05'),
-('SHP/06','Shaping Machine 06'),
-('VTL','VTL Machine'),
-('DRILL','Drilling Machine'),
-('KEYWAY','Keyway Machine');
+INSERT INTO machines (code, name, default_operation) VALUES
+('HOB/01','Hobbing Machine 01','Hobbing'),
+('HOB/02','Hobbing Machine 02','Hobbing'),
+('HOB/03','Hobbing Machine 03','Hobbing'),
+('HOB/04','Hobbing Machine 04','Hobbing'),
+('HOB/05','Hobbing Machine 05','Hobbing'),
+('HOB/06','Hobbing Machine 06','Hobbing'),
+('SHP/01','Shaping Machine 01','Shaping'),
+('SHP/02','Shaping Machine 02','Shaping'),
+('SHP/03','Shaping Machine 03','Shaping'),
+('SHP/04','Shaping Machine 04','Shaping'),
+('SHP/05','Shaping Machine 05','Shaping'),
+('SHP/06','Shaping Machine 06','Shaping'),
+('VTL','VTL Machine','Turning'),
+('DRILL','Drilling Machine','Drilling'),
+('KEYWAY','Keyway Machine','Keyway');
 
 CREATE TABLE IF NOT EXISTS operators (
   id INT AUTO_INCREMENT PRIMARY KEY,

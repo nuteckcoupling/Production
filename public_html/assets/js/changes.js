@@ -87,7 +87,7 @@
       document.getElementById('setting_new_component').disabled = true;
       document.getElementById('setting_new_planned_qty').value = 0;
       document.getElementById('settingChangeQtyError').className = 'banner';
-      configureOperationControl('setting_new_operation_select', 'setting_new_operation', job.machine_code);
+      configureOperationControl('setting_new_operation_select', 'setting_new_operation', job.machine_code, job.machine_default_operation);
       loadSettingCutterOptions();
     }
 

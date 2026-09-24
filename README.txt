@@ -12,6 +12,7 @@ CURRENT FEATURES
 - Independent Weekly Plan ISO records with CSV/Excel and Print/Save PDF output
 - Monthly ISO snapshots generated from Weekly Plans with final locking
 - Admin-only Shift Management with automatic hours and safe deactivate rules
+- Admin-only Machine Management with default operations and history-safe deletion
 - Cutter and coupling management
 - Machine-wise daily, weekly and monthly production reports
 - CSV/Excel download and Print/Save PDF report output
@@ -56,6 +57,12 @@ SHIFT MANAGEMENT
 ----------------
 - Only Admin can add, edit, delete unused shifts, or deactivate shifts with history.
 - Existing production records are not included in this repository file.
+
+MACHINE MANAGEMENT
+------------------
+- Only Admin can add, edit, delete unused machines, or deactivate machines with history.
+- A machine with a running job cannot be deactivated or deleted until that job is ended.
+- Default Operation automatically fills Start Job and Change Setting forms; Other remains available.
 
 PLANNED QTY AUTO-FILL
 ---------------------

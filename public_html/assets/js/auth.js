@@ -33,17 +33,15 @@
         element.classList.toggle('hidden', user.role !== 'Admin');
       });
 
-      machineSelect.innerHTML = '<option value="">-- select --</option>';
       document.getElementById('operator_id').innerHTML = '<option value="">-- select --</option>';
-      const machineLoad = fetchData(`${API}/get_machines.php`, 'machine_id', m => `<option value="${m.id}" data-code="${m.code}">${m.code} — ${m.name}</option>`);
+      const machineLoad = refreshMachineOptions();
       const operatorLoad = fetchData(`${API}/get_operators.php`, 'operator_id', o => `<option value="${o.id}">${o.name}</option>`);
-      const reportMachineLoad = fetchData(`${API}/get_machines.php`, 'reportMachine', m => `<option value="${m.id}">${m.code} — ${m.name}</option>`);
       const reportOperatorLoad = fetchData(`${API}/get_operators.php`, 'reportOperator', o => `<option value="${o.id}">${o.name}</option>`);
       const partsLoad = fetchParts();
       const cutterLoad = refreshDailyCutters();
       const shiftLoad = refreshShiftOptions();
       setStartJobFieldsEnabled(false);
-      Promise.all([machineLoad, operatorLoad, reportMachineLoad, reportOperatorLoad, partsLoad, cutterLoad, shiftLoad]).then(() => {
+      Promise.all([machineLoad, operatorLoad, reportOperatorLoad, partsLoad, cutterLoad, shiftLoad]).then(() => {
         updateShiftHours();
         updateHandoverShiftHours();
         populateReportParts();
