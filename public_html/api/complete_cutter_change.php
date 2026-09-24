@@ -51,6 +51,9 @@ try {
     $durationStmt->close();
 
     $conn->commit();
+    audit_log($conn, $user, 'Cutter Change', 'Completed',
+        'Completed cutter change #' . $change_id . ' for Job #' . $job_id . ' — downtime ' . $downtime . ' min',
+        'cutter_change', (int)$change_id);
     json_response(['success' => true, 'change_id' => $change_id, 'job_id' => (int)$job_id,
         'new_cutter_id' => $new_cutter_id, 'downtime_min' => $downtime, 'status' => 'Completed']);
 } catch (RuntimeException $error) {

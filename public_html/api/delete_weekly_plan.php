@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . "/bootstrap.php";
-require_auth();
+$user = require_auth();
 $data = json_input();
 $id = filter_var($data['id'] ?? null, FILTER_VALIDATE_INT);
 if (!$id) {
@@ -12,6 +12,7 @@ $stmt->execute();
 if ($stmt->affected_rows === 0) {
     json_error('Weekly Plan not found', 404);
 }
+audit_log($conn, $user, 'Production Plan', 'Deleted', 'Deleted Weekly Plan #' . $id, 'weekly_plan', (int)$id);
 json_response(['success' => true]);
 $stmt->close();
 $conn->close();

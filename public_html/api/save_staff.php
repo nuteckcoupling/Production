@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . "/bootstrap.php";
-require_admin();
+$user = require_admin();
 $data = json_input();
 
 $id = filter_var($data['id'] ?? null, FILTER_VALIDATE_INT) ?: null;
@@ -10,6 +10,7 @@ $designation = trim($data['designation'] ?? '');
 $department = trim($data['department'] ?? '');
 $phone = trim($data['phone'] ?? '');
 $status = $data['status'] ?? 'Active';
+$is_new = !$id;
 
 if ($staff_code === '' || strlen($staff_code) > 30 || !preg_match('/^[A-Z0-9][A-Z0-9 _\/-]*$/', $staff_code)) {
     json_error('Staff ID must use letters, numbers, spaces, /, _ or -', 400);
@@ -48,6 +49,9 @@ try {
         $id = (int)$stmt->insert_id;
         http_response_code(201);
     }
+    audit_log($conn, $user, 'Staff Management', $is_new ? 'Created' : 'Updated',
+        ($is_new ? 'Created staff ' : 'Updated staff ') . $staff_code . ' — ' . $name . ' (' . $status . ')',
+        'staff', (int)$id);
     json_response(['success' => true, 'id' => (int)$id]);
 } catch (mysqli_sql_exception $error) {
     if ($error->getCode() === 1062) json_error('Staff ID already exists', 409);

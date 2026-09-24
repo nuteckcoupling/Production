@@ -1,17 +1,17 @@
 <?php
 require __DIR__ . "/bootstrap.php";
-require_admin();
+$user = require_admin();
 $data = json_input();
 $id = filter_var($data['id'] ?? null, FILTER_VALIDATE_INT);
 if (!$id) {
     json_error('Valid machine is required', 400);
 }
-$stmt = $conn->prepare("SELECT id FROM machines WHERE id = ? LIMIT 1");
+$stmt = $conn->prepare("SELECT id, code FROM machines WHERE id = ? LIMIT 1");
 $stmt->bind_param('i', $id);
 $stmt->execute();
-$exists = $stmt->get_result()->num_rows === 1;
+$machine = $stmt->get_result()->fetch_assoc();
 $stmt->close();
-if (!$exists) {
+if (!$machine) {
     json_error('Machine not found', 404);
 }
 if (machine_has_active_job($conn, $id)) {
@@ -26,6 +26,7 @@ $delete->execute();
 if ($delete->affected_rows !== 1) {
     json_error('Unable to delete machine', 500);
 }
+audit_log($conn, $user, 'Machine Management', 'Deleted', 'Deleted unused machine ' . $machine['code'], 'machine', (int)$id);
 json_response(['success' => true]);
 $delete->close();
 $conn->close();

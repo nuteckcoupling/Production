@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . "/bootstrap.php";
-require_operator_supervisor();
+$user = require_operator_supervisor();
 
 $data = json_input();
 $coupling_type = $data['coupling_type'] ?? '';
@@ -58,6 +58,8 @@ try {
     }
 
     $conn->commit();
+    audit_log($conn, $user, 'Coupling Management', 'Created',
+        'Created coupling ' . $part_name . ' in ' . $coupling_type, 'part', (int)$part_id);
     http_response_code(201);
     json_response(["success" => true, "id" => $part_id]);
 } catch (mysqli_sql_exception $error) {

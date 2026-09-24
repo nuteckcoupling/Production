@@ -14,6 +14,7 @@ $priority = $data['priority'] ?? 'Normal';
 $status = $data['status'] ?? 'Draft';
 $remarks = trim($data['remarks'] ?? '');
 $shift_master = find_shift($conn, $shift);
+$is_new = !$id;
 
 $date = DateTime::createFromFormat('Y-m-d', $week_start);
 if (!$date || $date->format('Y-m-d') !== $week_start) {
@@ -54,6 +55,9 @@ try {
         $id = $stmt->insert_id;
         http_response_code(201);
     }
+    audit_log($conn, $user, 'Production Plan', $is_new ? 'Created' : 'Updated',
+        ($is_new ? 'Created' : 'Updated') . ' Weekly Plan #' . $id . ' for week ' . $week_start,
+        'weekly_plan', (int)$id);
     json_response(['success' => true, 'id' => (int)$id]);
 } catch (mysqli_sql_exception $error) {
     if ($error->getCode() === 1062) {

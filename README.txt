@@ -16,6 +16,7 @@ CURRENT FEATURES
 - Admin-only Staff Management with staff details, active status and history-safe deletion
 - Admin-only User Management with role/staff linking, account status and password reset
 - Secure self-service password change for every logged-in user
+- Admin-only immutable Activity / Audit Log with filters and CSV download
 - Cutter and coupling management
 - Machine-wise daily, weekly and monthly production reports
 - Admin-only actual-production analysis with achievement, pending/overdue jobs, downtime and rejection details
@@ -81,6 +82,13 @@ USER AND PASSWORD MANAGEMENT
 - Every logged-in user can change their own password after confirming the current password.
 - Duplicate usernames and duplicate staff-account links are blocked.
 - The current Admin cannot deactivate or remove Admin access from their own account, and one active Admin is always required.
+
+ACTIVITY / AUDIT LOG
+--------------------
+- Admin can review login/logout, production, handover, cutter/setting, ISO plan and master-data actions.
+- Filters are available for date, user, module and action, with CSV download.
+- Audit records are read-only and store action details, username, role, IP address and timestamp.
+- Passwords and password values are never stored in the audit log.
 
 ADMIN PRODUCTION ANALYSIS
 -------------------------

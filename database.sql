@@ -66,6 +66,24 @@ ON DUPLICATE KEY UPDATE
   operator_id = VALUES(operator_id),
   status = VALUES(status);
 
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT DEFAULT NULL,
+  username VARCHAR(50) NOT NULL,
+  role VARCHAR(50) DEFAULT NULL,
+  module VARCHAR(60) NOT NULL,
+  action VARCHAR(60) NOT NULL,
+  description VARCHAR(500) NOT NULL,
+  entity_type VARCHAR(60) DEFAULT NULL,
+  entity_id INT DEFAULT NULL,
+  ip_address VARCHAR(45) DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_audit_created (created_at),
+  KEY idx_audit_user (user_id),
+  KEY idx_audit_module (module),
+  KEY idx_audit_action (action)
+);
+
 CREATE TABLE IF NOT EXISTS parts (
   id INT AUTO_INCREMENT PRIMARY KEY,
   part_name VARCHAR(150) NOT NULL UNIQUE,

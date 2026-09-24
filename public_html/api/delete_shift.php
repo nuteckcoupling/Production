@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . "/bootstrap.php";
-require_admin();
+$user = require_admin();
 $data = json_input();
 $id = filter_var($data['id'] ?? null, FILTER_VALIDATE_INT);
 if (!$id) {
@@ -23,6 +23,7 @@ $delete->execute();
 if ($delete->affected_rows !== 1) {
     json_error('Unable to delete shift', 500);
 }
+audit_log($conn, $user, 'Shift Management', 'Deleted', 'Deleted unused shift ' . $shift['code'], 'shift', (int)$id);
 json_response(['success' => true]);
 $delete->close();
 $conn->close();

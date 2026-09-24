@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . "/bootstrap.php";
-require_operator_supervisor();
+$user = require_operator_supervisor();
 
 $data = json_input();
 $id = filter_var($data['id'] ?? null, FILTER_VALIDATE_INT);
@@ -55,6 +55,8 @@ try {
         }
         $exists->close();
     }
+    audit_log($conn, $user, 'Cutter Management', 'Updated',
+        'Updated cutter ' . $cutter_num . ' (' . $status . ')', 'cutter', (int)$id);
     json_response(['success' => true, 'id' => (int)$id]);
 } catch (mysqli_sql_exception $error) {
     if ($error->getCode() === 1062) {

@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . "/bootstrap.php";
-require_operator_supervisor();
+$user = require_operator_supervisor();
 
 $data = json_input();
 $id = filter_var($data['id'] ?? null, FILTER_VALIDATE_INT);
@@ -19,6 +19,8 @@ try {
         http_response_code(404);
         json_response(['error' => 'Deleted cutter not found']);
     } else {
+        audit_log($conn, $user, 'Cutter Management', 'Restored',
+            'Restored cutter ID ' . $id . ' as Active', 'cutter', (int)$id);
         json_response(['success' => true, 'id' => (int)$id, 'message' => 'Cutter restored as Active.']);
     }
 } catch (Throwable $error) {

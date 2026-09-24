@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . "/bootstrap.php";
-require_admin();
+$user = require_admin();
 $data = json_input();
 
 $id = filter_var($data['id'] ?? null, FILTER_VALIDATE_INT) ?: null;
@@ -9,6 +9,7 @@ $name = trim($data['name'] ?? '');
 $start_time = trim($data['start_time'] ?? '');
 $end_time = trim($data['end_time'] ?? '');
 $status = $data['status'] ?? 'Active';
+$is_new = !$id;
 $hours = calculate_shift_hours($start_time, $end_time);
 
 if ($code === '' || strlen($code) > 30 || !preg_match('/^[A-Za-z0-9][A-Za-z0-9 _\\/-]*$/', $code)) {
@@ -49,6 +50,8 @@ try {
         $id = (int)$stmt->insert_id;
         http_response_code(201);
     }
+    audit_log($conn, $user, 'Shift Management', $is_new ? 'Created' : 'Updated',
+        ($is_new ? 'Created shift ' : 'Updated shift ') . $code . ' (' . $status . ')', 'shift', (int)$id);
     json_response(['success' => true, 'id' => (int)$id, 'shift_hours' => $hours]);
 } catch (mysqli_sql_exception $error) {
     if ($error->getCode() === 1062) {

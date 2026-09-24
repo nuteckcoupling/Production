@@ -65,6 +65,8 @@ try {
     $touch->execute();
     $touch->close();
     $conn->commit();
+    audit_log($conn, $user, 'Production Plan', 'Generated',
+        'Generated Monthly Plan ' . $month . ' with ' . $item_count . ' items', 'monthly_plan', (int)$plan_id);
     json_response(['success' => true, 'id' => $plan_id, 'item_count' => $item_count]);
 } catch (Throwable $error) {
     $conn->rollback();

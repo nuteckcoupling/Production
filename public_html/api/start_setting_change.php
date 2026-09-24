@@ -129,6 +129,9 @@ try {
     $insert->close();
 
     $conn->commit();
+    audit_log($conn, $user, 'Setting Change', 'Started',
+        'Started setting change #' . $change_id . ' for Job #' . $job_id . ' — reason: ' . $reason,
+        'setting_change', (int)$change_id);
     json_response(['success' => true, 'change_id' => (int)$change_id, 'job_id' => (int)$job_id,
         'status' => 'In Progress']);
 } catch (mysqli_sql_exception $error) {

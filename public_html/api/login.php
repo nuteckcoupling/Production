@@ -23,6 +23,7 @@ $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
 
 if (!$user || !password_verify($password, $user['password_hash'])) {
+    audit_log($conn, null, 'Authentication', 'Login Failed', 'Failed login attempt', 'user', null, $username);
     http_response_code(401);
     json_response(['error' => 'Invalid username or Password / PIN']);
     exit;
@@ -40,6 +41,8 @@ $_SESSION['user'] = [
 $update = $conn->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
 $update->bind_param("i", $_SESSION['user']['id']);
 $update->execute();
+
+audit_log($conn, $_SESSION['user'], 'Authentication', 'Login', 'User logged in', 'user', (int)$user['id']);
 
 json_response(['success' => true, 'user' => $_SESSION['user']]);
 

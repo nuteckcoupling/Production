@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . "/bootstrap.php";
-require_operator_supervisor();
+$user = require_operator_supervisor();
 
 $data = json_input();
 $id = filter_var($data['id'] ?? null, FILTER_VALIDATE_INT);
@@ -34,6 +34,8 @@ try {
     $message = 'Cutter moved to Trash. Production history remains safe.';
 
     $conn->commit();
+    audit_log($conn, $user, 'Cutter Management', 'Moved to Trash',
+        'Moved cutter ' . $cutter['cutter_num'] . ' to Trash', 'cutter', (int)$id);
     json_response(['success' => true, 'id' => (int)$id, 'action' => $action, 'message' => $message]);
 } catch (Throwable $error) {
     $conn->rollback();

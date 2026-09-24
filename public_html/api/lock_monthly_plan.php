@@ -43,6 +43,8 @@ try {
     $update->execute();
     $update->close();
     $conn->commit();
+    audit_log($conn, $user, 'Production Plan', 'Locked',
+        'Locked Monthly Plan ' . $month, 'monthly_plan', (int)$plan['id']);
     json_response(['success' => true, 'id' => (int)$plan['id']]);
 } catch (Throwable $error) {
     $conn->rollback();

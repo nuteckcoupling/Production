@@ -1,5 +1,8 @@
 <?php
-require __DIR__ . "/auth.php";
+require __DIR__ . "/bootstrap.php";
+
+$user = current_user();
+if ($user !== null) audit_log($conn, $user, 'Authentication', 'Logout', 'User logged out', 'user', (int)$user['id']);
 
 $_SESSION = [];
 if (ini_get('session.use_cookies')) {
@@ -9,4 +12,5 @@ if (ini_get('session.use_cookies')) {
 session_destroy();
 
 json_response(['success' => true]);
+$conn->close();
 ?>

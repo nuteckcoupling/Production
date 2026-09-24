@@ -65,6 +65,9 @@ try {
     $updateJob->close();
 
     $conn->commit();
+    audit_log($conn, $user, 'Handover', 'Accepted',
+        'Accepted handover for Job #' . $job_id . ' on shift ' . $shift,
+        'production_job', (int)$job_id);
     json_response(['success' => true, 'job_id' => (int)$job_id, 'shift_id' => (int)$shift_id,
         'status' => 'Running', 'operator_name' => $user['operator_name'] ?? $user['username'],
         'shift' => $shift, 'shift_hours' => $shift_hours]);

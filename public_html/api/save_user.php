@@ -9,6 +9,7 @@ $role = $data['role'] ?? '';
 $operator_id = filter_var($data['operator_id'] ?? null, FILTER_VALIDATE_INT) ?: null;
 $status = $data['status'] ?? 'Active';
 $password = (string)($data['password'] ?? '');
+$is_new = !$id;
 
 if (!preg_match('/^[a-z0-9][a-z0-9._-]{2,49}$/', $username)) {
     json_error('Username must be 3-50 characters using lowercase letters, numbers, ., _ or -', 400);
@@ -74,6 +75,13 @@ try {
         $stmt->execute();
         $id = (int)$stmt->insert_id;
         http_response_code(201);
+    }
+    audit_log($conn, $current, 'User Management', $is_new ? 'Created' : 'Updated',
+        ($is_new ? 'Created user ' : 'Updated user ') . $username . ' (' . $role . ', ' . $status . ')',
+        'user', (int)$id);
+    if (!$is_new && $password !== '') {
+        audit_log($conn, $current, 'User Management', 'Password Reset',
+            'Admin reset password for user ' . $username, 'user', (int)$id);
     }
     json_response(['success' => true, 'id' => (int)$id]);
 } catch (mysqli_sql_exception $error) {

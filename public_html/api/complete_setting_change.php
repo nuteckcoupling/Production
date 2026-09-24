@@ -97,6 +97,9 @@ try {
     $complete->close();
 
     $conn->commit();
+    audit_log($conn, $user, 'Setting Change', 'Completed',
+        'Completed setting change #' . $change_id . ': Job #' . $job_id . ' replaced by Job #' . $new_job_id .
+        ' — downtime ' . $downtime . ' min', 'setting_change', (int)$change_id);
     json_response(['success' => true, 'change_id' => $change_id, 'old_job_id' => (int)$job_id,
         'old_job_status' => $oldStatus, 'new_job_id' => (int)$new_job_id,
         'new_shift_id' => (int)$new_shift_id, 'downtime_min' => $downtime, 'status' => 'Completed']);

@@ -119,6 +119,9 @@ try {
     $updateJob->close();
 
     $conn->commit();
+    audit_log($conn, $user, 'Production Job', 'Shift Ended',
+        'Ended shift for Job #' . $job_id . ' — ' . $job_outcome . ', status ' . $new_status .
+        ', OK qty ' . $values['ok_qty'], 'production_job', (int)$job_id);
     json_response(['success' => true, 'job_id' => (int)$job_id, 'status' => $new_status,
         'cumulative_ok_qty' => $new_cumulative]);
 } catch (RuntimeException $error) {

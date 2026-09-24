@@ -25,6 +25,7 @@ $update->bind_param('si', $password_hash, $current['id']);
 $update->execute();
 $update->close();
 session_regenerate_id(true);
+audit_log($conn, $current, 'User Management', 'Password Changed', 'User changed own password', 'user', (int)$current['id']);
 json_response(['success' => true]);
 $conn->close();
 ?>

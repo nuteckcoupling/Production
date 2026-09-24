@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . "/bootstrap.php";
-require_operator_supervisor();
+$user = require_operator_supervisor();
 
 $data = json_input();
 $cutter_num = trim($data['cutter_num'] ?? '');
@@ -44,8 +44,11 @@ $stmt->bind_param("ssssss", $cutter_num, $cutter_type, $lead_angle_value, $rpm_s
 
 try {
     $stmt->execute();
+    $cutter_id = (int)$stmt->insert_id;
+    audit_log($conn, $user, 'Cutter Management', 'Created',
+        'Created cutter ' . $cutter_num . ' (' . $status . ')', 'cutter', $cutter_id);
     http_response_code(201);
-    json_response(["success" => true, "id" => $stmt->insert_id]);
+    json_response(["success" => true, "id" => $cutter_id]);
 } catch (mysqli_sql_exception $error) {
     if ($error->getCode() === 1062) {
         http_response_code(409);

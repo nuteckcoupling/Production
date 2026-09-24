@@ -70,6 +70,9 @@ try {
     $insert->close();
 
     $conn->commit();
+    audit_log($conn, $user, 'Cutter Change', 'Started',
+        'Started cutter change #' . $change_id . ' for Job #' . $job_id . ' — reason: ' . $reason,
+        'cutter_change', (int)$change_id);
     json_response(['success' => true, 'change_id' => (int)$change_id, 'job_id' => (int)$job_id,
         'new_cutter_id' => (int)$new_cutter_id, 'new_cutter_num' => $newCutter['cutter_num'],
         'status' => 'In Progress']);

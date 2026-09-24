@@ -117,6 +117,9 @@ try {
     $shiftStmt->close();
 
     $conn->commit();
+    audit_log($conn, $user, 'Production Job', 'Started',
+        'Started Job #' . $job_id . ' on machine ID ' . $machine_id . ' for shift ' . $data['shift'],
+        'production_job', (int)$job_id);
     http_response_code(201);
     json_response([
         'success' => true,
