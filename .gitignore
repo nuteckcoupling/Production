@@ -1,4 +1,7 @@
 backups/
+!storage/
+!storage/backups/
+!storage/backups/.gitignore
 *.zip
 *.log
 node_modules/

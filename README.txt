@@ -17,6 +17,7 @@ CURRENT FEATURES
 - Admin-only User Management with role/staff linking, account status and password reset
 - Secure self-service password change for every logged-in user
 - Admin-only immutable Activity / Audit Log with filters and CSV download
+- Admin-only protected database backup, download, restore and manual deletion
 - Cutter and coupling management
 - Machine-wise daily, weekly and monthly production reports
 - Admin-only actual-production analysis with achievement, pending/overdue jobs, downtime and rejection details
@@ -89,6 +90,14 @@ ACTIVITY / AUDIT LOG
 - Filters are available for date, user, module and action, with CSV download.
 - Audit records are read-only and store action details, username, role, IP address and timestamp.
 - Passwords and password values are never stored in the audit log.
+
+DATABASE BACKUP MANAGEMENT
+--------------------------
+- Only Admin can create, download, restore or delete database backup files.
+- Backup files are stored under storage/backups outside public_html and are ignored by Git.
+- Restore requires the current Admin password, typing RESTORE and a final confirmation popup.
+- A safety backup is created automatically immediately before every restore.
+- Backup files contain password hashes and production data; downloaded files must be stored privately.
 
 ADMIN PRODUCTION ANALYSIS
 -------------------------

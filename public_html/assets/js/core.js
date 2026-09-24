@@ -30,6 +30,7 @@
     const userManagementModule = document.getElementById('userManagementModule');
     const changePasswordModule = document.getElementById('changePasswordModule');
     const auditLogModule = document.getElementById('auditLogModule');
+    const backupManagementModule = document.getElementById('backupManagementModule');
     const reportModule = document.getElementById('reportModule');
     const adminAnalysisModule = document.getElementById('adminAnalysisModule');
     const cutterModule = document.getElementById('cutterModule');
@@ -43,6 +44,7 @@
     const navUserManagement = document.getElementById('navUserManagement');
     const navChangePassword = document.getElementById('navChangePassword');
     const navAuditLog = document.getElementById('navAuditLog');
+    const navBackupManagement = document.getElementById('navBackupManagement');
     const navReports = document.getElementById('navReports');
     const navAdminAnalysis = document.getElementById('navAdminAnalysis');
     const navCutter = document.getElementById('navCutter');
@@ -71,8 +73,8 @@
 
 
     function switchModule(moduleName) {
-      const modules = { dashboard: dashboardModule, daily: dailyModule, active: activeJobModule, productionPlan: productionPlanModule, shiftManagement: shiftManagementModule, machineManagement: machineManagementModule, staffManagement: staffManagementModule, userManagement: userManagementModule, changePassword: changePasswordModule, auditLog: auditLogModule, reports: reportModule, adminAnalysis: adminAnalysisModule, cutter: cutterModule, coupling: couplingModule };
-      const navItems = { dashboard: navDashboard, daily: navDaily, productionPlan: navProductionPlan, shiftManagement: navShiftManagement, machineManagement: navMachineManagement, staffManagement: navStaffManagement, userManagement: navUserManagement, changePassword: navChangePassword, auditLog: navAuditLog, reports: navReports, adminAnalysis: navAdminAnalysis, cutter: navCutter, coupling: navCoupling };
+      const modules = { dashboard: dashboardModule, daily: dailyModule, active: activeJobModule, productionPlan: productionPlanModule, shiftManagement: shiftManagementModule, machineManagement: machineManagementModule, staffManagement: staffManagementModule, userManagement: userManagementModule, changePassword: changePasswordModule, auditLog: auditLogModule, backupManagement: backupManagementModule, reports: reportModule, adminAnalysis: adminAnalysisModule, cutter: cutterModule, coupling: couplingModule };
+      const navItems = { dashboard: navDashboard, daily: navDaily, productionPlan: navProductionPlan, shiftManagement: navShiftManagement, machineManagement: navMachineManagement, staffManagement: navStaffManagement, userManagement: navUserManagement, changePassword: navChangePassword, auditLog: navAuditLog, backupManagement: navBackupManagement, reports: navReports, adminAnalysis: navAdminAnalysis, cutter: navCutter, coupling: navCoupling };
       Object.entries(modules).forEach(([name, element]) => element.classList.toggle('hidden', name !== moduleName));
       Object.entries(navItems).forEach(([name, element]) => {
         const active = name === moduleName;
@@ -86,6 +88,7 @@
       if (moduleName === 'staffManagement') loadStaffManagement();
       if (moduleName === 'userManagement') loadUserManagement();
       if (moduleName === 'auditLog') initializeAuditLog();
+      if (moduleName === 'backupManagement') loadBackups();
       if (moduleName === 'reports' && !currentReportData) loadProductionReport();
       if (moduleName === 'adminAnalysis') initializeAdminAnalysis();
       if (moduleName === 'cutter') loadCutters();
