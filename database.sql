@@ -84,6 +84,22 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   KEY idx_audit_action (action)
 );
 
+CREATE TABLE IF NOT EXISTS backup_settings (
+  id TINYINT PRIMARY KEY,
+  enabled TINYINT(1) NOT NULL DEFAULT 1,
+  backup_time TIME NOT NULL DEFAULT '23:00:00',
+  retention_count INT NOT NULL DEFAULT 14,
+  last_backup_date DATE DEFAULT NULL,
+  last_backup_filename VARCHAR(120) DEFAULT NULL,
+  updated_by_user_id INT DEFAULT NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (updated_by_user_id) REFERENCES users(id)
+);
+
+INSERT INTO backup_settings (id, enabled, backup_time, retention_count)
+VALUES (1, 1, '23:00:00', 14)
+ON DUPLICATE KEY UPDATE id = VALUES(id);
+
 CREATE TABLE IF NOT EXISTS parts (
   id INT AUTO_INCREMENT PRIMARY KEY,
   part_name VARCHAR(150) NOT NULL UNIQUE,

@@ -88,7 +88,10 @@
       if (moduleName === 'staffManagement') loadStaffManagement();
       if (moduleName === 'userManagement') loadUserManagement();
       if (moduleName === 'auditLog') initializeAuditLog();
-      if (moduleName === 'backupManagement') loadBackups();
+      if (moduleName === 'backupManagement') {
+        loadBackups();
+        loadBackupSettings();
+      }
       if (moduleName === 'reports' && !currentReportData) loadProductionReport();
       if (moduleName === 'adminAnalysis') initializeAdminAnalysis();
       if (moduleName === 'cutter') loadCutters();

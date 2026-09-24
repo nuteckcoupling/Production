@@ -15,7 +15,7 @@ function ensure_backup_directory(): string
 
 function valid_backup_filename(string $filename): bool
 {
-    return preg_match('/^production-(?:backup|safety)-\d{8}-\d{6}-[a-f0-9]{8}\.sql$/', $filename) === 1;
+    return preg_match('/^production-(?:backup|safety|automatic)-\d{8}-\d{6}-[a-f0-9]{8}\.sql$/', $filename) === 1;
 }
 
 function backup_file_path(string $filename): string
@@ -37,7 +37,7 @@ function backup_write($handle, string $content): void
 
 function create_database_backup(mysqli $conn, string $kind = 'backup'): array
 {
-    if (!in_array($kind, ['backup', 'safety'], true)) $kind = 'backup';
+    if (!in_array($kind, ['backup', 'safety', 'automatic'], true)) $kind = 'backup';
     $directory = ensure_backup_directory();
     $filename = 'production-' . $kind . '-' . date('Ymd-His') . '-' . bin2hex(random_bytes(4)) . '.sql';
     $final_path = $directory . DIRECTORY_SEPARATOR . $filename;
@@ -113,11 +113,24 @@ function list_database_backups(): array
             'filename' => $filename,
             'size' => filesize($path),
             'created_at' => date('Y-m-d H:i:s', filemtime($path)),
-            'kind' => str_starts_with($filename, 'production-safety-') ? 'safety' : 'backup'
+            'kind' => str_starts_with($filename, 'production-safety-') ? 'safety'
+                : (str_starts_with($filename, 'production-automatic-') ? 'automatic' : 'backup')
         ];
     }
     usort($files, fn($a, $b) => strcmp($b['created_at'], $a['created_at']) ?: strcmp($b['filename'], $a['filename']));
     return $files;
+}
+
+function prune_automatic_backups(int $retention_count): int
+{
+    $retention_count = max(1, min(90, $retention_count));
+    $automatic = array_values(array_filter(list_database_backups(), fn($backup) => $backup['kind'] === 'automatic'));
+    $removed = 0;
+    foreach (array_slice($automatic, $retention_count) as $backup) {
+        $path = backup_file_path($backup['filename']);
+        if (is_file($path) && unlink($path)) $removed++;
+    }
+    return $removed;
 }
 
 function restore_database_backup(mysqli $conn, string $filename): void

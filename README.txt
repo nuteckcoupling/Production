@@ -18,6 +18,7 @@ CURRENT FEATURES
 - Secure self-service password change for every logged-in user
 - Admin-only immutable Activity / Audit Log with filters and CSV download
 - Admin-only protected database backup, download, restore and manual deletion
+- Configurable automatic daily database backups with retention control
 - Cutter and coupling management
 - Machine-wise daily, weekly and monthly production reports
 - Admin-only actual-production analysis with achievement, pending/overdue jobs, downtime and rejection details
@@ -98,6 +99,9 @@ DATABASE BACKUP MANAGEMENT
 - Restore requires the current Admin password, typing RESTORE and a final confirmation popup.
 - A safety backup is created automatically immediately before every restore.
 - Backup files contain password hashes and production data; downloaded files must be stored privately.
+- Automatic backups run on the first authenticated app request after the configured daily time.
+- Admin can enable/disable the schedule, choose the time and retain the latest 1-90 automatic backups.
+- Automatic retention never deletes manual or pre-restore safety backups.
 
 ADMIN PRODUCTION ANALYSIS
 -------------------------

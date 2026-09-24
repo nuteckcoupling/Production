@@ -13,6 +13,23 @@
       </div>
       <div id="backupManagementMessage" class="banner"></div>
 
+      <form class="card backup-schedule-card" id="backupScheduleForm" onsubmit="handleBackupScheduleSubmit(event)">
+        <div class="list-heading">
+          <div><h2>Automatic Daily Backup</h2><span class="table-subtext">Runs on the first active app request after the selected time.</span></div>
+          <span class="tag idle" id="backupScheduleStatus">Loading...</span>
+        </div>
+        <div class="grid management-grid">
+          <label>Automatic Backup<select name="enabled" id="automaticBackupEnabled"><option value="1">Enabled</option><option value="0">Disabled</option></select></label>
+          <label>Daily Time<input type="time" name="backup_time" id="automaticBackupTime" required /></label>
+          <label>Keep Latest Automatic Backups<input type="number" name="retention_count" id="automaticBackupRetention" min="1" max="90" required /></label>
+          <label>Last Automatic Backup<input type="text" id="automaticBackupLastRun" readonly value="Never" /></label>
+        </div>
+        <div class="management-form-actions">
+          <button type="submit" class="submit" id="saveBackupScheduleBtn">Save Schedule</button>
+        </div>
+        <p class="table-subtext">Apache and MySQL must be running. Manual and safety backups are never removed by automatic retention.</p>
+      </form>
+
       <form class="card backup-restore-card hidden" id="restoreBackupForm" onsubmit="handleRestoreBackup(event)">
         <input type="hidden" name="file" id="restoreBackupFile" />
         <h2>Restore Database</h2>

@@ -27,6 +27,72 @@
         });
     }
 
+    function loadBackupSettings() {
+      if (currentUser?.role !== 'Admin') return;
+      fetch(API + '/get_backup_settings.php')
+        .then(async response => {
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || 'Unable to load automatic backup settings.');
+          return data;
+        })
+        .then(settings => {
+          document.getElementById('automaticBackupEnabled').value = settings.enabled ? '1' : '0';
+          document.getElementById('automaticBackupTime').value = settings.backup_time;
+          document.getElementById('automaticBackupRetention').value = settings.retention_count;
+          document.getElementById('automaticBackupLastRun').value = settings.last_backup_date
+            ? settings.last_backup_date + (settings.last_backup_filename ? ' — ' + settings.last_backup_filename : '')
+            : 'Never';
+          const status = document.getElementById('backupScheduleStatus');
+          status.className = 'tag ' + (settings.enabled ? 'running' : 'idle');
+          status.innerText = settings.enabled ? 'Enabled' : 'Disabled';
+        })
+        .catch(error => showBackupMessage('error', error.message));
+    }
+
+    function handleBackupScheduleSubmit(event) {
+      event.preventDefault();
+      const data = Object.fromEntries(new FormData(event.target).entries());
+      data.enabled = data.enabled === '1';
+      const button = document.getElementById('saveBackupScheduleBtn');
+      button.disabled = true;
+      button.innerText = 'Saving...';
+      fetch(API + '/save_backup_settings.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      }).then(async response => {
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Unable to save automatic backup settings.');
+      }).then(() => {
+        showBackupMessage('success', 'Automatic backup schedule saved.');
+        loadBackupSettings();
+        checkScheduledBackup();
+      }).catch(error => showBackupMessage('error', error.message))
+        .finally(() => {
+          button.disabled = false;
+          button.innerText = 'Save Schedule';
+        });
+    }
+
+    function checkScheduledBackup() {
+      if (!currentUser) return Promise.resolve();
+      return fetch(API + '/run_scheduled_backup.php', { method: 'POST' })
+        .then(async response => {
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error || 'Automatic backup check failed.');
+          return result;
+        })
+        .then(result => {
+          if (!result.performed) return;
+          if (currentUser?.role === 'Admin') {
+            showToast('success', 'Automatic database backup created.');
+            loadBackupSettings();
+            if (!backupManagementModule.classList.contains('hidden')) loadBackups();
+          }
+        })
+        .catch(error => console.error('Automatic backup check:', error.message));
+    }
+
     function renderBackups() {
       const tbody = document.getElementById('backupTableBody');
       if (!databaseBackups.length) {
@@ -35,7 +101,8 @@
       }
       tbody.innerHTML = databaseBackups.map(backup => '<tr>' +
         '<td><strong>' + escapeHtml(backup.filename) + '</strong></td>' +
-        '<td><span class="tag ' + (backup.kind === 'safety' ? 'handover-pending' : 'idle') + '">' + escapeHtml(backup.kind === 'safety' ? 'Safety' : 'Manual') + '</span></td>' +
+        '<td><span class="tag ' + (backup.kind === 'automatic' ? 'running' : (backup.kind === 'safety' ? 'handover-pending' : 'idle')) + '">' +
+          escapeHtml(backup.kind === 'automatic' ? 'Automatic' : (backup.kind === 'safety' ? 'Safety' : 'Manual')) + '</span></td>' +
         '<td>' + escapeHtml(backup.created_at) + '</td>' +
         '<td>' + escapeHtml(formatBackupSize(Number(backup.size))) + '</td>' +
         '<td class="table-actions">' +
@@ -150,3 +217,7 @@
         loadBackups();
       }).catch(error => showBackupMessage('error', error.message));
     }
+
+    window.setInterval(() => {
+      if (currentUser) checkScheduledBackup();
+    }, 300000);

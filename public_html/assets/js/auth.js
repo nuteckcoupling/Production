@@ -45,6 +45,7 @@
         populateReportParts();
         applyOperatorAccess();
         switchModule('dashboard');
+        checkScheduledBackup();
       });
     }
 
