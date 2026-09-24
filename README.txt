@@ -15,6 +15,7 @@ CURRENT FEATURES
 - Admin-only Machine Management with default operations and history-safe deletion
 - Admin-only Staff Management with staff details, active status and history-safe deletion
 - Admin-only User Management with role/staff linking, account status and password reset
+- Login security with failed-attempt lockout, Admin unlock, forced password change and 60-minute idle timeout
 - Secure self-service password change for every logged-in user
 - Admin-only immutable Activity / Audit Log with filters and CSV download
 - Admin-only protected database backup, download, restore and manual deletion

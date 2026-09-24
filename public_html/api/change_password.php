@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . "/bootstrap.php";
-$current = require_auth();
+$current = require_auth(true);
 $data = json_input();
 $current_password = (string)($data['current_password'] ?? '');
 $new_password = (string)($data['new_password'] ?? '');
@@ -20,12 +20,17 @@ if (!$row || !password_verify($current_password, $row['password_hash'])) {
 }
 
 $password_hash = password_hash($new_password, PASSWORD_DEFAULT);
-$update = $conn->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
+$update = $conn->prepare("UPDATE users SET password_hash = ?, must_change_password = 0,
+                          failed_login_attempts = 0, locked_until = NULL, session_version = session_version + 1
+                          WHERE id = ?");
 $update->bind_param('si', $password_hash, $current['id']);
 $update->execute();
 $update->close();
 session_regenerate_id(true);
+$fresh_user = active_user_by_id($conn, (int)$current['id']);
+$_SESSION['user'] = $fresh_user;
+$_SESSION['last_activity_at'] = time();
 audit_log($conn, $current, 'User Management', 'Password Changed', 'User changed own password', 'user', (int)$current['id']);
-json_response(['success' => true]);
+json_response(['success' => true, 'user' => $fresh_user]);
 $conn->close();
 ?>

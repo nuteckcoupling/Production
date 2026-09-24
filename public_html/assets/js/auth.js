@@ -1,4 +1,25 @@
 // Extracted from index.html during Phase 2 frontend separation.
+    const CLIENT_IDLE_TIMEOUT_MS = 60 * 60 * 1000;
+    let clientIdleTimer = null;
+
+    function clearClientIdleTimer() {
+      if (clientIdleTimer) window.clearTimeout(clientIdleTimer);
+      clientIdleTimer = null;
+    }
+
+    function resetClientIdleTimer() {
+      if (!currentUser) return;
+      clearClientIdleTimer();
+      clientIdleTimer = window.setTimeout(() => {
+        fetch(`${API}/logout.php`, { method: 'POST' })
+          .finally(() => showLogin('Session expired after 60 minutes of inactivity. Please login again.'));
+      }, CLIENT_IDLE_TIMEOUT_MS);
+    }
+
+    ['pointerdown', 'keydown', 'touchstart'].forEach(eventName => {
+      document.addEventListener(eventName, resetClientIdleTimer, { passive: true });
+    });
+
     function checkSession() {
       fetch(`${API}/session.php`)
         .then(response => response.json())
@@ -10,6 +31,7 @@
     }
 
     function showLogin(message = '') {
+      clearClientIdleTimer();
       currentUser = null;
       document.getElementById('appShell').classList.add('hidden');
       document.getElementById('loginView').classList.remove('hidden');
@@ -22,16 +44,29 @@
 
     function initializeApp(user) {
       currentUser = user;
+      resetClientIdleTimer();
       document.getElementById('loginView').classList.add('hidden');
       document.getElementById('appShell').classList.remove('hidden');
       document.getElementById('currentUserName').innerText = user.operator_name || user.username;
       document.getElementById('currentUserRole').innerText = user.role === 'Admin' ? 'Admin / Director' : user.role;
+      document.querySelectorAll('.sidebar-item').forEach(element => element.classList.remove('hidden'));
       document.querySelectorAll('.operator-only').forEach(element => {
         element.classList.toggle('hidden', user.role !== 'Operator/Supervisor');
       });
       document.querySelectorAll('.admin-only').forEach(element => {
         element.classList.toggle('hidden', user.role !== 'Admin');
       });
+
+      if (user.must_change_password) {
+        document.querySelectorAll('.sidebar-item').forEach(element => {
+          element.classList.toggle('hidden', element.id !== 'navChangePassword');
+        });
+        switchModule('changePassword');
+        const banner = document.getElementById('changePasswordMessage');
+        banner.className = 'banner warning';
+        banner.innerText = 'Admin ne temporary password set kiya hai. Continue karne se pehle password change karein.';
+        return;
+      }
 
       const machineLoad = refreshMachineOptions();
       const operatorLoad = refreshOperatorOptions();
@@ -87,6 +122,7 @@
     }
 
     function handleLogout() {
+      clearClientIdleTimer();
       fetch(`${API}/logout.php`, { method: 'POST' })
         .finally(() => showLogin());
     }

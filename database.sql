@@ -50,6 +50,11 @@ CREATE TABLE IF NOT EXISTS users (
   operator_id INT DEFAULT NULL UNIQUE,
   status ENUM('Active','Inactive') NOT NULL DEFAULT 'Active',
   last_login DATETIME DEFAULT NULL,
+  last_failed_login DATETIME DEFAULT NULL,
+  failed_login_attempts INT UNSIGNED NOT NULL DEFAULT 0,
+  locked_until DATETIME DEFAULT NULL,
+  must_change_password TINYINT(1) NOT NULL DEFAULT 0,
+  session_version INT UNSIGNED NOT NULL DEFAULT 1,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (operator_id) REFERENCES operators(id)
 );

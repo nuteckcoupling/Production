@@ -14,7 +14,7 @@
           <label>Status<select name="status" id="userStatus"><option>Active</option><option>Inactive</option></select></label>
           <label>Password / Reset Password
             <input type="password" name="password" id="userPassword" minlength="8" maxlength="128" autocomplete="new-password" placeholder="Required for new user" />
-            <span class="table-subtext">Editing: leave blank to keep the current password.</span>
+            <span class="table-subtext">Editing: leave blank to keep the current password. New/reset password must be changed by the user at next login.</span>
           </label>
         </div>
         <div class="management-form-actions">
@@ -26,12 +26,12 @@
       <div class="card list-card">
         <div class="list-heading">
           <h2>Login Accounts</h2>
-          <span class="table-subtext">Inactive users are immediately blocked from login and future API requests.</span>
+          <span class="table-subtext">5 failed attempts lock an account for 15 minutes. Admin can unlock it immediately.</span>
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Username</th><th>Role</th><th>Linked Staff</th><th>Status</th><th>Last Login</th><th>Actions</th></tr></thead>
-            <tbody id="userManagementTableBody"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody>
+            <thead><tr><th>Username</th><th>Role</th><th>Linked Staff</th><th>Status</th><th>Security</th><th>Last Login</th><th>Actions</th></tr></thead>
+            <tbody id="userManagementTableBody"><tr><td colspan="7" class="empty">Loading...</td></tr></tbody>
           </table>
         </div>
       </div>

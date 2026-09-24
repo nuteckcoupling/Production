@@ -11,7 +11,7 @@
     function loadUserManagement() {
       if (currentUser?.role !== 'Admin') return;
       const tbody = document.getElementById('userManagementTableBody');
-      tbody.innerHTML = '<tr><td colspan="6" class="empty">Loading...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="empty">Loading...</td></tr>';
       Promise.all([
         fetch(API + '/get_users.php').then(async response => {
           const data = await response.json();
@@ -36,19 +36,25 @@
     function renderManagedUsers() {
       const tbody = document.getElementById('userManagementTableBody');
       if (!managedUsers.length) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty">No users found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="empty">No users found.</td></tr>';
         return;
       }
       tbody.innerHTML = managedUsers.map(user => {
         const staff = user.operator_name ? escapeHtml(user.staff_code) + ' — ' + escapeHtml(user.operator_name) : 'Not linked';
         const current = user.is_current ? ' <span class="table-subtext">(You)</span>' : '';
+        let security = 'OK';
+        if (user.is_locked) security = '<span class="tag breakdown">Locked</span>';
+        else if (user.must_change_password) security = '<span class="tag handover-pending">Password change required</span>';
+        else if (user.failed_login_attempts) security = escapeHtml(user.failed_login_attempts) + ' failed attempt(s)';
         return '<tr>' +
           '<td><strong>' + escapeHtml(user.username) + '</strong>' + current + '</td>' +
           '<td>' + escapeHtml(user.role) + '</td>' +
           '<td>' + staff + '</td>' +
           '<td><span class="tag ' + (user.status === 'Active' ? 'running' : 'idle') + '">' + escapeHtml(user.status) + '</span></td>' +
+          '<td>' + security + '</td>' +
           '<td>' + escapeHtml(user.last_login || 'Never') + '</td>' +
           '<td><button type="button" class="table-action edit" onclick="editUser(' + Number(user.id) + ')">Edit / Reset Password</button>' +
+          (user.is_locked || user.failed_login_attempts ? '<button type="button" class="table-action" onclick="unlockUser(' + Number(user.id) + ')">Unlock</button>' : '') +
           (!user.is_current && user.status === 'Active' ? '<button type="button" class="table-action delete" onclick="deactivateUser(' + Number(user.id) + ')">Deactivate</button>' : '') + '</td></tr>';
       }).join('');
     }
@@ -151,6 +157,29 @@
       }).catch(error => showUserManagementMessage('error', error.message));
     }
 
+    async function unlockUser(id) {
+      const user = managedUsers.find(item => Number(item.id) === Number(id));
+      if (!user) return;
+      const confirmed = await showConfirmDialog({
+        title: 'Unlock Account?',
+        message: 'Failed login attempts for ' + user.username + ' will be cleared.',
+        confirmText: 'Unlock',
+        tone: 'warning'
+      });
+      if (!confirmed) return;
+      fetch(API + '/unlock_user.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: user.id })
+      }).then(async response => {
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Unable to unlock user.');
+      }).then(() => {
+        showUserManagementMessage('success', 'User account unlocked.');
+        loadUserManagement();
+      }).catch(error => showUserManagementMessage('error', error.message));
+    }
+
     function handleChangePassword(event) {
       event.preventDefault();
       const data = Object.fromEntries(new FormData(event.target).entries());
@@ -164,6 +193,7 @@
       const button = document.getElementById('changePasswordBtn');
       button.disabled = true;
       button.innerText = 'Changing...';
+      const wasForced = Boolean(currentUser?.must_change_password);
       fetch(API + '/change_password.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -171,11 +201,14 @@
       }).then(async response => {
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || 'Unable to change password.');
-      }).then(() => {
+        return result;
+      }).then(result => {
         event.target.reset();
         banner.className = 'banner success';
         banner.innerText = 'Password changed successfully.';
         showToast('success', banner.innerText);
+        currentUser = result.user;
+        if (wasForced) initializeApp(result.user);
       }).catch(error => {
         banner.className = 'banner error';
         banner.innerText = error.message;

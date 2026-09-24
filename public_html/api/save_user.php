@@ -59,18 +59,21 @@ try {
         if ($password !== '') {
             $password_hash = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $conn->prepare("UPDATE users
-                                   SET username = ?, role = ?, operator_id = ?, status = ?, password_hash = ?
+                                   SET username = ?, role = ?, operator_id = ?, status = ?, password_hash = ?,
+                                       must_change_password = 1, failed_login_attempts = 0, locked_until = NULL,
+                                       session_version = session_version + 1
                                    WHERE id = ?");
             $stmt->bind_param('ssissi', $username, $role, $operator_id, $status, $password_hash, $id);
         } else {
-            $stmt = $conn->prepare("UPDATE users SET username = ?, role = ?, operator_id = ?, status = ? WHERE id = ?");
+            $stmt = $conn->prepare("UPDATE users SET username = ?, role = ?, operator_id = ?, status = ?,
+                                    session_version = session_version + 1 WHERE id = ?");
             $stmt->bind_param('ssisi', $username, $role, $operator_id, $status, $id);
         }
         $stmt->execute();
     } else {
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $conn->prepare("INSERT INTO users (username, password_hash, role, operator_id, status)
-                               VALUES (?, ?, ?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO users (username, password_hash, role, operator_id, status, must_change_password)
+                               VALUES (?, ?, ?, ?, ?, 1)");
         $stmt->bind_param('sssis', $username, $password_hash, $role, $operator_id, $status);
         $stmt->execute();
         $id = (int)$stmt->insert_id;
