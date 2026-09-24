@@ -45,6 +45,27 @@
         });
     }
 
+    function refreshOperatorOptions() {
+      return fetch(API + '/get_operators.php')
+        .then(async response => {
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || 'Unable to load staff.');
+          return data;
+        })
+        .then(staff => {
+          [['operator_id', '-- select --'], ['reportOperator', 'All Operators']].forEach(([id, firstLabel]) => {
+            const select = document.getElementById(id);
+            if (!select) return;
+            const previous = select.value;
+            select.innerHTML = '<option value="">' + firstLabel + '</option>';
+            staff.forEach(person => select.insertAdjacentHTML('beforeend',
+              '<option value="' + Number(person.id) + '">' + escapeHtml(person.staff_code) + ' — ' + escapeHtml(person.name) + '</option>'));
+            if ([...select.options].some(option => option.value === previous)) select.value = previous;
+          });
+          return staff;
+        });
+    }
+
     function refreshDailyCutters() {
       const select = document.getElementById('cutter_id');
       select.innerHTML = '<option value="">-- select --</option>';

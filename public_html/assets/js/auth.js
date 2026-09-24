@@ -33,15 +33,13 @@
         element.classList.toggle('hidden', user.role !== 'Admin');
       });
 
-      document.getElementById('operator_id').innerHTML = '<option value="">-- select --</option>';
       const machineLoad = refreshMachineOptions();
-      const operatorLoad = fetchData(`${API}/get_operators.php`, 'operator_id', o => `<option value="${o.id}">${o.name}</option>`);
-      const reportOperatorLoad = fetchData(`${API}/get_operators.php`, 'reportOperator', o => `<option value="${o.id}">${o.name}</option>`);
+      const operatorLoad = refreshOperatorOptions();
       const partsLoad = fetchParts();
       const cutterLoad = refreshDailyCutters();
       const shiftLoad = refreshShiftOptions();
       setStartJobFieldsEnabled(false);
-      Promise.all([machineLoad, operatorLoad, reportOperatorLoad, partsLoad, cutterLoad, shiftLoad]).then(() => {
+      Promise.all([machineLoad, operatorLoad, partsLoad, cutterLoad, shiftLoad]).then(() => {
         updateShiftHours();
         updateHandoverShiftHours();
         populateReportParts();

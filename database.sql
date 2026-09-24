@@ -28,15 +28,19 @@ INSERT INTO machines (code, name, default_operation) VALUES
 
 CREATE TABLE IF NOT EXISTS operators (
   id INT AUTO_INCREMENT PRIMARY KEY,
+  staff_code VARCHAR(30) NOT NULL UNIQUE,
   name VARCHAR(100) NOT NULL,
+  designation VARCHAR(100) NOT NULL DEFAULT 'Operator',
+  department VARCHAR(100) NOT NULL DEFAULT 'Production',
+  phone VARCHAR(20) DEFAULT NULL,
   status ENUM('Active','Inactive') DEFAULT 'Active'
 );
 
-INSERT INTO operators (name, status) VALUES
-('Mukesh','Active'),
-('Prakash','Active'),
-('vijay','Active'),
-('subdeep','Active');
+INSERT INTO operators (staff_code, name, designation, department, phone, status) VALUES
+('OP-001','Mukesh','Operator','Production',NULL,'Active'),
+('OP-002','Prakash','Operator','Production',NULL,'Active'),
+('OP-003','vijay','Operator','Production',NULL,'Active'),
+('OP-004','subdeep','Operator','Production',NULL,'Active');
 
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,

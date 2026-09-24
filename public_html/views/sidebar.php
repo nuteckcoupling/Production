@@ -13,6 +13,7 @@
         <button type="button" id="navCoupling" class="sidebar-item operator-only" onclick="switchModule('coupling')">Coupling Add</button>
         <button type="button" id="navShiftManagement" class="sidebar-item admin-only" onclick="switchModule('shiftManagement')">Shift Management</button>
         <button type="button" id="navMachineManagement" class="sidebar-item admin-only" onclick="switchModule('machineManagement')">Machine Management</button>
+        <button type="button" id="navStaffManagement" class="sidebar-item admin-only" onclick="switchModule('staffManagement')">Staff Management</button>
       </nav>
       <div class="sidebar-user">
         <strong id="currentUserName">-</strong>

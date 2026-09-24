@@ -19,6 +19,7 @@
     <?php require __DIR__ . '/views/production-plan.php'; ?>
     <?php require __DIR__ . '/views/shift-management.php'; ?>
     <?php require __DIR__ . '/views/machine-management.php'; ?>
+    <?php require __DIR__ . '/views/staff-management.php'; ?>
     <?php require __DIR__ . '/views/daily-entry.php'; ?>
     <?php require __DIR__ . '/views/active-job.php'; ?>
     <?php require __DIR__ . '/views/reports.php'; ?>
@@ -30,13 +31,14 @@
   </div>
 
   <script src="assets/js/notifications.js?v=20260924-1"></script>
-  <script src="assets/js/core.js?v=20260924-2"></script>
-  <script src="assets/js/api.js?v=20260923-4"></script>
-  <script src="assets/js/auth.js?v=20260923-4"></script>
+  <script src="assets/js/core.js?v=20260924-3"></script>
+  <script src="assets/js/api.js?v=20260924-1"></script>
+  <script src="assets/js/auth.js?v=20260924-1"></script>
   <script src="assets/js/weekly-plan.js?v=20260924-1"></script>
   <script src="assets/js/monthly-plan.js?v=20260924-1"></script>
   <script src="assets/js/shift-management.js?v=20260924-1"></script>
   <script src="assets/js/machine-management.js?v=20260924-1"></script>
+  <script src="assets/js/staff-management.js?v=20260924-1"></script>
   <script src="assets/js/jobs.js?v=20260923-4"></script>
   <script src="assets/js/changes.js?v=20260923-3"></script>
   <script src="assets/js/reports.js?v=20260923-2"></script>
