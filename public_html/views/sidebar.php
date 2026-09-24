@@ -14,6 +14,8 @@
         <button type="button" id="navShiftManagement" class="sidebar-item admin-only" onclick="switchModule('shiftManagement')">Shift Management</button>
         <button type="button" id="navMachineManagement" class="sidebar-item admin-only" onclick="switchModule('machineManagement')">Machine Management</button>
         <button type="button" id="navStaffManagement" class="sidebar-item admin-only" onclick="switchModule('staffManagement')">Staff Management</button>
+        <button type="button" id="navUserManagement" class="sidebar-item admin-only" onclick="switchModule('userManagement')">User Management</button>
+        <button type="button" id="navChangePassword" class="sidebar-item" onclick="switchModule('changePassword')">Change My Password</button>
       </nav>
       <div class="sidebar-user">
         <strong id="currentUserName">-</strong>

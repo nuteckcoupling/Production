@@ -14,6 +14,8 @@ CURRENT FEATURES
 - Admin-only Shift Management with automatic hours and safe deactivate rules
 - Admin-only Machine Management with default operations and history-safe deletion
 - Admin-only Staff Management with staff details, active status and history-safe deletion
+- Admin-only User Management with role/staff linking, account status and password reset
+- Secure self-service password change for every logged-in user
 - Cutter and coupling management
 - Machine-wise daily, weekly and monthly production reports
 - Admin-only actual-production analysis with achievement, pending/overdue jobs, downtime and rejection details
@@ -72,6 +74,13 @@ STAFF MANAGEMENT
 - Only Admin can add, edit, delete unused staff, or deactivate staff with production history/login accounts.
 - Staff with a running job or shift cannot be deactivated or deleted until the work is ended.
 - Active staff automatically appear in production and report dropdowns.
+
+USER AND PASSWORD MANAGEMENT
+----------------------------
+- Only Admin can create/edit login accounts, assign roles, link staff, activate/deactivate users and reset passwords.
+- Every logged-in user can change their own password after confirming the current password.
+- Duplicate usernames and duplicate staff-account links are blocked.
+- The current Admin cannot deactivate or remove Admin access from their own account, and one active Admin is always required.
 
 ADMIN PRODUCTION ANALYSIS
 -------------------------
