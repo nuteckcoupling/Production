@@ -6,8 +6,7 @@
       <nav class="sidebar-nav">
         <button type="button" id="navDashboard" class="sidebar-item active" aria-current="page" onclick="switchModule('dashboard')">Machine Dashboard</button>
         <button type="button" id="navDaily" class="sidebar-item operator-only" onclick="switchModule('daily')">Daily Entry</button>
-        <button type="button" id="navWeeklyPlan" class="sidebar-item" onclick="switchModule('weeklyPlan')">Weekly Plan</button>
-        <button type="button" id="navMonthlyPlan" class="sidebar-item" onclick="switchModule('monthlyPlan')">Monthly Plan</button>
+        <button type="button" id="navProductionPlan" class="sidebar-item" onclick="switchModule('productionPlan')">Production Plan</button>
         <button type="button" id="navReports" class="sidebar-item" onclick="switchModule('reports')">Production Reports</button>
         <button type="button" id="navAdminAnalysis" class="sidebar-item admin-only" onclick="switchModule('adminAnalysis')">Admin Analysis</button>
         <button type="button" id="navCutter" class="sidebar-item operator-only" onclick="switchModule('cutter')">Cutter Data</button>

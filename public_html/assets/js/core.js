@@ -21,6 +21,7 @@
     const dashboardModule = document.getElementById('dashboardModule');
     const dailyModule = document.getElementById('dailyModule');
     const activeJobModule = document.getElementById('activeJobModule');
+    const productionPlanModule = document.getElementById('productionPlanModule');
     const weeklyPlanModule = document.getElementById('weeklyPlanModule');
     const monthlyPlanModule = document.getElementById('monthlyPlanModule');
     const shiftManagementModule = document.getElementById('shiftManagementModule');
@@ -31,8 +32,7 @@
     const couplingModule = document.getElementById('couplingModule');
     const navDashboard = document.getElementById('navDashboard');
     const navDaily = document.getElementById('navDaily');
-    const navWeeklyPlan = document.getElementById('navWeeklyPlan');
-    const navMonthlyPlan = document.getElementById('navMonthlyPlan');
+    const navProductionPlan = document.getElementById('navProductionPlan');
     const navShiftManagement = document.getElementById('navShiftManagement');
     const navMachineManagement = document.getElementById('navMachineManagement');
     const navReports = document.getElementById('navReports');
@@ -47,6 +47,7 @@
     let machineCheckSequence = 0;
     let currentReportPeriod = 'daily';
     let currentReportData = null;
+    let currentPlanTab = 'weekly';
     let currentAnalysisPeriod = 'daily';
     let currentAnalysisData = null;
     let adminAnalysisInitialized = false;
@@ -62,8 +63,8 @@
 
 
     function switchModule(moduleName) {
-      const modules = { dashboard: dashboardModule, daily: dailyModule, active: activeJobModule, weeklyPlan: weeklyPlanModule, monthlyPlan: monthlyPlanModule, shiftManagement: shiftManagementModule, machineManagement: machineManagementModule, reports: reportModule, adminAnalysis: adminAnalysisModule, cutter: cutterModule, coupling: couplingModule };
-      const navItems = { dashboard: navDashboard, daily: navDaily, weeklyPlan: navWeeklyPlan, monthlyPlan: navMonthlyPlan, shiftManagement: navShiftManagement, machineManagement: navMachineManagement, reports: navReports, adminAnalysis: navAdminAnalysis, cutter: navCutter, coupling: navCoupling };
+      const modules = { dashboard: dashboardModule, daily: dailyModule, active: activeJobModule, productionPlan: productionPlanModule, shiftManagement: shiftManagementModule, machineManagement: machineManagementModule, reports: reportModule, adminAnalysis: adminAnalysisModule, cutter: cutterModule, coupling: couplingModule };
+      const navItems = { dashboard: navDashboard, daily: navDaily, productionPlan: navProductionPlan, shiftManagement: navShiftManagement, machineManagement: navMachineManagement, reports: navReports, adminAnalysis: navAdminAnalysis, cutter: navCutter, coupling: navCoupling };
       Object.entries(modules).forEach(([name, element]) => element.classList.toggle('hidden', name !== moduleName));
       Object.entries(navItems).forEach(([name, element]) => {
         const active = name === moduleName;
@@ -71,14 +72,23 @@
         element.toggleAttribute('aria-current', active);
       });
       if (moduleName === 'dashboard') loadMachineDashboard();
-      if (moduleName === 'weeklyPlan') initializeWeeklyPlan();
-      if (moduleName === 'monthlyPlan') initializeMonthlyPlan();
+      if (moduleName === 'productionPlan') switchPlanTab(currentPlanTab);
       if (moduleName === 'shiftManagement') loadShiftManagement();
       if (moduleName === 'machineManagement') loadMachineManagement();
       if (moduleName === 'reports' && !currentReportData) loadProductionReport();
       if (moduleName === 'adminAnalysis') initializeAdminAnalysis();
       if (moduleName === 'cutter') loadCutters();
       if (moduleName === 'coupling') loadCouplings();
+    }
+
+    function switchPlanTab(tab) {
+      currentPlanTab = tab === 'monthly' ? 'monthly' : 'weekly';
+      weeklyPlanModule.classList.toggle('hidden', currentPlanTab !== 'weekly');
+      monthlyPlanModule.classList.toggle('hidden', currentPlanTab !== 'monthly');
+      document.getElementById('weeklyPlanTab').classList.toggle('active', currentPlanTab === 'weekly');
+      document.getElementById('monthlyPlanTab').classList.toggle('active', currentPlanTab === 'monthly');
+      if (currentPlanTab === 'weekly') initializeWeeklyPlan();
+      else initializeMonthlyPlan();
     }
 
     function escapeHtml(value) {

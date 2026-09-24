@@ -188,6 +188,8 @@ body { margin: 0; font-family: -apple-system, Segoe UI, Roboto, Arial, sans-seri
 .report-tabs { display: flex; gap: 7px; margin-bottom: 15px; }
 .report-tabs button { border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; color: #475569; padding: 8px 18px; cursor: pointer; }
 .report-tabs button.active { border-color: #2563eb; background: #2563eb; color: #fff; }
+.plan-module-tabs { width: fit-content; margin-bottom: 18px; padding: 8px; }
+.plan-module-tabs button { min-width: 140px; }
 .report-filter-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
 .report-filter-row label { display: grid; gap: 5px; color: #475569; font-size: 12px; font-weight: 600; }
 .report-filter-row input, .report-filter-row select { min-width: 155px; padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-size: 14px; }
@@ -304,6 +306,8 @@ th { background: #f8f9fb; font-weight: 600; }
   .report-table { font-size: 8px; }
   .report-table th, .report-table td { padding: 4px; white-space: normal; }
   body.weekly-plan-print #reportModule { display: none !important; }
+  body.weekly-plan-print #productionPlanModule { display: block !important; }
+  body.weekly-plan-print .plan-module-tabs { display: none !important; }
   body.weekly-plan-print #weeklyPlanModule, body.weekly-plan-print #weeklyPlanModule * { visibility: visible; }
   body.weekly-plan-print #weeklyPlanModule { display: block !important; position: absolute; inset: 0; width: 100%; }
   body.weekly-plan-print #weeklyPlanModule > .report-header,
@@ -314,6 +318,8 @@ th { background: #f8f9fb; font-weight: 600; }
   body.weekly-plan-print .weekly-plan-print-area table { font-size: 9px; }
   body.weekly-plan-print .weekly-plan-print-area th, body.weekly-plan-print .weekly-plan-print-area td { padding: 5px; white-space: normal; }
   body.monthly-plan-print #reportModule { display: none !important; }
+  body.monthly-plan-print #productionPlanModule { display: block !important; }
+  body.monthly-plan-print .plan-module-tabs { display: none !important; }
   body.monthly-plan-print #monthlyPlanModule, body.monthly-plan-print #monthlyPlanModule * { visibility: visible; }
   body.monthly-plan-print #monthlyPlanModule { display: block !important; position: absolute; inset: 0; width: 100%; }
   body.monthly-plan-print #monthlyPlanModule > .report-header,

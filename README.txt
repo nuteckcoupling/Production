@@ -9,7 +9,7 @@ CURRENT FEATURES
 - Live machine dashboard and automatic alerts
 - Start Job, End Shift and operator handover workflow
 - Cutter and setting change workflow
-- Independent Weekly Plan ISO records with CSV/Excel and Print/Save PDF output
+- One Production Plan module with Weekly and Monthly ISO tabs, CSV/Excel and Print/Save PDF output
 - Monthly ISO snapshots generated from Weekly Plans with final locking
 - Admin-only Shift Management with automatic hours and safe deactivate rules
 - Admin-only Machine Management with default operations and history-safe deletion
