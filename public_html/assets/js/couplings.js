@@ -3,6 +3,7 @@
       const banner = document.getElementById('couplingMessage');
       banner.className = `banner ${type}`;
       banner.innerText = text;
+      if (text && (type === 'success' || type === 'error')) showToast(type, text);
     }
 
     function loadCouplings() {

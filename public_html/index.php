@@ -4,10 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>NU-TECK Couplings — Daily Production Entry</title>
-  <link rel="stylesheet" href="style.css?v=20260924-2" />
+  <link rel="stylesheet" href="style.css?v=20260924-3" />
 </head>
 <body>
   <?php require __DIR__ . '/views/login.php'; ?>
+  <?php require __DIR__ . '/views/notifications.php'; ?>
 
   <div id="appShell" class="app-shell hidden">
   <?php require __DIR__ . '/views/sidebar.php'; ?>
@@ -28,20 +29,21 @@
     </main>
   </div>
 
+  <script src="assets/js/notifications.js?v=20260924-1"></script>
   <script src="assets/js/core.js?v=20260924-2"></script>
   <script src="assets/js/api.js?v=20260923-4"></script>
   <script src="assets/js/auth.js?v=20260923-4"></script>
-  <script src="assets/js/weekly-plan.js?v=20260923-1"></script>
-  <script src="assets/js/monthly-plan.js?v=20260923-1"></script>
-  <script src="assets/js/shift-management.js?v=20260923-1"></script>
-  <script src="assets/js/machine-management.js?v=20260923-1"></script>
+  <script src="assets/js/weekly-plan.js?v=20260924-1"></script>
+  <script src="assets/js/monthly-plan.js?v=20260924-1"></script>
+  <script src="assets/js/shift-management.js?v=20260924-1"></script>
+  <script src="assets/js/machine-management.js?v=20260924-1"></script>
   <script src="assets/js/jobs.js?v=20260923-4"></script>
   <script src="assets/js/changes.js?v=20260923-3"></script>
   <script src="assets/js/reports.js?v=20260923-2"></script>
   <script src="assets/js/admin-analysis.js?v=20260924-1"></script>
   <script src="assets/js/dashboard.js?v=20260923-2"></script>
-  <script src="assets/js/cutters.js?v=20260923-2"></script>
-  <script src="assets/js/couplings.js?v=20260923-2"></script>
+  <script src="assets/js/cutters.js?v=20260924-1"></script>
+  <script src="assets/js/couplings.js?v=20260924-1"></script>
   <script src="assets/js/app.js?v=20260923-2"></script>
 </body>
 </html>

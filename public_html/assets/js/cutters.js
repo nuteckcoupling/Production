@@ -3,6 +3,7 @@
       const banner = document.getElementById('cutterMessage');
       banner.className = `banner ${type}`;
       banner.innerText = text;
+      if (text && (type === 'success' || type === 'error')) showToast(type, text);
     }
 
     function loadCutters() {
@@ -108,8 +109,14 @@
       }
     }
 
-    function deleteCutter(cutter) {
-      if (!window.confirm('Move cutter ' + cutter.cutter_num + ' to Trash?')) return;
+    async function deleteCutter(cutter) {
+      const confirmed = await showConfirmDialog({
+        title: 'Move Cutter to Trash?',
+        message: cutter.cutter_num + ' will be removed from active cutter dropdowns and can be restored later.',
+        confirmText: 'Move to Trash',
+        tone: 'danger'
+      });
+      if (!confirmed) return;
       fetch(`${API}/delete_cutter.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

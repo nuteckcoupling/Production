@@ -57,6 +57,7 @@
       const banner = document.getElementById('weeklyPlanMessage');
       banner.className = 'banner ' + type;
       banner.innerText = text;
+      if (text && (type === 'success' || type === 'error')) showToast(type, text);
     }
 
     function loadWeeklyPlans() {
@@ -168,8 +169,14 @@
       updateWeeklyPlanEnd();
     }
 
-    function deleteWeeklyPlan(id) {
-      if (!window.confirm('Delete this Weekly Plan record?')) return;
+    async function deleteWeeklyPlan(id) {
+      const confirmed = await showConfirmDialog({
+        title: 'Delete Weekly Plan?',
+        message: 'This ISO plan record will be permanently deleted.',
+        confirmText: 'Delete Plan',
+        tone: 'danger'
+      });
+      if (!confirmed) return;
       fetch(API + '/delete_weekly_plan.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

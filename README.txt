@@ -17,6 +17,7 @@ CURRENT FEATURES
 - Machine-wise daily, weekly and monthly production reports
 - Admin-only actual-production analysis with achievement, pending/overdue jobs, downtime and rejection details
 - CSV/Excel download and Print/Save PDF report output
+- Custom in-app confirmation popups and success/error toast notifications
 
 FOLDER GUIDE
 ------------

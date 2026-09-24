@@ -4,6 +4,7 @@
       const banner = document.getElementById('machineManagementMessage');
       banner.className = 'banner ' + type;
       banner.innerText = text;
+      if (text && (type === 'success' || type === 'error')) showToast(type, text);
     }
 
     function loadMachineManagement() {
@@ -93,8 +94,15 @@
       document.getElementById('cancelMachineEditBtn').classList.add('hidden');
     }
 
-    function deleteMachine(id) {
-      if (!window.confirm('Delete this unused machine?')) return;
+    async function deleteMachine(id) {
+      const machine = managedMachines.find(item => Number(item.id) === Number(id));
+      const confirmed = await showConfirmDialog({
+        title: 'Delete Machine?',
+        message: (machine ? machine.code + ' — ' : '') + 'This unused machine will be permanently deleted.',
+        confirmText: 'Delete Machine',
+        tone: 'danger'
+      });
+      if (!confirmed) return;
       fetch(API + '/delete_machine.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -110,9 +118,16 @@
       }).catch(error => showMachineManagementMessage('error', error.message));
     }
 
-    function deactivateMachine(id) {
+    async function deactivateMachine(id) {
       const machine = managedMachines.find(item => Number(item.id) === Number(id));
-      if (!machine || !window.confirm('Deactivate this used machine? Historical records will remain safe.')) return;
+      if (!machine) return;
+      const confirmed = await showConfirmDialog({
+        title: 'Deactivate Machine?',
+        message: machine.code + ' will disappear from the dashboard and production forms. Historical records will remain safe.',
+        confirmText: 'Deactivate',
+        tone: 'warning'
+      });
+      if (!confirmed) return;
       fetch(API + '/save_machine.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

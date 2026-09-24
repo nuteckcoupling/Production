@@ -13,6 +13,7 @@
       const banner = document.getElementById('monthlyPlanMessage');
       banner.className = text ? 'banner ' + type : 'banner';
       banner.innerText = text;
+      if (text && (type === 'success' || type === 'error')) showToast(type, text);
     }
 
     function loadMonthlyPlan() {
@@ -111,9 +112,15 @@
         });
     }
 
-    function lockMonthlyPlan() {
+    async function lockMonthlyPlan() {
       const month = document.getElementById('monthlyPlanMonth').value;
-      if (!window.confirm('Lock this Monthly Plan? After locking, it cannot be refreshed or changed.')) return;
+      const confirmed = await showConfirmDialog({
+        title: 'Lock Monthly Plan?',
+        message: 'After locking, this monthly ISO plan cannot be refreshed or changed.',
+        confirmText: 'Lock Final Month',
+        tone: 'warning'
+      });
+      if (!confirmed) return;
       const button = document.getElementById('lockMonthlyPlanBtn');
       button.disabled = true;
       fetch(API + '/lock_monthly_plan.php', {

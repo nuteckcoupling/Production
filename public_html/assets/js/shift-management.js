@@ -22,6 +22,7 @@
       const banner = document.getElementById('shiftManagementMessage');
       banner.className = 'banner ' + type;
       banner.innerText = text;
+      if (text && (type === 'success' || type === 'error')) showToast(type, text);
     }
 
     function loadShiftManagement() {
@@ -118,8 +119,14 @@
       document.getElementById('cancelShiftEditBtn').classList.add('hidden');
     }
 
-    function deleteShift(id) {
-      if (!window.confirm('Delete this unused shift?')) return;
+    async function deleteShift(id) {
+      const confirmed = await showConfirmDialog({
+        title: 'Delete Shift?',
+        message: 'This unused shift will be permanently deleted.',
+        confirmText: 'Delete Shift',
+        tone: 'danger'
+      });
+      if (!confirmed) return;
       fetch(API + '/delete_shift.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -134,9 +141,16 @@
       }).catch(error => showShiftManagementMessage('error', error.message));
     }
 
-    function deactivateShift(id) {
+    async function deactivateShift(id) {
       const shift = managedShifts.find(item => Number(item.id) === Number(id));
-      if (!shift || !window.confirm('Deactivate this used shift? It will remain in historical records.')) return;
+      if (!shift) return;
+      const confirmed = await showConfirmDialog({
+        title: 'Deactivate Shift?',
+        message: shift.name + ' will disappear from production dropdowns. Historical records will remain safe.',
+        confirmText: 'Deactivate',
+        tone: 'warning'
+      });
+      if (!confirmed) return;
       const data = {
         id: shift.id,
         code: shift.code,
