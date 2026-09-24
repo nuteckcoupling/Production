@@ -29,6 +29,10 @@
       </div>
 
       <div class="card list-card monthly-plan-print-area" id="monthlyPlanPrintArea">
+        <div class="report-brand-lockup plan-print-brand">
+          <img src="assets/images/nuteck-logo.png" alt="NU-TECK Couplings Pvt. Ltd." class="report-brand-logo" />
+          <div><strong id="monthlyPlanBrandHeading">NU-TECK COUPLINGS — Monthly Plan</strong><span id="monthlyPlanBrandAddress" class="hidden"></span></div>
+        </div>
         <div class="list-heading">
           <div>
             <h2>Monthly ISO Plan</h2>

@@ -6,7 +6,11 @@
         productionReportHeading: reportTitle,
         productionReportAddress: systemSettings.company_address || '',
         adminAnalysisHeading: `${systemSettings.company_name} — Admin Production Analysis`,
-        adminAnalysisAddress: systemSettings.company_address || ''
+        adminAnalysisAddress: systemSettings.company_address || '',
+        weeklyPlanBrandHeading: `${systemSettings.company_name} — Weekly Plan`,
+        weeklyPlanBrandAddress: systemSettings.company_address || '',
+        monthlyPlanBrandHeading: `${systemSettings.company_name} — Monthly Plan`,
+        monthlyPlanBrandAddress: systemSettings.company_address || ''
       };
       Object.entries(values).forEach(([id, value]) => {
         const element = document.getElementById(id);

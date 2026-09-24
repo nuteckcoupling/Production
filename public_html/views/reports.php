@@ -32,8 +32,10 @@
       <div id="reportMessage" class="banner"></div>
       <div id="reportPrintArea">
         <div class="report-print-heading">
-          <strong id="productionReportHeading">NU-TECK Machine-Wise Production Report</strong>
-          <span id="productionReportAddress" class="hidden"></span>
+          <div class="report-brand-lockup">
+            <img src="assets/images/nuteck-logo.png" alt="NU-TECK Couplings Pvt. Ltd." class="report-brand-logo" />
+            <div><strong id="productionReportHeading">NU-TECK Machine-Wise Production Report</strong><span id="productionReportAddress" class="hidden"></span></div>
+          </div>
           <span id="reportPeriodLabel">-</span>
         </div>
         <div class="report-kpis">

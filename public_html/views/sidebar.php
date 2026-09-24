@@ -1,6 +1,9 @@
     <aside class="sidebar" aria-label="Production modules">
       <div class="sidebar-brand">
-        <strong id="sidebarCompanyName">NU-TECK</strong>
+        <div class="brand-logo-frame sidebar-logo-frame">
+          <img src="assets/images/nuteck-logo.png" alt="NU-TECK Couplings Pvt. Ltd." class="brand-logo" />
+        </div>
+        <strong id="sidebarCompanyName">NU-TECK COUPLINGS</strong>
         <span>Production System</span>
       </div>
       <nav class="sidebar-nav">

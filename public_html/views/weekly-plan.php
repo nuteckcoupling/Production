@@ -34,6 +34,10 @@
       </form>
 
       <div class="card list-card weekly-plan-print-area" id="weeklyPlanPrintArea">
+        <div class="report-brand-lockup plan-print-brand">
+          <img src="assets/images/nuteck-logo.png" alt="NU-TECK Couplings Pvt. Ltd." class="report-brand-logo" />
+          <div><strong id="weeklyPlanBrandHeading">NU-TECK COUPLINGS — Weekly Plan</strong><span id="weeklyPlanBrandAddress" class="hidden"></span></div>
+        </div>
         <div class="list-heading">
           <div><h2>Weekly ISO Plan</h2><span id="weeklyPlanPeriodLabel" class="table-subtext">-</span></div>
           <label class="weekly-plan-filter">View Week<input type="date" id="weeklyPlanFilterWeek" onchange="loadWeeklyPlans()" /></label>

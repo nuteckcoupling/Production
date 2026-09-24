@@ -1,6 +1,8 @@
   <section id="loginView" class="login-page">
     <form class="login-card" onsubmit="handleLogin(event)">
-      <div class="login-brand">NU-TECK</div>
+      <div class="brand-logo-frame login-logo-frame">
+        <img src="assets/images/nuteck-logo.png" alt="NU-TECK Couplings Pvt. Ltd." class="brand-logo" />
+      </div>
       <h1>Production System Login</h1>
       <p>Sign in with your Operator/Supervisor or Admin/Director account.</p>
       <div id="loginMessage" class="banner"></div>

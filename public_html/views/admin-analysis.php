@@ -30,8 +30,10 @@
       <div id="adminAnalysisMessage" class="banner"></div>
       <div id="adminAnalysisPrintArea" class="admin-analysis-print-area">
         <div class="report-print-heading">
-          <strong id="adminAnalysisHeading">NU-TECK Admin Production Analysis</strong>
-          <span id="adminAnalysisAddress" class="hidden"></span>
+          <div class="report-brand-lockup">
+            <img src="assets/images/nuteck-logo.png" alt="NU-TECK Couplings Pvt. Ltd." class="report-brand-logo" />
+            <div><strong id="adminAnalysisHeading">NU-TECK Admin Production Analysis</strong><span id="adminAnalysisAddress" class="hidden"></span></div>
+          </div>
           <span id="analysisPeriodLabel">-</span>
         </div>
         <p class="analysis-source-note" id="analysisSourceNote">Actual production data only.</p>

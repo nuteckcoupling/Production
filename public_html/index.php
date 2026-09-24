@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>NU-TECK Couplings — Daily Production Entry</title>
-  <link rel="stylesheet" href="style.css?v=20260924-4" />
+  <link rel="stylesheet" href="style.css?v=20260924-5" />
 </head>
 <body>
   <?php require __DIR__ . '/views/login.php'; ?>
@@ -46,7 +46,7 @@
   <script src="assets/js/staff-management.js?v=20260924-1"></script>
   <script src="assets/js/user-management.js?v=20260924-2"></script>
   <script src="assets/js/audit-log.js?v=20260924-1"></script>
-  <script src="assets/js/system-settings.js?v=20260924-1"></script>
+  <script src="assets/js/system-settings.js?v=20260924-2"></script>
   <script src="assets/js/backup-management.js?v=20260924-2"></script>
   <script src="assets/js/jobs.js?v=20260923-4"></script>
   <script src="assets/js/changes.js?v=20260923-3"></script>
