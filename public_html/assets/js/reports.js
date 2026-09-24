@@ -115,7 +115,8 @@
         'Jobs', 'Planned Qty', 'Total Qty', 'OK Qty', 'M.C. Reject', 'R.M. Defect', 'Rework',
         'Pending Qty', 'Downtime Minutes', 'Achievement %', 'Status'];
       const lines = [
-        [csvCell('NU-TECK Machine-Wise Production Report')].join(','),
+        [csvCell(`${systemSettings.company_name} — ${systemSettings.report_heading}`)].join(','),
+        [csvCell(systemSettings.company_address || '')].join(','),
         [csvCell(currentReportData.period_label)].join(','),
         headers.map(csvCell).join(',')
       ];
@@ -147,7 +148,7 @@
     function printProductionReport() {
       if (!currentReportData) return;
       const oldTitle = document.title;
-      document.title = `Production Report - ${currentReportData.period_label}`;
+      document.title = `${systemSettings.company_name} - ${systemSettings.report_heading} - ${currentReportData.period_label}`;
       window.print();
       document.title = oldTitle;
     }

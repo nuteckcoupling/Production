@@ -142,7 +142,8 @@
     function downloadMonthlyPlanCsv() {
       if (!monthlyPlanData?.items?.length) return;
       const lines = [
-        [csvCell('NU-TECK Monthly Plan - ISO Document')].join(','),
+        [csvCell(systemSettings.company_name + ' Monthly Plan - ISO Document')].join(','),
+        [csvCell(systemSettings.company_address || '')].join(','),
         [csvCell(monthlyPlanData.period_label), csvCell(monthlyPlanData.plan.status)].join(','),
         ['Machine Number', 'Machine Name', 'Shift', 'Part Name', 'Operation', 'Weekly Lines', 'Planned Qty'].map(csvCell).join(',')
       ];

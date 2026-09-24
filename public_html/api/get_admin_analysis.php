@@ -1,6 +1,9 @@
 <?php
 require __DIR__ . "/bootstrap.php";
 require_admin();
+$systemSettings = system_settings_values($conn);
+$analysisHandoverMinutes = (int)$systemSettings['handover_overdue_minutes'];
+$analysisShiftGrace = (int)$systemSettings['shift_end_grace_minutes'];
 
 function analysis_period(string $period, string $value): array
 {
@@ -159,10 +162,10 @@ $pendingStmt = $conn->prepare("SELECT j.id AS job_id, j.status, j.planned_qty, j
         js.started_at AS shift_started_at, js.shift_hours,
         CASE WHEN js.id IS NOT NULL THEN DATE_ADD(js.started_at, INTERVAL ROUND(js.shift_hours * 60) MINUTE) ELSE NULL END AS expected_end,
         CASE
-          WHEN js.id IS NOT NULL AND NOW() > DATE_ADD(js.started_at, INTERVAL ROUND(js.shift_hours * 60) MINUTE)
+          WHEN js.id IS NOT NULL AND NOW() > DATE_ADD(js.started_at, INTERVAL (ROUND(js.shift_hours * 60) + $analysisShiftGrace) MINUTE)
             THEN TIMESTAMPDIFF(MINUTE, DATE_ADD(js.started_at, INTERVAL ROUND(js.shift_hours * 60) MINUTE), NOW())
-          WHEN j.status = 'Handover Pending' AND TIMESTAMPDIFF(MINUTE, j.status_changed_at, NOW()) > 30
-            THEN TIMESTAMPDIFF(MINUTE, j.status_changed_at, NOW()) - 30
+          WHEN j.status = 'Handover Pending' AND TIMESTAMPDIFF(MINUTE, j.status_changed_at, NOW()) > $analysisHandoverMinutes
+            THEN TIMESTAMPDIFF(MINUTE, j.status_changed_at, NOW()) - $analysisHandoverMinutes
           ELSE 0
         END AS overdue_minutes
     FROM production_jobs j

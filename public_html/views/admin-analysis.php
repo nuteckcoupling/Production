@@ -30,7 +30,8 @@
       <div id="adminAnalysisMessage" class="banner"></div>
       <div id="adminAnalysisPrintArea" class="admin-analysis-print-area">
         <div class="report-print-heading">
-          <strong>NU-TECK Admin Production Analysis</strong>
+          <strong id="adminAnalysisHeading">NU-TECK Admin Production Analysis</strong>
+          <span id="adminAnalysisAddress" class="hidden"></span>
           <span id="analysisPeriodLabel">-</span>
         </div>
         <p class="analysis-source-note" id="analysisSourceNote">Actual production data only.</p>

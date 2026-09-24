@@ -73,8 +73,9 @@
       const partsLoad = fetchParts();
       const cutterLoad = refreshDailyCutters();
       const shiftLoad = refreshShiftOptions();
+      const settingsLoad = loadSystemSettings();
       setStartJobFieldsEnabled(false);
-      Promise.all([machineLoad, operatorLoad, partsLoad, cutterLoad, shiftLoad]).then(() => {
+      Promise.all([machineLoad, operatorLoad, partsLoad, cutterLoad, shiftLoad, settingsLoad]).then(() => {
         updateShiftHours();
         updateHandoverShiftHours();
         populateReportParts();

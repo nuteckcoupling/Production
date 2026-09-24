@@ -1,6 +1,6 @@
     <aside class="sidebar" aria-label="Production modules">
       <div class="sidebar-brand">
-        <strong>NU-TECK</strong>
+        <strong id="sidebarCompanyName">NU-TECK</strong>
         <span>Production System</span>
       </div>
       <nav class="sidebar-nav">
@@ -16,6 +16,7 @@
         <button type="button" id="navStaffManagement" class="sidebar-item admin-only" onclick="switchModule('staffManagement')">Staff Management</button>
         <button type="button" id="navUserManagement" class="sidebar-item admin-only" onclick="switchModule('userManagement')">User Management</button>
         <button type="button" id="navAuditLog" class="sidebar-item admin-only" onclick="switchModule('auditLog')">Activity Log</button>
+        <button type="button" id="navSystemSettings" class="sidebar-item admin-only" onclick="switchModule('systemSettings')">System Settings</button>
         <button type="button" id="navBackupManagement" class="sidebar-item admin-only" onclick="switchModule('backupManagement')">Database Backups</button>
         <button type="button" id="navChangePassword" class="sidebar-item" onclick="switchModule('changePassword')">Change My Password</button>
       </nav>

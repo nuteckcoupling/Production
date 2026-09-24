@@ -6,4 +6,5 @@ require_once __DIR__ . "/machine_helpers.php";
 require_once __DIR__ . "/staff_helpers.php";
 require_once __DIR__ . "/audit_helpers.php";
 require_once __DIR__ . "/backup_helpers.php";
+require_once __DIR__ . "/system_settings_helpers.php";
 ?>

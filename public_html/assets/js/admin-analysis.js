@@ -161,7 +161,8 @@
       if (!currentAnalysisData) return;
       const data = currentAnalysisData;
       const lines = [
-        [csvCell('NU-TECK Admin Production Analysis')].join(','),
+        [csvCell(`${systemSettings.company_name} — Admin Production Analysis`)].join(','),
+        [csvCell(systemSettings.company_address || '')].join(','),
         [csvCell(data.period_label)].join(','),
         [csvCell(data.source_note)].join(','), '',
         ['Machine Performance'].map(csvCell).join(','),
@@ -188,7 +189,7 @@
     function printAdminAnalysis() {
       if (!currentAnalysisData) return;
       const oldTitle = document.title;
-      document.title = 'Admin Production Analysis - ' + currentAnalysisData.period_label;
+      document.title = systemSettings.company_name + ' - Admin Production Analysis - ' + currentAnalysisData.period_label;
       document.body.classList.add('admin-analysis-print');
       window.print();
       document.body.classList.remove('admin-analysis-print');

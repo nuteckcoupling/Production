@@ -193,7 +193,7 @@
     function downloadWeeklyPlanCsv() {
       if (!weeklyPlanRows.length) return;
       const headers = ['Week Start', 'Week End', 'Machine Number', 'Machine Name', 'Shift', 'Part Name', 'Operation', 'Planned Qty', 'Priority', 'Status', 'Remarks', 'Prepared By'];
-      const lines = [[csvCell('NU-TECK Weekly Plan - ISO Document')].join(','), headers.map(csvCell).join(',')];
+      const lines = [[csvCell(systemSettings.company_name + ' Weekly Plan - ISO Document')].join(','), [csvCell(systemSettings.company_address || '')].join(','), headers.map(csvCell).join(',')];
       weeklyPlanRows.forEach(row => {
         lines.push([row.week_start, row.week_end, row.machine_code, row.machine_name, row.shift, row.part_name, row.operation, row.planned_qty, row.priority, row.status, row.remarks, row.prepared_by].map(csvCell).join(','));
       });

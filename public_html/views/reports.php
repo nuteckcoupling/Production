@@ -32,7 +32,8 @@
       <div id="reportMessage" class="banner"></div>
       <div id="reportPrintArea">
         <div class="report-print-heading">
-          <strong>NU-TECK Machine-Wise Production Report</strong>
+          <strong id="productionReportHeading">NU-TECK Machine-Wise Production Report</strong>
+          <span id="productionReportAddress" class="hidden"></span>
           <span id="reportPeriodLabel">-</span>
         </div>
         <div class="report-kpis">

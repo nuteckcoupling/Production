@@ -30,6 +30,7 @@
     const userManagementModule = document.getElementById('userManagementModule');
     const changePasswordModule = document.getElementById('changePasswordModule');
     const auditLogModule = document.getElementById('auditLogModule');
+    const systemSettingsModule = document.getElementById('systemSettingsModule');
     const backupManagementModule = document.getElementById('backupManagementModule');
     const reportModule = document.getElementById('reportModule');
     const adminAnalysisModule = document.getElementById('adminAnalysisModule');
@@ -44,6 +45,7 @@
     const navUserManagement = document.getElementById('navUserManagement');
     const navChangePassword = document.getElementById('navChangePassword');
     const navAuditLog = document.getElementById('navAuditLog');
+    const navSystemSettings = document.getElementById('navSystemSettings');
     const navBackupManagement = document.getElementById('navBackupManagement');
     const navReports = document.getElementById('navReports');
     const navAdminAnalysis = document.getElementById('navAdminAnalysis');
@@ -63,6 +65,10 @@
     let adminAnalysisInitialized = false;
     let activeShifts = [];
     let showCutterTrash = false;
+    let systemSettings = {
+      company_name: 'NU-TECK COUPLINGS', report_heading: 'Production Report', company_address: '',
+      idle_alert_minutes: 60, handover_overdue_minutes: 30, shift_end_grace_minutes: 0
+    };
 
     document.getElementById('reportDailyDate').value = today;
     document.getElementById('reportWeeklyDate').value = today;
@@ -73,8 +79,8 @@
 
 
     function switchModule(moduleName) {
-      const modules = { dashboard: dashboardModule, daily: dailyModule, active: activeJobModule, productionPlan: productionPlanModule, shiftManagement: shiftManagementModule, machineManagement: machineManagementModule, staffManagement: staffManagementModule, userManagement: userManagementModule, changePassword: changePasswordModule, auditLog: auditLogModule, backupManagement: backupManagementModule, reports: reportModule, adminAnalysis: adminAnalysisModule, cutter: cutterModule, coupling: couplingModule };
-      const navItems = { dashboard: navDashboard, daily: navDaily, productionPlan: navProductionPlan, shiftManagement: navShiftManagement, machineManagement: navMachineManagement, staffManagement: navStaffManagement, userManagement: navUserManagement, changePassword: navChangePassword, auditLog: navAuditLog, backupManagement: navBackupManagement, reports: navReports, adminAnalysis: navAdminAnalysis, cutter: navCutter, coupling: navCoupling };
+      const modules = { dashboard: dashboardModule, daily: dailyModule, active: activeJobModule, productionPlan: productionPlanModule, shiftManagement: shiftManagementModule, machineManagement: machineManagementModule, staffManagement: staffManagementModule, userManagement: userManagementModule, changePassword: changePasswordModule, auditLog: auditLogModule, systemSettings: systemSettingsModule, backupManagement: backupManagementModule, reports: reportModule, adminAnalysis: adminAnalysisModule, cutter: cutterModule, coupling: couplingModule };
+      const navItems = { dashboard: navDashboard, daily: navDaily, productionPlan: navProductionPlan, shiftManagement: navShiftManagement, machineManagement: navMachineManagement, staffManagement: navStaffManagement, userManagement: navUserManagement, changePassword: navChangePassword, auditLog: navAuditLog, systemSettings: navSystemSettings, backupManagement: navBackupManagement, reports: navReports, adminAnalysis: navAdminAnalysis, cutter: navCutter, coupling: navCoupling };
       Object.entries(modules).forEach(([name, element]) => element.classList.toggle('hidden', name !== moduleName));
       Object.entries(navItems).forEach(([name, element]) => {
         const active = name === moduleName;
@@ -88,6 +94,7 @@
       if (moduleName === 'staffManagement') loadStaffManagement();
       if (moduleName === 'userManagement') loadUserManagement();
       if (moduleName === 'auditLog') initializeAuditLog();
+      if (moduleName === 'systemSettings') loadSystemSettings(true);
       if (moduleName === 'backupManagement') {
         loadBackups();
         loadBackupSettings();

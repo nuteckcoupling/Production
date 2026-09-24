@@ -68,7 +68,7 @@
         .then(data => {
           document.getElementById('alertCount').innerText = Number(data.counts.total || 0);
           document.getElementById('alertCount').classList.toggle('has-alerts', Number(data.counts.total || 0) > 0);
-          document.getElementById('alertThresholds').innerText = `Handover overdue: ${data.thresholds.handover_overdue_minutes} min · Idle: ${data.thresholds.idle_alert_minutes} min`;
+          document.getElementById('alertThresholds').innerText = `Shift grace: ${data.thresholds.shift_end_grace_minutes} min · Handover overdue: ${data.thresholds.handover_overdue_minutes} min · Idle: ${data.thresholds.idle_alert_minutes} min`;
           if (!data.alerts.length) {
             list.innerHTML = '<div class="alerts-empty ok">No pending alerts.</div>';
             return;

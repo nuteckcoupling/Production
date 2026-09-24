@@ -105,6 +105,24 @@ INSERT INTO backup_settings (id, enabled, backup_time, retention_count)
 VALUES (1, 1, '23:00:00', 14)
 ON DUPLICATE KEY UPDATE id = VALUES(id);
 
+CREATE TABLE IF NOT EXISTS system_settings (
+  id TINYINT PRIMARY KEY,
+  company_name VARCHAR(150) NOT NULL DEFAULT 'NU-TECK COUPLINGS',
+  report_heading VARCHAR(150) NOT NULL DEFAULT 'Production Report',
+  company_address VARCHAR(255) DEFAULT NULL,
+  idle_alert_minutes INT UNSIGNED NOT NULL DEFAULT 60,
+  handover_overdue_minutes INT UNSIGNED NOT NULL DEFAULT 30,
+  shift_end_grace_minutes INT UNSIGNED NOT NULL DEFAULT 0,
+  updated_by_user_id INT DEFAULT NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (updated_by_user_id) REFERENCES users(id)
+);
+
+INSERT INTO system_settings (id, company_name, report_heading, idle_alert_minutes,
+  handover_overdue_minutes, shift_end_grace_minutes)
+VALUES (1, 'NU-TECK COUPLINGS', 'Production Report', 60, 30, 0)
+ON DUPLICATE KEY UPDATE id = VALUES(id);
+
 CREATE TABLE IF NOT EXISTS parts (
   id INT AUTO_INCREMENT PRIMARY KEY,
   part_name VARCHAR(150) NOT NULL UNIQUE,

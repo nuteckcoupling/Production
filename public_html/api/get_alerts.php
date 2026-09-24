@@ -2,8 +2,10 @@
 require __DIR__ . "/bootstrap.php";
 require_auth();
 
-$handover_overdue_minutes = 30;
-$idle_alert_minutes = 60;
+$settings = system_settings_values($conn);
+$handover_overdue_minutes = $settings['handover_overdue_minutes'];
+$idle_alert_minutes = $settings['idle_alert_minutes'];
+$shift_end_grace_minutes = $settings['shift_end_grace_minutes'];
 $alerts = [];
 
 $shiftSql = "SELECT j.id AS job_id, m.id AS machine_id, m.code AS machine_code, m.name AS machine_name,
@@ -14,8 +16,11 @@ $shiftSql = "SELECT j.id AS job_id, m.id AS machine_id, m.code AS machine_code, 
     JOIN machines m ON m.id = j.machine_id
     JOIN operators o ON o.id = s.operator_id
     WHERE s.status = 'Running'
-      AND TIMESTAMPDIFF(MINUTE, s.started_at, NOW()) >= (s.shift_hours * 60)";
-$result = $conn->query($shiftSql);
+      AND TIMESTAMPDIFF(MINUTE, s.started_at, NOW()) >= (s.shift_hours * 60) + ?";
+$shiftStmt = $conn->prepare($shiftSql);
+$shiftStmt->bind_param('i', $shift_end_grace_minutes);
+$shiftStmt->execute();
+$result = $shiftStmt->get_result();
 while ($row = $result->fetch_assoc()) {
     $overdue = max(0, (int)$row['elapsed_minutes'] - (int)round((float)$row['shift_hours'] * 60));
     $alerts[] = [
@@ -32,6 +37,7 @@ while ($row = $result->fetch_assoc()) {
         'started_at' => $row['started_at']
     ];
 }
+$shiftStmt->close();
 
 $handoverStmt = $conn->prepare("SELECT j.id AS job_id, m.id AS machine_id, m.code AS machine_code,
         m.name AS machine_name, o.name AS operator_name, j.status_changed_at,
@@ -114,7 +120,8 @@ json_response([
     ],
     'thresholds' => [
         'handover_overdue_minutes' => $handover_overdue_minutes,
-        'idle_alert_minutes' => $idle_alert_minutes
+        'idle_alert_minutes' => $idle_alert_minutes,
+        'shift_end_grace_minutes' => $shift_end_grace_minutes
     ]
 ]);
 $conn->close();

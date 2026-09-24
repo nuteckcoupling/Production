@@ -20,6 +20,7 @@ CURRENT FEATURES
 - Admin-only immutable Activity / Audit Log with filters and CSV download
 - Admin-only protected database backup, download, restore and manual deletion
 - Configurable automatic daily database backups with retention control
+- Admin-only System Settings for company/report identity and live alert thresholds
 - Cutter and coupling management
 - Machine-wise daily, weekly and monthly production reports
 - Admin-only actual-production analysis with achievement, pending/overdue jobs, downtime and rejection details
