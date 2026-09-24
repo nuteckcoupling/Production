@@ -204,6 +204,11 @@ body { margin: 0; font-family: -apple-system, Segoe UI, Roboto, Arial, sans-seri
 .report-table th, .report-table td { padding: 8px; vertical-align: top; }
 .table-subtext { color: #64748b; font-size: 10px; }
 .report-generated { margin-top: 10px; color: #64748b; font-size: 11px; text-align: right; }
+.analysis-kpis { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.analysis-source-note { margin: -5px 0 14px; color: #64748b; font-size: 12px; }
+.analysis-section { margin-top: 16px; }
+.analysis-section h2 { margin: 0; padding: 14px 16px; border-bottom: 1px solid #e2e8f0; font-size: 16px; }
+.analysis-overdue-row { background: #fff7ed; }
 .weekly-plan-filter { display: grid; gap: 5px; color: #475569; font-size: 12px; font-weight: 600; }
 .weekly-plan-filter input { padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-size: 14px; }
 tfoot th { border-top: 2px solid #cbd5e1; background: #f8fafc; }
@@ -262,6 +267,7 @@ th { background: #f8f9fb; font-weight: 600; }
   .active-job-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .report-header { align-items: flex-start; flex-direction: column; }
   .report-kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .analysis-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 500px) {
@@ -280,6 +286,7 @@ th { background: #f8f9fb; font-weight: 600; }
   .report-actions, .report-filter-row { align-items: stretch; flex-direction: column; width: 100%; }
   .report-filter-row input, .report-filter-row select { min-width: 0; width: 100%; }
   .report-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .analysis-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .grid { grid-template-columns: 1fr; }
   .monthly-plan-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -316,4 +323,16 @@ th { background: #f8f9fb; font-weight: 600; }
   body.monthly-plan-print .monthly-plan-print-area { margin: 0; padding: 0; box-shadow: none; }
   body.monthly-plan-print .monthly-plan-print-area table { font-size: 10px; }
   body.monthly-plan-print .monthly-plan-print-area th, body.monthly-plan-print .monthly-plan-print-area td { padding: 6px; white-space: normal; }
+  body.admin-analysis-print #reportModule { display: none !important; }
+  body.admin-analysis-print #adminAnalysisModule, body.admin-analysis-print #adminAnalysisModule * { visibility: visible; }
+  body.admin-analysis-print #adminAnalysisModule { display: block !important; position: absolute; inset: 0; width: 100%; }
+  body.admin-analysis-print #adminAnalysisModule > .report-header,
+  body.admin-analysis-print #adminAnalysisModule > .report-controls,
+  body.admin-analysis-print #adminAnalysisMessage { display: none !important; }
+  body.admin-analysis-print .admin-analysis-print-area { margin: 0; padding: 0; }
+  body.admin-analysis-print .analysis-kpis { grid-template-columns: repeat(5, 1fr); gap: 4px; }
+  body.admin-analysis-print .analysis-section { box-shadow: none; break-inside: auto; }
+  body.admin-analysis-print .analysis-section table { font-size: 7px; }
+  body.admin-analysis-print .analysis-section th,
+  body.admin-analysis-print .analysis-section td { padding: 4px; white-space: normal; }
 }

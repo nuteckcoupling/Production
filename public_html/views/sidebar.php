@@ -9,6 +9,7 @@
         <button type="button" id="navWeeklyPlan" class="sidebar-item" onclick="switchModule('weeklyPlan')">Weekly Plan</button>
         <button type="button" id="navMonthlyPlan" class="sidebar-item" onclick="switchModule('monthlyPlan')">Monthly Plan</button>
         <button type="button" id="navReports" class="sidebar-item" onclick="switchModule('reports')">Production Reports</button>
+        <button type="button" id="navAdminAnalysis" class="sidebar-item admin-only" onclick="switchModule('adminAnalysis')">Admin Analysis</button>
         <button type="button" id="navCutter" class="sidebar-item operator-only" onclick="switchModule('cutter')">Cutter Data</button>
         <button type="button" id="navCoupling" class="sidebar-item operator-only" onclick="switchModule('coupling')">Coupling Add</button>
         <button type="button" id="navShiftManagement" class="sidebar-item admin-only" onclick="switchModule('shiftManagement')">Shift Management</button>

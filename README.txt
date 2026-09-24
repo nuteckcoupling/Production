@@ -15,6 +15,7 @@ CURRENT FEATURES
 - Admin-only Machine Management with default operations and history-safe deletion
 - Cutter and coupling management
 - Machine-wise daily, weekly and monthly production reports
+- Admin-only actual-production analysis with achievement, pending/overdue jobs, downtime and rejection details
 - CSV/Excel download and Print/Save PDF report output
 
 FOLDER GUIDE
@@ -63,6 +64,12 @@ MACHINE MANAGEMENT
 - Only Admin can add, edit, delete unused machines, or deactivate machines with history.
 - A machine with a running job cannot be deactivated or deleted until that job is ended.
 - Default Operation automatically fills Start Job and Change Setting forms; Other remains available.
+
+ADMIN PRODUCTION ANALYSIS
+-------------------------
+- Uses actual production jobs, shift entries and cutter-change downtime only.
+- Weekly and Monthly ISO Plan records are intentionally not used in analysis.
+- Includes machine achievement, pending/overdue jobs, rejection, downtime, remarks, filters, CSV and Print/Save PDF.
 
 PLANNED QTY AUTO-FILL
 ---------------------
