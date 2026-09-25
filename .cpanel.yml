@@ -1,0 +1,9 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/nuteckco/public_html/production.nuteckcouplings.com/
+    - /bin/mkdir -p "$DEPLOYPATH"
+    - /usr/bin/rsync -a --delete --exclude='api/config.php' public_html/ "$DEPLOYPATH"
+    - /usr/bin/test -f "${DEPLOYPATH}api/config.php" || /bin/cp public_html/api/config.php "${DEPLOYPATH}api/config.php"
+    - /bin/mkdir -p /home/nuteckco/public_html/storage/backups
+    - /bin/cp storage/.htaccess /home/nuteckco/public_html/storage/.htaccess
