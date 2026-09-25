@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS machines (
   status ENUM('Active','Inactive') DEFAULT 'Active'
 );
 
-INSERT INTO machines (code, name, default_operation) VALUES
+INSERT IGNORE INTO machines (code, name, default_operation) VALUES
 ('HOB/01','Hobbing Machine 01','Hobbing'),
 ('HOB/02','Hobbing Machine 02','Hobbing'),
 ('HOB/03','Hobbing Machine 03','Hobbing'),
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS operators (
   status ENUM('Active','Inactive') DEFAULT 'Active'
 );
 
-INSERT INTO operators (staff_code, name, designation, department, phone, status) VALUES
+INSERT IGNORE INTO operators (staff_code, name, designation, department, phone, status) VALUES
 ('OP-001','Mukesh','Operator','Production',NULL,'Active'),
 ('OP-002','Prakash','Operator','Production',NULL,'Active'),
 ('OP-003','vijay','Operator','Production',NULL,'Active'),
@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS parts (
   status ENUM('Active','Inactive') DEFAULT 'Active'
 );
 
-INSERT INTO parts (part_name, coupling_type) VALUES
+INSERT IGNORE INTO parts (part_name, coupling_type) VALUES
 ('GC-100','GC Gear Coupling'),
 ('GC-101','GC Gear Coupling'),
 ('GC-102','GC Gear Coupling'),
@@ -211,12 +211,12 @@ CREATE TABLE IF NOT EXISTS part_components (
   FOREIGN KEY (part_id) REFERENCES parts(id) ON DELETE CASCADE
 );
 
-INSERT INTO part_components (part_id, component_name, sort_order)
+INSERT IGNORE INTO part_components (part_id, component_name, sort_order)
 SELECT id, 'Hub', 1 FROM parts WHERE coupling_type IN ('GC Gear Coupling','NA Gear Coupling')
 UNION ALL
 SELECT id, 'Sleeve', 2 FROM parts WHERE coupling_type IN ('GC Gear Coupling','NA Gear Coupling');
 
-INSERT INTO part_components (part_id, component_name, sort_order)
+INSERT IGNORE INTO part_components (part_id, component_name, sort_order)
 SELECT p.id, c.component_name, c.sort_order
 FROM parts p
 JOIN (
@@ -332,7 +332,7 @@ CREATE TABLE IF NOT EXISTS production_jobs (
   created_by_user_id INT DEFAULT NULL,
   active_machine_id INT AS (
     CASE WHEN status IN ('Running','Handover Pending','Breakdown','Stopped') THEN machine_id ELSE NULL END
-  ) PERSISTENT,
+  ) STORED,
   UNIQUE KEY unique_active_job_per_machine (active_machine_id),
   KEY idx_production_jobs_machine (machine_id),
   KEY idx_production_jobs_status (status),
@@ -364,7 +364,7 @@ CREATE TABLE IF NOT EXISTS job_shifts (
   issue_code VARCHAR(100) DEFAULT NULL,
   remarks VARCHAR(255) DEFAULT NULL,
   started_by_user_id INT NOT NULL,
-  active_job_id INT AS (CASE WHEN status = 'Running' THEN job_id ELSE NULL END) PERSISTENT,
+  active_job_id INT AS (CASE WHEN status = 'Running' THEN job_id ELSE NULL END) STORED,
   UNIQUE KEY unique_running_shift_per_job (active_job_id),
   KEY idx_job_shifts_job (job_id),
   KEY idx_job_shifts_operator (operator_id),
@@ -386,7 +386,7 @@ CREATE TABLE IF NOT EXISTS job_cutter_changes (
   status ENUM('In Progress','Completed') NOT NULL DEFAULT 'In Progress',
   started_by_user_id INT NOT NULL,
   completed_by_user_id INT DEFAULT NULL,
-  active_job_id INT AS (CASE WHEN status = 'In Progress' THEN job_id ELSE NULL END) PERSISTENT,
+  active_job_id INT AS (CASE WHEN status = 'In Progress' THEN job_id ELSE NULL END) STORED,
   UNIQUE KEY unique_active_cutter_change_per_job (active_job_id),
   KEY idx_cutter_changes_job (job_id),
   KEY idx_cutter_changes_shift (shift_id),
@@ -425,7 +425,7 @@ CREATE TABLE IF NOT EXISTS job_setting_changes (
   new_job_id INT DEFAULT NULL,
   started_by_user_id INT NOT NULL,
   completed_by_user_id INT DEFAULT NULL,
-  active_machine_id INT AS (CASE WHEN status = 'In Progress' THEN machine_id ELSE NULL END) PERSISTENT,
+  active_machine_id INT AS (CASE WHEN status = 'In Progress' THEN machine_id ELSE NULL END) STORED,
   UNIQUE KEY unique_active_setting_change_per_machine (active_machine_id),
   KEY idx_setting_changes_old_job (old_job_id),
   KEY idx_setting_changes_old_shift (old_shift_id),
