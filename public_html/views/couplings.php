@@ -1,13 +1,15 @@
     <section id="couplingModule" class="hidden">
       <header class="module-header">
         <div>
-          <h1>Coupling Add</h1>
-          <p>Add a unique coupling code for use in Daily Entry.</p>
+          <h1>Coupling Management</h1>
+          <p>Add, edit or safely delete coupling codes used in production.</p>
         </div>
       </header>
 
       <form class="card" id="couplingForm" onsubmit="handleCouplingSubmit(event)">
         <div id="couplingMessage" class="banner"></div>
+        <h2 id="couplingFormTitle">Add Coupling</h2>
+        <input type="hidden" name="id" id="coupling_edit_id" />
         <div class="grid management-grid compact-grid">
           <label>
             Coupling Range
@@ -25,16 +27,22 @@
             <input type="text" name="part_name" id="new_part_name" required placeholder="e.g. GC-119" />
           </label>
         </div>
-        <button type="submit" class="submit" id="saveCouplingBtn">Save Coupling</button>
+        <div class="management-form-actions">
+          <button type="submit" class="submit" id="saveCouplingBtn">Save Coupling</button>
+          <button type="button" class="secondary-button hidden" id="cancelCouplingEditBtn" onclick="cancelCouplingEdit()">Cancel Edit</button>
+        </div>
       </form>
 
       <div class="card list-card">
-        <h2>Existing Couplings</h2>
+        <div class="list-heading">
+          <h2 id="couplingListTitle">Existing Couplings</h2>
+          <button type="button" class="secondary-button" id="toggleCouplingTrashBtn" onclick="toggleCouplingTrash()">Show Deleted Couplings</button>
+        </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Coupling Range</th><th>Coupling Code / Part Name</th></tr></thead>
+            <thead><tr><th>Coupling Range</th><th>Coupling Code / Part Name</th><th>Actions</th></tr></thead>
             <tbody id="couplingsTableBody">
-              <tr><td colspan="2" class="empty">Loading...</td></tr>
+              <tr><td colspan="3" class="empty">Loading...</td></tr>
             </tbody>
           </table>
         </div>

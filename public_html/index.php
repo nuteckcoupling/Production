@@ -54,7 +54,7 @@
   <script src="assets/js/admin-analysis.js?v=20260924-2"></script>
   <script src="assets/js/dashboard.js?v=20260924-3"></script>
   <script src="assets/js/cutters.js?v=20260924-1"></script>
-  <script src="assets/js/couplings.js?v=20260924-1"></script>
+  <script src="assets/js/couplings.js?v=20260928-1"></script>
   <script src="assets/js/app.js?v=20260923-2"></script>
 </body>
 </html>
