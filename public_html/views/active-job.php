@@ -62,6 +62,43 @@
         <button type="submit" class="submit handover-button" id="acceptHandoverButton">Accept Handover &amp; Start Shift</button>
       </form>
 
+      <form id="takeoverShiftPanel" class="card accept-handover-card hidden" onsubmit="handleStartTakeover(event)">
+        <h2>Emergency Shift Takeover</h2>
+        <p>Use only when the current operator cannot end the shift. Admin will receive an alert and the job will resume after 2 minutes.</p>
+        <input type="hidden" name="job_id" id="takeover_job_id" />
+        <div class="grid">
+          <label>Current Operator<input type="text" id="takeover_current_operator" readonly /></label>
+          <label>New Operator<input type="text" id="takeover_new_operator" readonly /></label>
+          <label>Date<input type="date" name="shift_date" id="takeover_shift_date" readonly required /></label>
+          <label>Shift<select name="shift" id="takeover_shift" onchange="updateTakeoverShiftHours()" required><option value="">-- select --</option></select></label>
+          <label>Shift Hours<input type="number" id="takeover_shift_hours" step="0.01" readonly /></label>
+          <label>Takeover Reason
+            <select name="reason" required>
+              <option value="">-- select reason --</option>
+              <option value="Operator Unavailable">Operator Unavailable</option>
+              <option value="Shift Not Ended">Shift Not Ended</option>
+              <option value="Emergency">Emergency</option>
+              <option value="Supervisor Correction">Supervisor Correction</option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+          <label class="full">Takeover Remarks<input type="text" name="remarks" maxlength="150" required placeholder="Mandatory details for Admin and report" /></label>
+        </div>
+        <button type="submit" class="submit" id="startTakeoverButton">Start Takeover</button>
+      </form>
+
+      <div id="takeoverPendingPanel" class="card handover-summary-card hidden">
+        <h2>Emergency Takeover Pending</h2>
+        <p>Admin alert and audit record have been created. The job will resume automatically after the safety countdown.</p>
+        <dl class="active-job-summary">
+          <div><dt>Incoming Operator</dt><dd id="takeoverPendingOperator">-</dd></div>
+          <div><dt>Shift</dt><dd id="takeoverPendingShift">-</dd></div>
+          <div><dt>Reason / Remarks</dt><dd id="takeoverPendingRemarks">-</dd></div>
+          <div><dt>Resume In</dt><dd id="takeoverCountdown">02:00</dd></div>
+        </dl>
+        <button type="button" class="submit" id="completeTakeoverButton" onclick="completeEmergencyTakeover()" disabled>Waiting 02:00</button>
+      </div>
+
       <form id="resumeJobPanel" class="card accept-handover-card hidden" onsubmit="handleResumeJob(event)">
         <h2>Resume Job</h2>
         <p>Part, operation, cutter, planned quantity and previous production will remain unchanged.</p>

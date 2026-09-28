@@ -18,6 +18,9 @@ $stmt = $conn->prepare("SELECT
         j.current_operator_id, o.name AS operator_name, j.current_shift,
         j.started_at, j.status_changed_at, j.completed_at, j.remarks,
         s.id AS shift_id, s.shift_date, s.shift, s.shift_hours, s.started_at AS shift_started_at,
+        s.remarks AS current_shift_remarks,
+        CASE WHEN j.status = 'Handover Pending' AND s.remarks LIKE '[TAKEOVER]%'
+             THEN GREATEST(TIMESTAMPDIFF(SECOND, NOW(), s.started_at), 0) ELSE 0 END AS takeover_seconds_remaining,
         last_s.id AS last_shift_id, last_s.shift AS last_shift, last_s.shift_hours AS last_shift_hours,
         last_s.started_at AS last_shift_started_at, last_s.ended_at AS last_shift_ended_at,
         last_s.total_qty AS last_total_qty, last_s.ok_qty AS last_ok_qty,
@@ -78,6 +81,10 @@ foreach (['last_shift_id', 'last_total_qty', 'last_ok_qty', 'last_mc_reject_qty'
     'last_rm_defect_qty', 'last_rework_qty', 'last_downtime_min'] as $field) {
     $job[$field] = $job[$field] === null ? null : (int)$job[$field];
 }
+$job['takeover_seconds_remaining'] = (int)($job['takeover_seconds_remaining'] ?? 0);
+$job['takeover_pending'] = $job['status'] === 'Handover Pending'
+    && $job['shift_id'] !== null
+    && str_starts_with((string)($job['current_shift_remarks'] ?? ''), '[TAKEOVER]');
 $job['cutter_change_id'] = $job['cutter_change_id'] === null ? null : (int)$job['cutter_change_id'];
 $job['last_shift_hours'] = $job['last_shift_hours'] === null ? null : (float)$job['last_shift_hours'];
 $job['old_cutter_id'] = $job['old_cutter_id'] === null ? null : (int)$job['old_cutter_id'];
@@ -124,6 +131,16 @@ $job['can_resume_job'] = ($user['role'] ?? '') === 'Operator/Supervisor'
     && $job['shift_id'] === null
     && $job['cutter_change_id'] === null
     && $job['setting_change_id'] === null;
+$job['can_takeover_shift'] = ($user['role'] ?? '') === 'Operator/Supervisor'
+    && (int)($user['operator_id'] ?? 0) !== (int)$job['current_operator_id']
+    && $job['status'] === 'Running'
+    && $job['shift_id'] !== null
+    && $job['cutter_change_id'] === null
+    && $job['setting_change_id'] === null;
+$job['can_complete_takeover'] = ($user['role'] ?? '') === 'Operator/Supervisor'
+    && (int)($user['operator_id'] ?? 0) === (int)$job['current_operator_id']
+    && $job['takeover_pending']
+    && $job['takeover_seconds_remaining'] <= 0;
 
 json_response($job);
 $conn->close();

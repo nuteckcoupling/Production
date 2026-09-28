@@ -125,6 +125,7 @@
         const canOperate = currentUser?.role === 'Operator/Supervisor';
         const canAcceptHandover = machine.runtime_status === 'Handover Pending'
           && canOperate
+          && !machine.takeover_pending
           && Number(machine.current_operator_id) !== Number(currentUser.operator_id);
         const detailRows = isAvailable
           ? '<p class="machine-available-text">No active job. Machine is ready.</p>'
@@ -145,7 +146,7 @@
           </div>
           ${detailRows}
           <button type="button" class="machine-action" onclick="openMachineFromDashboard(${Number(machine.id)}, '${escapeHtml(machine.runtime_status)}', ${machine.job_id === null ? 'null' : Number(machine.job_id)})">
-            ${isAvailable && canOperate ? 'Start New Job' : (canAcceptHandover ? 'Accept Handover' : (machine.runtime_status === 'Stopped' && canOperate ? 'Resume Job' : (isAvailable ? 'View Status' : 'Open Job')))}
+            ${isAvailable && canOperate ? 'Start New Job' : (canAcceptHandover ? 'Accept Handover' : (machine.takeover_pending ? 'Takeover Pending' : (machine.runtime_status === 'Stopped' && canOperate ? 'Resume Job' : (isAvailable ? 'View Status' : 'Open Job'))))}
           </button>
         </article>`;
       }).join('');

@@ -1,4 +1,7 @@
 // Extracted from index.html during Phase 2 frontend separation.
+    let takeoverCountdownTimer = null;
+    let takeoverAutoCompleting = false;
+
     function setStartJobFieldsEnabled(enabled) {
       startJobAvailable = enabled;
       ['entry_date', 'shift', 'coupling_type', 'drg_no', 'operation_select', 'operation', 'cutter_id'].forEach(id => {
@@ -150,6 +153,8 @@
       const handoverSummary = document.getElementById('handoverSummary');
       const acceptPanel = document.getElementById('acceptHandoverPanel');
       const resumePanel = document.getElementById('resumeJobPanel');
+      const takeoverPanel = document.getElementById('takeoverShiftPanel');
+      const takeoverPendingPanel = document.getElementById('takeoverPendingPanel');
       const machineActionPanel = document.getElementById('machineActionPanel');
       const machineActionSelect = document.getElementById('machineActionSelect');
       const cutterChangePanel = document.getElementById('cutterChangePanel');
@@ -163,6 +168,11 @@
       handoverSummary.classList.add('hidden');
       acceptPanel.classList.add('hidden');
       resumePanel.classList.add('hidden');
+      takeoverPanel.classList.add('hidden');
+      takeoverPendingPanel.classList.add('hidden');
+      if (takeoverCountdownTimer) window.clearInterval(takeoverCountdownTimer);
+      takeoverCountdownTimer = null;
+      takeoverAutoCompleting = false;
       machineActionPanel.classList.add('hidden');
       machineActionSelect.value = '';
       cutterChangePanel.classList.add('hidden');
@@ -238,6 +248,15 @@
             handoverSummary.classList.remove('hidden');
           }
 
+          if (job.takeover_pending) {
+            setActiveJobValue('takeoverPendingOperator', job.operator_name || '-');
+            setActiveJobValue('takeoverPendingShift', job.shift || job.current_shift || '-');
+            setActiveJobValue('takeoverPendingRemarks', (job.current_shift_remarks || '').replace(/^\[TAKEOVER\]\s*/, ''));
+            takeoverPendingPanel.dataset.jobId = job.id;
+            takeoverPendingPanel.classList.remove('hidden');
+            startTakeoverCountdown(job);
+          }
+
           document.getElementById('machineActionCutter').disabled = !job.can_start_cutter_change;
           document.getElementById('machineActionSetting').disabled = !job.can_start_setting_change;
           if (job.can_start_cutter_change) {
@@ -253,6 +272,16 @@
 
           if (job.can_start_cutter_change || job.can_start_setting_change) {
             machineActionPanel.classList.remove('hidden');
+          }
+
+          if (job.can_takeover_shift) {
+            takeoverPanel.reset();
+            document.getElementById('takeover_job_id').value = job.id;
+            document.getElementById('takeover_current_operator').value = job.operator_name || '-';
+            document.getElementById('takeover_new_operator').value = currentUser.operator_name || currentUser.username;
+            document.getElementById('takeover_shift_date').value = today;
+            updateTakeoverShiftHours();
+            takeoverPanel.classList.remove('hidden');
           }
 
           if (job.can_end_shift) {
@@ -341,6 +370,96 @@
     function updateResumeShiftHours() {
       const selected = activeShifts.find(shift => String(shift.code) === document.getElementById('resume_shift').value);
       document.getElementById('resume_shift_hours').value = selected ? selected.shift_hours : '';
+    }
+
+    function updateTakeoverShiftHours() {
+      const selected = activeShifts.find(shift => String(shift.code) === document.getElementById('takeover_shift').value);
+      document.getElementById('takeover_shift_hours').value = selected ? selected.shift_hours : '';
+    }
+
+    function handleStartTakeover(event) {
+      event.preventDefault();
+      const form = event.target;
+      const button = document.getElementById('startTakeoverButton');
+      const data = Object.fromEntries(new FormData(form).entries());
+      button.disabled = true;
+      button.innerText = 'Starting Takeover...';
+      fetch(`${API}/start_takeover.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+        .then(async response => ({ ok: response.ok, data: await response.json() }))
+        .then(result => {
+          if (!result.ok) throw new Error(result.data.error || 'Unable to start takeover.');
+          showToast('warning', 'Emergency takeover recorded. Job will resume after 2 minutes.', 5000);
+          loadActiveJob(data.job_id);
+        })
+        .catch(error => {
+          const message = document.getElementById('activeJobMessage');
+          message.className = 'banner error';
+          message.innerText = error.message;
+        })
+        .finally(() => {
+          button.disabled = false;
+          button.innerText = 'Start Takeover';
+        });
+    }
+
+    function startTakeoverCountdown(job) {
+      let remaining = Math.max(0, Number(job.takeover_seconds_remaining || 0));
+      const countdown = document.getElementById('takeoverCountdown');
+      const button = document.getElementById('completeTakeoverButton');
+      const ownsTakeover = currentUser?.role === 'Operator/Supervisor'
+        && Number(currentUser.operator_id) === Number(job.current_operator_id);
+      const render = () => {
+        const minutes = String(Math.floor(remaining / 60)).padStart(2, '0');
+        const seconds = String(remaining % 60).padStart(2, '0');
+        countdown.innerText = `${minutes}:${seconds}`;
+        button.disabled = !ownsTakeover || remaining > 0 || takeoverAutoCompleting;
+        button.innerText = remaining > 0 ? `Waiting ${minutes}:${seconds}` : 'Resume Job Now';
+        if (remaining <= 0 && ownsTakeover && !takeoverAutoCompleting) completeEmergencyTakeover();
+      };
+      render();
+      if (remaining > 0) {
+        takeoverCountdownTimer = window.setInterval(() => {
+          remaining = Math.max(0, remaining - 1);
+          render();
+          if (remaining <= 0 && takeoverCountdownTimer) {
+            window.clearInterval(takeoverCountdownTimer);
+            takeoverCountdownTimer = null;
+          }
+        }, 1000);
+      }
+    }
+
+    function completeEmergencyTakeover() {
+      if (takeoverAutoCompleting) return;
+      const jobId = document.getElementById('takeoverPendingPanel').dataset.jobId;
+      if (!jobId) return;
+      takeoverAutoCompleting = true;
+      const button = document.getElementById('completeTakeoverButton');
+      button.disabled = true;
+      button.innerText = 'Resuming Job...';
+      fetch(`${API}/complete_takeover.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ job_id: jobId })
+      })
+        .then(async response => ({ ok: response.ok, data: await response.json() }))
+        .then(result => {
+          if (!result.ok) throw new Error(result.data.error || 'Unable to complete takeover.');
+          dashboardFlashMessage = 'Emergency takeover completed. Job is now Running.';
+          switchModule('dashboard');
+        })
+        .catch(error => {
+          takeoverAutoCompleting = false;
+          const message = document.getElementById('activeJobMessage');
+          message.className = 'banner error';
+          message.innerText = error.message;
+          button.disabled = false;
+          button.innerText = 'Resume Job Now';
+        });
     }
 
     function handleResumeJob(event) {

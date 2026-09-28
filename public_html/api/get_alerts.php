@@ -39,6 +39,35 @@ while ($row = $result->fetch_assoc()) {
 }
 $shiftStmt->close();
 
+$takeoverStmt = $conn->prepare("SELECT j.id AS job_id, m.id AS machine_id, m.code AS machine_code,
+        m.name AS machine_name, o.name AS operator_name, s.started_at, s.remarks,
+        GREATEST(TIMESTAMPDIFF(SECOND, NOW(), s.started_at), 0) AS remaining_seconds
+    FROM production_jobs j
+    JOIN machines m ON m.id = j.machine_id
+    JOIN operators o ON o.id = j.current_operator_id
+    JOIN job_shifts s ON s.job_id = j.id AND s.status = 'Running' AND s.remarks LIKE '[TAKEOVER]%'
+    WHERE j.status = 'Handover Pending'
+    ORDER BY j.status_changed_at");
+$takeoverStmt->execute();
+$result = $takeoverStmt->get_result();
+while ($row = $result->fetch_assoc()) {
+    $remaining = max(0, (int)$row['remaining_seconds']);
+    $alerts[] = [
+        'type' => 'emergency_takeover',
+        'severity' => 'critical',
+        'title' => 'Emergency Takeover',
+        'message' => $row['operator_name'] . ' requested takeover. Resume in ' . $remaining . ' sec. ' . $row['remarks'],
+        'machine_id' => (int)$row['machine_id'],
+        'machine_code' => $row['machine_code'],
+        'machine_name' => $row['machine_name'],
+        'job_id' => (int)$row['job_id'],
+        'status' => 'Handover Pending',
+        'elapsed_minutes' => 0,
+        'started_at' => $row['started_at']
+    ];
+}
+$takeoverStmt->close();
+
 $handoverStmt = $conn->prepare("SELECT j.id AS job_id, m.id AS machine_id, m.code AS machine_code,
         m.name AS machine_name, o.name AS operator_name, j.status_changed_at,
         TIMESTAMPDIFF(MINUTE, j.status_changed_at, NOW()) AS pending_minutes
@@ -46,6 +75,9 @@ $handoverStmt = $conn->prepare("SELECT j.id AS job_id, m.id AS machine_id, m.cod
     JOIN machines m ON m.id = j.machine_id
     LEFT JOIN operators o ON o.id = j.current_operator_id
     WHERE j.status = 'Handover Pending'
+      AND NOT EXISTS (SELECT 1 FROM job_shifts takeover_s
+          WHERE takeover_s.job_id = j.id AND takeover_s.status = 'Running'
+            AND takeover_s.remarks LIKE '[TAKEOVER]%')
     ORDER BY j.status_changed_at");
 $handoverStmt->execute();
 $result = $handoverStmt->get_result();
