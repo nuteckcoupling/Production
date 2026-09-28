@@ -4,7 +4,7 @@ require_admin();
 try {
     json_response(list_database_backups());
 } catch (Throwable $error) {
-    json_error($error->getMessage(), 500);
+    json_server_error('List database backups', $error, 'Unable to list database backups');
 }
 $conn->close();
 ?>

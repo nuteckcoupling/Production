@@ -26,6 +26,7 @@ CURRENT FEATURES
 - Admin-only actual-production analysis with achievement, pending/overdue jobs, downtime and rejection details
 - CSV/Excel download and Print/Save PDF report output
 - Custom in-app confirmation popups and success/error toast notifications
+- V2 reliability dashboard with tracked database migrations and private error references
 
 FOLDER GUIDE
 ------------
@@ -104,6 +105,16 @@ DATABASE BACKUP MANAGEMENT
 - Automatic backups run on the first authenticated app request after the configured daily time.
 - Admin can enable/disable the schedule, choose the time and retain the latest 1-90 automatic backups.
 - Automatic retention never deletes manual or pre-restore safety backups.
+
+V2 DATABASE MIGRATIONS AND ERROR LOG
+------------------------------------
+- Admin can review migration status under System Settings.
+- Applying pending migrations requires the Admin password and typing MIGRATE.
+- A safety backup is created before migrations run.
+- Applied migration filename and checksum are recorded in schema_migrations.
+- Changed or missing applied migration files block further migration for safety.
+- Unexpected server errors return a short reference code instead of database details.
+- The private Admin error log stores technical details without passwords or request bodies.
 
 ADMIN PRODUCTION ANALYSIS
 -------------------------

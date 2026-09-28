@@ -26,9 +26,10 @@ try {
         'Restored database from ' . $filename . '; safety backup: ' . $safety['filename'], 'backup', null);
     json_response(['success' => true, 'safety_backup' => $safety['filename']]);
 } catch (RuntimeException $error) {
-    json_error($error->getMessage(), in_array($error->getCode(), [400, 404], true) ? $error->getCode() : 500);
+    if (in_array($error->getCode(), [400, 404], true)) json_error($error->getMessage(), $error->getCode());
+    json_server_error('Restore database backup', $error, 'Unable to restore database backup');
 } catch (Throwable $error) {
-    json_error('Unable to restore backup: ' . $error->getMessage(), 500);
+    json_server_error('Restore database backup', $error, 'Unable to restore database backup');
 }
 $conn->close();
 ?>

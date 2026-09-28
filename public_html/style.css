@@ -299,8 +299,10 @@ th { background: #f8f9fb; font-weight: 600; }
 
 .tag { padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 500; }
 .tag.running { background: #e6f4ea; color: #1e7b34; }
+.tag.active { background: #e6f4ea; color: #1e7b34; }
 .tag.idle { background: #fff4e0; color: #a3690a; }
 .tag.breakdown { background: #fdecea; color: #c0392b; }
+.tag.inactive { background: #fdecea; color: #c0392b; }
 
 .hidden { display: none !important; }
 

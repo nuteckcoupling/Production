@@ -89,6 +89,15 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   KEY idx_audit_action (action)
 );
 
+CREATE TABLE IF NOT EXISTS schema_migrations (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  version VARCHAR(190) NOT NULL UNIQUE,
+  checksum CHAR(64) NOT NULL,
+  applied_by_user_id INT DEFAULT NULL,
+  applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_schema_migrations_applied (applied_at)
+);
+
 CREATE TABLE IF NOT EXISTS backup_settings (
   id TINYINT PRIMARY KEY,
   enabled TINYINT(1) NOT NULL DEFAULT 1,

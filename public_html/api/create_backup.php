@@ -7,7 +7,7 @@ try {
         'Created database backup ' . $backup['filename'], 'backup', null);
     json_response(['success' => true, 'backup' => $backup], 201);
 } catch (Throwable $error) {
-    json_error('Unable to create backup: ' . $error->getMessage(), 500);
+    json_server_error('Create database backup', $error, 'Unable to create database backup');
 }
 $conn->close();
 ?>

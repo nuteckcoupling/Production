@@ -94,7 +94,10 @@
       if (moduleName === 'staffManagement') loadStaffManagement();
       if (moduleName === 'userManagement') loadUserManagement();
       if (moduleName === 'auditLog') initializeAuditLog();
-      if (moduleName === 'systemSettings') loadSystemSettings(true);
+      if (moduleName === 'systemSettings') {
+        loadSystemSettings(true);
+        loadReliabilityStatus();
+      }
       if (moduleName === 'backupManagement') {
         loadBackups();
         loadBackupSettings();

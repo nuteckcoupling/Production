@@ -35,7 +35,7 @@ try {
         }
     }
 } catch (Throwable $error) {
-    json_error('Automatic backup failed: ' . $error->getMessage(), 500);
+    json_server_error('Automatic database backup', $error, 'Automatic backup failed');
 } finally {
     try { $conn->query("SELECT RELEASE_LOCK('nuteck_production_auto_backup')"); } catch (Throwable $ignored) {}
 }

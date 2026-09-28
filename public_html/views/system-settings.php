@@ -33,4 +33,36 @@
           <button type="submit" class="submit" id="saveSystemSettingsBtn">Save Settings</button>
         </div>
       </form>
+
+      <section class="card list-card">
+        <div class="list-card-heading">
+          <div><h2>Database Migrations</h2><span class="table-subtext" id="migrationSummary">Checking...</span></div>
+          <button type="button" class="secondary-button" onclick="loadReliabilityStatus()">Refresh</button>
+        </div>
+        <div id="reliabilityMessage" class="banner"></div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Migration</th><th>Status</th><th>Applied At</th></tr></thead>
+            <tbody id="migrationTableBody"><tr><td colspan="3" class="empty">Checking migration status...</td></tr></tbody>
+          </table>
+        </div>
+        <form id="applyMigrationsForm" class="grid management-grid" onsubmit="handleApplyMigrations(event)">
+          <label>Admin Password<input type="password" name="password" autocomplete="current-password" required /></label>
+          <label>Type MIGRATE<input type="text" name="confirmation" autocomplete="off" required placeholder="MIGRATE" /></label>
+          <div class="management-form-actions"><button type="submit" class="submit" id="applyMigrationsBtn" disabled>Backup &amp; Apply Pending Migrations</button></div>
+        </form>
+        <p class="table-subtext">A protected safety backup is created before any pending migration is applied.</p>
+      </section>
+
+      <section class="card list-card">
+        <div class="list-card-heading">
+          <div><h2>Application Error Log</h2><span class="table-subtext" id="errorLogCount">0 recent errors</span></div>
+          <button type="button" class="secondary-button" onclick="loadApplicationErrors()">Refresh</button>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Time</th><th>Reference</th><th>Context</th><th>Message</th><th>Request</th></tr></thead>
+            <tbody id="errorLogTableBody"><tr><td colspan="5" class="empty">Open System Settings to load errors.</td></tr></tbody>
+          </table>
+        </div>
+        <p class="table-subtext">Only Admin can view this private log. Passwords and request bodies are not recorded.</p>
+      </section>
     </section>
