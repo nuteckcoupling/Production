@@ -4,6 +4,7 @@ $user = require_operator_supervisor();
 
 $data = json_input();
 $cutter_num = trim($data['cutter_num'] ?? '');
+$module = trim($data['module'] ?? '');
 $cutter_type = trim($data['cutter_type'] ?? '');
 $lead_angle = trim((string)($data['lead_angle'] ?? ''));
 $rpm_stroke = trim($data['rpm_stroke'] ?? '');
@@ -39,8 +40,8 @@ if ($check->get_result()->num_rows > 0) {
 }
 $check->close();
 
-$stmt = $conn->prepare("INSERT INTO cutters (cutter_num, cutter_type, lead_angle, rpm_stroke, status, remarks) VALUES (?, ?, ?, ?, ?, ?)");
-$stmt->bind_param("ssssss", $cutter_num, $cutter_type, $lead_angle_value, $rpm_stroke, $status, $remarks);
+$stmt = $conn->prepare("INSERT INTO cutters (cutter_num, cutter_module, cutter_type, lead_angle, rpm_stroke, status, remarks) VALUES (?, ?, ?, ?, ?, ?, ?)");
+$stmt->bind_param("sssssss", $cutter_num, $module, $cutter_type, $lead_angle_value, $rpm_stroke, $status, $remarks);
 
 try {
     $stmt->execute();

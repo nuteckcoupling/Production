@@ -250,6 +250,7 @@ WHERE p.coupling_type = 'Roller Chain Coupling'
 CREATE TABLE IF NOT EXISTS cutters (
   id INT AUTO_INCREMENT PRIMARY KEY,
   cutter_num VARCHAR(50) NOT NULL UNIQUE,
+  cutter_module VARCHAR(50) DEFAULT NULL,
   cutter_type VARCHAR(100),
   lead_angle DECIMAL(6,2) DEFAULT NULL,
   rpm_stroke VARCHAR(50) DEFAULT NULL,

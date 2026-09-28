@@ -9,7 +9,7 @@
             if (Number(cutter.id) === Number(currentCutterId)) return;
             const option = document.createElement('option');
             option.value = cutter.id;
-            option.textContent = cutter.cutter_num;
+            option.textContent = cutter.cutter_num + (cutter.module ? ' — ' + cutter.module : '');
             select.appendChild(option);
           });
         })
@@ -100,7 +100,7 @@
           cutters.forEach(cutter => {
             const option = document.createElement('option');
             option.value = cutter.id;
-            option.textContent = cutter.cutter_num;
+            option.textContent = cutter.cutter_num + (cutter.module ? ' — ' + cutter.module : '');
             select.appendChild(option);
           });
         })

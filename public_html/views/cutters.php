@@ -10,10 +10,14 @@
         <div id="cutterMessage" class="banner"></div>
         <div class="grid management-grid">
           <label>
-            Cutter Number / Module
+            Cutter Number
             <input type="text" name="cutter_num" id="cutter_num" required placeholder="e.g. CUT-101" />
         <h2 id="cutterFormTitle">Add Cutter</h2>
         <input type="hidden" name="id" id="cutter_edit_id" />
+          </label>
+          <label>
+            Module
+            <input type="text" name="module" id="cutter_module" placeholder="e.g. 2.5 MOD" />
           </label>
           <label>
             Cutter Type
@@ -52,9 +56,9 @@
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Cutter Number / Module</th><th>Cutter Type</th><th>Lead Angle</th><th>RPM / Stroke</th><th>Status</th><th>Remarks</th><th>Actions</th></tr></thead>
+            <thead><tr><th>Cutter Number</th><th>Module</th><th>Cutter Type</th><th>Lead Angle</th><th>RPM / Stroke</th><th>Status</th><th>Remarks</th><th>Actions</th></tr></thead>
             <tbody id="cuttersTableBody">
-              <tr><td colspan="7" class="empty">Loading...</td></tr>
+              <tr><td colspan="8" class="empty">Loading...</td></tr>
             </tbody>
           </table>
         </div>

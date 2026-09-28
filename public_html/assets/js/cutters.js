@@ -8,18 +8,18 @@
 
     function loadCutters() {
       const tbody = document.getElementById('cuttersTableBody');
-      tbody.innerHTML = '<tr><td colspan="7" class="empty">Loading...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" class="empty">Loading...</td></tr>';
       fetch(`${API}/get_all_cutters.php${showCutterTrash ? '?trash=1' : ''}`)
         .then(r => r.json())
         .then(cutters => {
           tbody.innerHTML = '';
           if (cutters.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="empty">' + (showCutterTrash ? 'Trash is empty.' : 'No cutters added yet.') + '</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="empty">' + (showCutterTrash ? 'Trash is empty.' : 'No cutters added yet.') + '</td></tr>';
             return;
           }
           cutters.forEach(cutter => {
             const row = document.createElement('tr');
-            [cutter.cutter_num, cutter.cutter_type || '-', cutter.lead_angle === null ? '-' : `${cutter.lead_angle}°`, cutter.rpm_stroke || '-', cutter.status, cutter.remarks || '-'].forEach(value => {
+            [cutter.cutter_num, cutter.module || '-', cutter.cutter_type || '-', cutter.lead_angle === null ? '-' : `${cutter.lead_angle}°`, cutter.rpm_stroke || '-', cutter.status, cutter.remarks || '-'].forEach(value => {
               const cell = document.createElement('td');
               cell.textContent = value;
               row.appendChild(cell);
@@ -52,7 +52,7 @@
           });
         })
         .catch(() => {
-          tbody.innerHTML = '<tr><td colspan="7" class="empty">Error loading cutters.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="8" class="empty">Error loading cutters.</td></tr>';
         });
     }
 
@@ -84,6 +84,7 @@
     function startCutterEdit(cutter) {
       document.getElementById('cutter_edit_id').value = cutter.id;
       document.getElementById('cutter_num').value = cutter.cutter_num || '';
+      document.getElementById('cutter_module').value = cutter.module || '';
       document.getElementById('cutter_type').value = cutter.cutter_type || '';
       document.getElementById('lead_angle').value = cutter.lead_angle ?? '';
       document.getElementById('rpm_stroke').value = cutter.rpm_stroke || '';

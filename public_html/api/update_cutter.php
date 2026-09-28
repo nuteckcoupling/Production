@@ -5,6 +5,7 @@ $user = require_operator_supervisor();
 $data = json_input();
 $id = filter_var($data['id'] ?? null, FILTER_VALIDATE_INT);
 $cutter_num = trim($data['cutter_num'] ?? '');
+$module = trim($data['module'] ?? '');
 $cutter_type = trim($data['cutter_type'] ?? '');
 $lead_angle = trim((string)($data['lead_angle'] ?? ''));
 $rpm_stroke = trim($data['rpm_stroke'] ?? '');
@@ -38,9 +39,9 @@ if ($check->get_result()->num_rows > 0) {
 }
 $check->close();
 
-$stmt = $conn->prepare("UPDATE cutters SET cutter_num = ?, cutter_type = ?, lead_angle = ?,
+$stmt = $conn->prepare("UPDATE cutters SET cutter_num = ?, cutter_module = ?, cutter_type = ?, lead_angle = ?,
     rpm_stroke = ?, status = ?, remarks = ? WHERE id = ? AND deleted_at IS NULL");
-$stmt->bind_param("ssssssi", $cutter_num, $cutter_type, $lead_angle_value, $rpm_stroke, $status, $remarks, $id);
+$stmt->bind_param("sssssssi", $cutter_num, $module, $cutter_type, $lead_angle_value, $rpm_stroke, $status, $remarks, $id);
 
 try {
     $stmt->execute();

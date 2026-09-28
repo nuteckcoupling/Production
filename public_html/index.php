@@ -37,7 +37,7 @@
 
   <script src="assets/js/notifications.js?v=20260924-1"></script>
   <script src="assets/js/core.js?v=20260924-7"></script>
-  <script src="assets/js/api.js?v=20260924-1"></script>
+  <script src="assets/js/api.js?v=20260928-1"></script>
   <script src="assets/js/auth.js?v=20260924-4"></script>
   <script src="assets/js/weekly-plan.js?v=20260924-2"></script>
   <script src="assets/js/monthly-plan.js?v=20260924-2"></script>
@@ -49,11 +49,11 @@
   <script src="assets/js/system-settings.js?v=20260924-2"></script>
   <script src="assets/js/backup-management.js?v=20260924-2"></script>
   <script src="assets/js/jobs.js?v=20260923-4"></script>
-  <script src="assets/js/changes.js?v=20260923-3"></script>
+  <script src="assets/js/changes.js?v=20260928-1"></script>
   <script src="assets/js/reports.js?v=20260924-3"></script>
   <script src="assets/js/admin-analysis.js?v=20260924-2"></script>
   <script src="assets/js/dashboard.js?v=20260924-3"></script>
-  <script src="assets/js/cutters.js?v=20260924-1"></script>
+  <script src="assets/js/cutters.js?v=20260928-1"></script>
   <script src="assets/js/couplings.js?v=20260928-1"></script>
   <script src="assets/js/app.js?v=20260923-2"></script>
 </body>
