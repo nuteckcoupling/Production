@@ -81,6 +81,24 @@ function create_database_backup(mysqli $conn, string $kind = 'backup'): array
             }
             backup_write($handle, "\n");
         }
+
+        $trigger_names = [];
+        $triggers_result = $conn->query('SHOW TRIGGERS');
+        while ($trigger_row = $triggers_result->fetch_assoc()) {
+            if (!empty($trigger_row['Trigger'])) $trigger_names[] = $trigger_row['Trigger'];
+        }
+        $triggers_result->free();
+        foreach ($trigger_names as $trigger_name) {
+            $quoted_trigger = '`' . str_replace('`', '``', $trigger_name) . '`';
+            $create_trigger_row = $conn->query('SHOW CREATE TRIGGER ' . $quoted_trigger)->fetch_assoc();
+            $create_trigger = $create_trigger_row['SQL Original Statement']
+                ?? $create_trigger_row['Create Trigger']
+                ?? null;
+            if (!$create_trigger) throw new RuntimeException('Unable to export database trigger ' . $trigger_name);
+            backup_write($handle, '-- Trigger ' . $quoted_trigger . "\nDROP TRIGGER IF EXISTS " . $quoted_trigger . ";\n");
+            backup_write($handle, $create_trigger . ";\n\n");
+        }
+
         $conn->commit();
         backup_write($handle, "SET FOREIGN_KEY_CHECKS=1;\n-- End of backup\n");
         fclose($handle);
