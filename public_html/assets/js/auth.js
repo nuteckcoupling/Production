@@ -56,6 +56,13 @@
       document.querySelectorAll('.admin-only').forEach(element => {
         element.classList.toggle('hidden', user.role !== 'Admin');
       });
+      document.querySelectorAll('.maintenance-only').forEach(element => {
+        element.classList.toggle('hidden', user.role !== 'Maintenance');
+      });
+      if (user.role === 'Maintenance') {
+        const allowed = new Set(['navDashboard', 'navMaintenance', 'navChangePassword']);
+        document.querySelectorAll('.sidebar-item').forEach(element => element.classList.toggle('hidden', !allowed.has(element.id)));
+      }
 
       if (user.must_change_password) {
         document.querySelectorAll('.sidebar-item').forEach(element => {

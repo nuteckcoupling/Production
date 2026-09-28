@@ -5,7 +5,7 @@ $user = require_operator_supervisor();
 $data = json_input();
 $job_id = filter_var($data['job_id'] ?? null, FILTER_VALIDATE_INT);
 $allowed_outcomes = ['Continue Next Shift', 'Job Completed', 'Job Stopped'];
-$allowed_machine_statuses = ['Running', 'Idle', 'Breakdown'];
+$allowed_machine_statuses = ['Running', 'Idle'];
 $allowed_issues = ['', 'No Operator', 'No Material', 'M/C Breakdown (Mechanical)',
     'M/C Breakdown (Electrical)', 'No Power', 'New Setting', 'Other'];
 
@@ -101,9 +101,7 @@ try {
     }
     $updateShift->close();
 
-    if ($machine_status === 'Breakdown') {
-        $new_status = 'Breakdown';
-    } elseif ($job_outcome === 'Continue Next Shift') {
+    if ($job_outcome === 'Continue Next Shift') {
         $new_status = 'Handover Pending';
     } elseif ($job_outcome === 'Job Completed') {
         $new_status = 'Completed';

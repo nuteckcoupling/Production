@@ -27,6 +27,7 @@ CURRENT FEATURES
 - CSV/Excel download and Print/Save PDF report output
 - Custom in-app confirmation popups and success/error toast notifications
 - V2 reliability dashboard with tracked database migrations and private error references
+- V2 Maintenance Management with breakdown tickets, repair ownership, MTTR and protected photos
 
 FOLDER GUIDE
 ------------
@@ -131,3 +132,15 @@ ACCESS MODEL
 ------------
 - Admin/Director: monitoring, analysis and production reports
 - Operator/Supervisor: production workflow, handover, cutter and coupling management
+- Maintenance: assigned breakdown tickets, automatic repair timestamps and repair completion
+
+V2 MAINTENANCE MANAGEMENT
+-------------------------
+- Operator/Supervisor raises Mechanical, Electrical or Other breakdown tickets from the machine dashboard.
+- Optional JPG/PNG breakdown photos are stored in protected storage and served only through an authenticated endpoint.
+- A running job and shift automatically move to Breakdown while repair is open.
+- Maintenance login can assign a Maintenance department staff member, start work and complete the repair.
+- Repair details are mandatory; spare-parts usage is optional.
+- Operator/Supervisor enters mandatory testing remarks and confirms the machine Running.
+- Breakdown duration is added to the linked production shift downtime and shown in maintenance MTTR.
+- Admin/Director can monitor all tickets but cannot perform Operator or Maintenance actions.

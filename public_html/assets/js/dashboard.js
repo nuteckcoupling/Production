@@ -138,21 +138,28 @@
               <div><dt>Pending</dt><dd>${Number(machine.pending_qty || 0)}</dd></div>
               <div><dt>Started</dt><dd>${escapeHtml(formatDashboardTime(machine.started_at))}</dd></div>
               <div><dt>Running For</dt><dd>${escapeHtml(formatRunningTime(machine.started_at))}</dd></div>
+              ${machine.maintenance_ticket_id ? `<div><dt>Breakdown</dt><dd>${escapeHtml(machine.breakdown_type || '-')}</dd></div><div><dt>Problem</dt><dd>${escapeHtml(machine.breakdown_description || '-')}</dd></div>` : ''}
             </dl>`;
+        const primaryAction = isAvailable && canOperate ? 'Start New Job' : (canAcceptHandover ? 'Accept Handover' : (machine.takeover_pending ? 'Takeover Pending' : (machine.runtime_status === 'Stopped' && canOperate ? 'Resume Job' : (machine.maintenance_ticket_id ? 'Open Breakdown' : (isAvailable ? 'View Status' : 'Open Job')))));
+        const breakdownButton = canOperate && !machine.maintenance_ticket_id && ['Available', 'Running'].includes(machine.runtime_status)
+          ? `<button type="button" class="machine-action danger-button" onclick="openBreakdownForm(${Number(machine.id)})">Raise Breakdown</button>` : '';
         return `<article class="machine-card ${statusClass(machine.runtime_status)}">
           <div class="machine-card-head">
             <div><h2>${escapeHtml(machine.code)}</h2><p>${escapeHtml(machine.name)}</p></div>
             <span class="machine-status">${escapeHtml(machine.runtime_status)}</span>
           </div>
           ${detailRows}
-          <button type="button" class="machine-action" onclick="openMachineFromDashboard(${Number(machine.id)}, '${escapeHtml(machine.runtime_status)}', ${machine.job_id === null ? 'null' : Number(machine.job_id)})">
-            ${isAvailable && canOperate ? 'Start New Job' : (canAcceptHandover ? 'Accept Handover' : (machine.takeover_pending ? 'Takeover Pending' : (machine.runtime_status === 'Stopped' && canOperate ? 'Resume Job' : (isAvailable ? 'View Status' : 'Open Job'))))}
-          </button>
+          <div class="machine-card-actions"><button type="button" class="machine-action" onclick="openMachineFromDashboard(${Number(machine.id)}, '${escapeHtml(machine.runtime_status)}', ${machine.job_id === null ? 'null' : Number(machine.job_id)}, ${machine.maintenance_ticket_id === null ? 'null' : Number(machine.maintenance_ticket_id)})">${primaryAction}</button>${breakdownButton}</div>
         </article>`;
       }).join('');
     }
 
-    function openMachineFromDashboard(machineId, status, jobId) {
+    function openMachineFromDashboard(machineId, status, jobId, maintenanceTicketId = null) {
+      if (maintenanceTicketId) {
+        selectedMaintenanceTicketId = Number(maintenanceTicketId);
+        switchModule('maintenance');
+        return;
+      }
       if (status === 'Available') {
         if (currentUser?.role === 'Operator/Supervisor') {
           switchModule('daily');

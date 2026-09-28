@@ -13,14 +13,16 @@ $stmt = $conn->prepare("SELECT
                             m.id,
                             m.code,
                             m.name,
-                            COALESCE(j.status, 'Available') AS runtime_status,
+                            CASE WHEN mt.id IS NOT NULL THEN 'Breakdown' ELSE COALESCE(j.status, 'Available') END AS runtime_status,
                             j.id AS job_id,
+                            mt.id AS maintenance_ticket_id,
                             o.name AS operator_name,
                             p.part_name
                         FROM machines m
                         LEFT JOIN production_jobs j
                           ON j.machine_id = m.id
                          AND j.status IN ('Running','Handover Pending','Breakdown','Stopped')
+                        LEFT JOIN maintenance_tickets mt ON mt.machine_id = m.id AND mt.status <> 'Closed'
                         LEFT JOIN operators o ON o.id = j.current_operator_id
                         LEFT JOIN parts p ON p.id = j.part_id
                         WHERE m.id = ? AND m.status = 'Active'
@@ -37,6 +39,7 @@ if (!$row) {
 
 $row['id'] = (int)$row['id'];
 $row['job_id'] = $row['job_id'] === null ? null : (int)$row['job_id'];
+$row['maintenance_ticket_id'] = $row['maintenance_ticket_id'] === null ? null : (int)$row['maintenance_ticket_id'];
 json_response($row);
 
 $stmt->close();

@@ -106,4 +106,13 @@ function require_operator_supervisor(): array
     }
     return $user;
 }
+
+function require_maintenance(): array
+{
+    $user = require_auth();
+    if (($user['role'] ?? '') !== 'Maintenance' || empty($user['operator_id'])) {
+        json_error('Maintenance access required', 403);
+    }
+    return $user;
+}
 ?>

@@ -61,10 +61,12 @@
 
     function populateUserStaffOptions(selectedId = '') {
       const select = document.getElementById('userOperatorId');
+      const role = document.getElementById('userRole').value;
       select.innerHTML = '<option value="">-- select staff --</option>';
       userManagementStaff.forEach(staff => {
         const available = staff.status === 'Active' && (!staff.user_id || String(staff.id) === String(selectedId));
-        if (!available) return;
+        const departmentMatches = role !== 'Maintenance' || String(staff.department || '').trim().toLowerCase() === 'maintenance';
+        if (!available || !departmentMatches) return;
         select.insertAdjacentHTML('beforeend', '<option value="' + Number(staff.id) + '">' + escapeHtml(staff.staff_code) + ' — ' + escapeHtml(staff.name) + '</option>');
       });
       if ([...select.options].some(option => option.value === String(selectedId))) select.value = String(selectedId);
@@ -75,6 +77,7 @@
       document.getElementById('userStaffField').classList.toggle('hidden', isAdmin);
       document.getElementById('userOperatorId').required = !isAdmin;
       if (isAdmin) document.getElementById('userOperatorId').value = '';
+      else populateUserStaffOptions(document.getElementById('userOperatorId').value);
     }
 
     function handleUserSubmit(event) {

@@ -7,6 +7,7 @@ $sql = "SELECT
             m.code,
             m.name,
             CASE
+              WHEN mt.id IS NOT NULL THEN 'Breakdown'
               WHEN cc.id IS NOT NULL THEN 'Cutter Change'
               WHEN sc.id IS NOT NULL THEN 'Setting Change'
               ELSE COALESCE(j.status, 'Available')
@@ -21,6 +22,10 @@ $sql = "SELECT
             j.started_at,
             j.status_changed_at,
             j.current_operator_id,
+            mt.id AS maintenance_ticket_id,
+            mt.ticket_no AS maintenance_ticket_no,
+            mt.breakdown_type,
+            mt.problem_description AS breakdown_description,
             EXISTS(
               SELECT 1 FROM job_shifts takeover_s
               WHERE takeover_s.job_id = j.id AND takeover_s.status = 'Running'
@@ -34,6 +39,7 @@ $sql = "SELECT
         FROM machines m
         LEFT JOIN production_jobs j ON j.machine_id = m.id
          AND j.status IN ('Running', 'Handover Pending', 'Breakdown', 'Stopped')
+        LEFT JOIN maintenance_tickets mt ON mt.machine_id = m.id AND mt.status <> 'Closed'
         LEFT JOIN shifts sm ON sm.code = j.current_shift
         LEFT JOIN operators o ON o.id = j.current_operator_id
         LEFT JOIN parts p ON p.id = j.part_id
@@ -52,6 +58,7 @@ while ($row = $result->fetch_assoc()) {
     $row['cumulative_ok_qty'] = $row['cumulative_ok_qty'] === null ? 0 : (int)$row['cumulative_ok_qty'];
     $row['pending_qty'] = $row['pending_qty'] === null ? 0 : (int)$row['pending_qty'];
     $row['current_operator_id'] = $row['current_operator_id'] === null ? null : (int)$row['current_operator_id'];
+    $row['maintenance_ticket_id'] = $row['maintenance_ticket_id'] === null ? null : (int)$row['maintenance_ticket_id'];
     $row['takeover_pending'] = (bool)$row['takeover_pending'];
     $row['setting_change_id'] = $row['setting_change_id'] === null ? null : (int)$row['setting_change_id'];
     $row['cutter_change_id'] = $row['cutter_change_id'] === null ? null : (int)$row['cutter_change_id'];

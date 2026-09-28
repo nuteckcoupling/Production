@@ -87,6 +87,13 @@ $plannedStmt->close();
 try {
     $conn->begin_transaction();
 
+    $maintenance_stmt = $conn->prepare("SELECT id FROM maintenance_tickets WHERE machine_id = ? AND status <> 'Closed' LIMIT 1 FOR UPDATE");
+    $maintenance_stmt->bind_param('i', $machine_id);
+    $maintenance_stmt->execute();
+    $open_maintenance = $maintenance_stmt->get_result()->fetch_assoc();
+    $maintenance_stmt->close();
+    if ($open_maintenance) throw new RuntimeException('Machine has an open breakdown ticket', 409);
+
     $jobStmt = $conn->prepare("INSERT INTO production_jobs
         (machine_id, part_id, component, drg_no, operation, cutter_id, planned_qty, status,
          current_operator_id, current_shift, started_at, created_by_user_id)
@@ -128,6 +135,9 @@ try {
         'planned_qty' => $planned_qty,
         'status' => 'Running'
     ]);
+} catch (RuntimeException $error) {
+    $conn->rollback();
+    json_error($error->getMessage(), in_array($error->getCode(), [400, 409], true) ? $error->getCode() : 400);
 } catch (mysqli_sql_exception $error) {
     $conn->rollback();
     if ($error->getCode() === 1062) {

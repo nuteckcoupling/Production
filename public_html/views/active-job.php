@@ -254,7 +254,6 @@
             <select name="machine_status" id="end_machine_status" required>
               <option value="Running">Running</option>
               <option value="Idle">Idle</option>
-              <option value="Breakdown">Breakdown</option>
             </select>
           </label>
           <label>

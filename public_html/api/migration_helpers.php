@@ -26,6 +26,13 @@ function ensure_schema_migrations_table(mysqli $conn): void
     )");
 }
 
+function migration_checksum(string $path): string
+{
+    $contents = file_get_contents($path);
+    if ($contents === false) throw new RuntimeException('Unable to read migration file ' . basename($path));
+    return hash('sha256', str_replace(["\r\n", "\r"], "\n", $contents));
+}
+
 function migration_status(mysqli $conn): array
 {
     ensure_schema_migrations_table($conn);
@@ -36,7 +43,7 @@ function migration_status(mysqli $conn): array
     $rows = [];
     foreach (glob(migrations_directory() . DIRECTORY_SEPARATOR . '*.sql') ?: [] as $path) {
         $version = basename($path);
-        $checksum = hash_file('sha256', $path);
+        $checksum = migration_checksum($path);
         $record = $applied[$version] ?? null;
         $status = $record === null ? 'Pending' : (hash_equals($record['checksum'], $checksum) ? 'Applied' : 'Changed');
         $rows[] = [

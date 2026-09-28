@@ -8,7 +8,7 @@ $result = $conn->query("SELECT u.id, u.username, u.role, u.operator_id, u.status
                                o.staff_code, o.name AS operator_name, o.status AS operator_status
                         FROM users u
                         LEFT JOIN operators o ON o.id = u.operator_id
-                        ORDER BY FIELD(u.role, 'Admin', 'Operator/Supervisor'), u.username");
+                        ORDER BY FIELD(u.role, 'Admin', 'Maintenance', 'Operator/Supervisor'), u.username");
 $rows = [];
 while ($row = $result->fetch_assoc()) {
     $row['id'] = (int)$row['id'];

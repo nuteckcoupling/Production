@@ -14,15 +14,15 @@ $is_new = !$id;
 if (!preg_match('/^[a-z0-9][a-z0-9._-]{2,49}$/', $username)) {
     json_error('Username must be 3-50 characters using lowercase letters, numbers, ., _ or -', 400);
 }
-if (!in_array($role, ['Admin', 'Operator/Supervisor'], true)) json_error('Invalid user role', 400);
+if (!in_array($role, ['Admin', 'Operator/Supervisor', 'Maintenance'], true)) json_error('Invalid user role', 400);
 if (!in_array($status, ['Active', 'Inactive'], true)) json_error('Invalid user status', 400);
-if ($role === 'Operator/Supervisor' && !$operator_id) json_error('Select a staff member for Operator/Supervisor', 400);
+if ($role !== 'Admin' && !$operator_id) json_error('Select a staff member for this login role', 400);
 if ($role === 'Admin') $operator_id = null;
 if ((!$id || $password !== '') && strlen($password) < 8) json_error('Password must be at least 8 characters', 400);
 if (strlen($password) > 128) json_error('Password is too long', 400);
 
 if ($operator_id) {
-    $staff = $conn->prepare("SELECT status FROM operators WHERE id = ? LIMIT 1");
+    $staff = $conn->prepare("SELECT status, department FROM operators WHERE id = ? LIMIT 1");
     $staff->bind_param('i', $operator_id);
     $staff->execute();
     $staff_row = $staff->get_result()->fetch_assoc();
@@ -30,6 +30,9 @@ if ($operator_id) {
     if (!$staff_row) json_error('Staff member not found', 404);
     if ($status === 'Active' && $staff_row['status'] !== 'Active') {
         json_error('Inactive staff cannot have an active login', 409);
+    }
+    if ($role === 'Maintenance' && strcasecmp(trim((string)$staff_row['department']), 'Maintenance') !== 0) {
+        json_error('Maintenance login must be linked to Maintenance department staff', 409);
     }
 }
 

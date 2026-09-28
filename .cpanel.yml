@@ -5,6 +5,6 @@ deployment:
     - /bin/mkdir -p "$DEPLOYPATH"
     - /usr/bin/rsync -a --delete --exclude='api/config.php' --exclude='storage/' public_html/ "$DEPLOYPATH"
     - /usr/bin/test -f "${DEPLOYPATH}api/config.php" || /bin/cp public_html/api/config.php "${DEPLOYPATH}api/config.php"
-    - /bin/mkdir -p "$DEPLOYPATH/storage/backups" "$DEPLOYPATH/storage/logs" "$DEPLOYPATH/storage/migrations"
+    - /bin/mkdir -p "$DEPLOYPATH/storage/backups" "$DEPLOYPATH/storage/logs" "$DEPLOYPATH/storage/migrations" "$DEPLOYPATH/storage/uploads/breakdowns"
     - /bin/cp storage/.htaccess "$DEPLOYPATH/storage/.htaccess"
     - /usr/bin/rsync -a --delete migrations/ "$DEPLOYPATH/storage/migrations/"

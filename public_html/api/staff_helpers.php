@@ -5,8 +5,9 @@ function staff_usage_count(mysqli $conn, int $staff_id): int
         (SELECT COUNT(*) FROM daily_entries WHERE operator_id = ?) +
         (SELECT COUNT(*) FROM production_jobs WHERE current_operator_id = ?) +
         (SELECT COUNT(*) FROM job_shifts WHERE operator_id = ?) +
-        (SELECT COUNT(*) FROM job_setting_changes WHERE operator_id = ?) AS usage_count");
-    $stmt->bind_param('iiii', $staff_id, $staff_id, $staff_id, $staff_id);
+        (SELECT COUNT(*) FROM job_setting_changes WHERE operator_id = ?) +
+        (SELECT COUNT(*) FROM maintenance_tickets WHERE assigned_staff_id = ?) AS usage_count");
+    $stmt->bind_param('iiiii', $staff_id, $staff_id, $staff_id, $staff_id, $staff_id);
     $stmt->execute();
     $count = (int)$stmt->get_result()->fetch_assoc()['usage_count'];
     $stmt->close();
@@ -23,9 +24,12 @@ function staff_has_active_work(mysqli $conn, int $staff_id): bool
         ) OR EXISTS (
             SELECT 1 FROM job_shifts
             WHERE operator_id = ? AND status = 'Running'
+        ) OR EXISTS (
+            SELECT 1 FROM maintenance_tickets
+            WHERE assigned_staff_id = ? AND status <> 'Closed'
         )
         LIMIT 1");
-    $stmt->bind_param('ii', $staff_id, $staff_id);
+    $stmt->bind_param('iii', $staff_id, $staff_id, $staff_id);
     $stmt->execute();
     $has_work = $stmt->get_result()->num_rows > 0;
     $stmt->close();

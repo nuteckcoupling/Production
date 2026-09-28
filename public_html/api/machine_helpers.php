@@ -6,8 +6,9 @@ function machine_usage_count(mysqli $conn, int $machine_id): int
         (SELECT COUNT(*) FROM production_jobs WHERE machine_id = ?) +
         (SELECT COUNT(*) FROM job_setting_changes WHERE machine_id = ?) +
         (SELECT COUNT(*) FROM weekly_plans WHERE machine_id = ?) +
-        (SELECT COUNT(*) FROM monthly_plan_items WHERE machine_id = ?) AS usage_count");
-    $stmt->bind_param('iiiii', $machine_id, $machine_id, $machine_id, $machine_id, $machine_id);
+        (SELECT COUNT(*) FROM monthly_plan_items WHERE machine_id = ?) +
+        (SELECT COUNT(*) FROM maintenance_tickets WHERE machine_id = ?) AS usage_count");
+    $stmt->bind_param('iiiiii', $machine_id, $machine_id, $machine_id, $machine_id, $machine_id, $machine_id);
     $stmt->execute();
     $count = (int)$stmt->get_result()->fetch_assoc()['usage_count'];
     $stmt->close();

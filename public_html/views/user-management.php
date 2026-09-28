@@ -9,7 +9,7 @@
         <div id="userManagementMessage" class="banner"></div>
         <div class="grid management-grid">
           <label>Username<input type="text" name="username" id="userUsername" maxlength="50" autocomplete="off" required placeholder="e.g. operator05" /></label>
-          <label>Role<select name="role" id="userRole" onchange="updateUserRoleFields()"><option>Operator/Supervisor</option><option>Admin</option></select></label>
+          <label>Role<select name="role" id="userRole" onchange="updateUserRoleFields()"><option>Operator/Supervisor</option><option>Maintenance</option><option>Admin</option></select></label>
           <label id="userStaffField">Linked Staff<select name="operator_id" id="userOperatorId"><option value="">-- select staff --</option></select></label>
           <label>Status<select name="status" id="userStatus"><option>Active</option><option>Inactive</option></select></label>
           <label>Password / Reset Password
