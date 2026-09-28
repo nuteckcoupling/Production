@@ -28,6 +28,12 @@
             });
             const actions = document.createElement('td');
             actions.className = 'table-actions';
+            const photosButton = document.createElement('button');
+            photosButton.type = 'button';
+            photosButton.className = 'table-action edit';
+            photosButton.textContent = 'Photos';
+            photosButton.addEventListener('click', () => openPartAttachments(coupling));
+            actions.appendChild(photosButton);
             if (showCouplingTrash) {
               const restoreButton = document.createElement('button');
               restoreButton.type = 'button';
@@ -55,6 +61,22 @@
         .catch(() => {
           tbody.innerHTML = '<tr><td colspan="3" class="empty">Error loading couplings.</td></tr>';
         });
+    }
+
+    function openPartAttachments(coupling) {
+      const panel = document.getElementById('partAttachmentPanel');
+      const form = document.getElementById('partAttachmentForm');
+      form.dataset.entityId = coupling.id;
+      form.classList.toggle('hidden', showCouplingTrash || currentUser?.role !== 'Operator/Supervisor');
+      document.getElementById('partAttachmentTitle').innerText = `${coupling.part_name} — Part Photographs`;
+      panel.classList.remove('hidden');
+      loadAttachmentList('part', coupling.id, 'partAttachmentList');
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function closePartAttachments() {
+      document.getElementById('partAttachmentPanel').classList.add('hidden');
+      document.getElementById('partAttachmentForm').reset();
     }
 
     function toggleCouplingTrash() {

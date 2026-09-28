@@ -28,6 +28,18 @@
         </dl>
       </div>
 
+      <section class="card attachment-card">
+        <h2>Job Attachments</h2>
+        <p>Drawings, job photographs and QC inspection documents. PDF/JPG/PNG, maximum 10 MB.</p>
+        <div id="jobAttachmentList" class="attachment-list"><div class="empty">Open a job to load attachments.</div></div>
+        <form id="jobAttachmentForm" class="grid management-grid operator-only" enctype="multipart/form-data"
+          onsubmit="handleAttachmentUpload(event, 'production_job', this.dataset.entityId, 'jobAttachmentList')">
+          <label>Document Type<select name="category" required><option value="Job Drawing">Job Drawing</option><option value="Job Photo">Job / Part Photograph</option><option value="QC Inspection">QC Inspection Document</option></select></label>
+          <label>Select File<input type="file" name="attachment" accept="application/pdf,image/jpeg,image/png" required /></label>
+          <div class="management-form-actions"><button type="submit" class="submit">Upload</button></div>
+        </form>
+      </section>
+
       <div id="handoverSummary" class="card handover-summary-card hidden">
         <h2>Previous Shift Summary</h2>
         <dl class="active-job-summary">

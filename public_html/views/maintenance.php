@@ -30,6 +30,23 @@
         </div>
         <dl class="active-job-summary" id="maintenanceDetailSummary"></dl>
 
+        <div class="attachment-card">
+          <h3>Breakdown Photographs</h3>
+          <div id="maintenanceAttachmentList" class="attachment-list"></div>
+          <form id="breakdownBeforeAttachmentForm" class="grid management-grid operator-only" enctype="multipart/form-data"
+            onsubmit="handleAttachmentUpload(event, 'maintenance_ticket', this.dataset.entityId, 'maintenanceAttachmentList')">
+            <input type="hidden" name="category" value="Breakdown Before" />
+            <label>Before Photograph<input type="file" name="attachment" accept="image/jpeg,image/png" required /></label>
+            <div class="management-form-actions"><button type="submit" class="submit">Upload</button></div>
+          </form>
+          <form id="breakdownAfterAttachmentForm" class="grid management-grid maintenance-only" enctype="multipart/form-data"
+            onsubmit="handleAttachmentUpload(event, 'maintenance_ticket', this.dataset.entityId, 'maintenanceAttachmentList')">
+            <input type="hidden" name="category" value="Breakdown After" />
+            <label>After Photograph<input type="file" name="attachment" accept="image/jpeg,image/png" required /></label>
+            <div class="management-form-actions"><button type="submit" class="submit">Upload</button></div>
+          </form>
+        </div>
+
         <form id="maintenanceAssignForm" class="grid management-grid maintenance-only hidden" onsubmit="handleMaintenanceAction(event, 'assign')">
           <input type="hidden" name="ticket_id" class="maintenance-ticket-id" />
           <label>Maintenance Person<select name="assigned_staff_id" id="maintenanceAssignedStaff" required><option value="">-- select --</option></select></label>

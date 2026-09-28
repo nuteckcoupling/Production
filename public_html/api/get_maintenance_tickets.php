@@ -5,7 +5,6 @@ $status = trim((string)($_GET['status'] ?? 'open'));
 $where = $status === 'all' ? '' : "WHERE mt.status <> 'Closed'";
 $result = $conn->query("SELECT mt.*, m.code AS machine_code, m.name AS machine_name,
         reporter.username AS reported_by, assigned.name AS assigned_staff_name, assigned.staff_code AS assigned_staff_code,
-        ma.id AS attachment_id, ma.original_name AS attachment_name,
         TIMESTAMPDIFF(MINUTE, mt.breakdown_started_at, COALESCE(mt.machine_running_confirmed_at, NOW())) AS downtime_minutes,
         CASE WHEN mt.work_started_at IS NULL THEN NULL
              ELSE TIMESTAMPDIFF(MINUTE, mt.work_started_at, COALESCE(mt.repair_completed_at, NOW())) END AS repair_minutes
@@ -13,13 +12,12 @@ $result = $conn->query("SELECT mt.*, m.code AS machine_code, m.name AS machine_n
     JOIN machines m ON m.id = mt.machine_id
     JOIN users reporter ON reporter.id = mt.reported_by_user_id
     LEFT JOIN operators assigned ON assigned.id = mt.assigned_staff_id
-    LEFT JOIN maintenance_attachments ma ON ma.ticket_id = mt.id
     $where
     ORDER BY (mt.status = 'Closed'), mt.breakdown_started_at DESC
     LIMIT 200");
 $rows = [];
 while ($row = $result->fetch_assoc()) {
-    foreach (['id','machine_id','job_id','assigned_staff_id','attachment_id','downtime_minutes','repair_minutes'] as $field) {
+    foreach (['id','machine_id','job_id','assigned_staff_id','downtime_minutes','repair_minutes'] as $field) {
         $row[$field] = $row[$field] === null ? null : (int)$row[$field];
     }
     $is_maintenance = ($user['role'] ?? '') === 'Maintenance';

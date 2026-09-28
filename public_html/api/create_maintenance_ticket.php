@@ -1,6 +1,7 @@
 <?php
 require __DIR__ . '/bootstrap.php';
 require_once __DIR__ . '/maintenance_helpers.php';
+require_once __DIR__ . '/attachment_helpers.php';
 $user = require_operator_supervisor();
 
 $machine_id = filter_var($_POST['machine_id'] ?? null, FILTER_VALIDATE_INT);
@@ -66,13 +67,15 @@ try {
     }
 
     if (isset($_FILES['breakdown_photo'])) {
-        $stored_photo = store_breakdown_photo($_FILES['breakdown_photo']);
+        $stored_photo = store_secure_attachment($_FILES['breakdown_photo']);
         if ($stored_photo) {
-            $photo = $conn->prepare("INSERT INTO maintenance_attachments
-                (ticket_id, original_name, stored_name, mime_type, file_size, uploaded_by_user_id)
-                VALUES (?, ?, ?, ?, ?, ?)");
-            $photo->bind_param('isssii', $ticket_id, $stored_photo['original_name'], $stored_photo['stored_name'],
-                $stored_photo['mime_type'], $stored_photo['file_size'], $user_id);
+            $entity_type = 'maintenance_ticket';
+            $category = 'Breakdown Before';
+            $photo = $conn->prepare("INSERT INTO attachments
+                (entity_type, entity_id, category, original_name, stored_name, relative_path, mime_type, file_size, uploaded_by_user_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $photo->bind_param('sisssssii', $entity_type, $ticket_id, $category, $stored_photo['original_name'],
+                $stored_photo['stored_name'], $stored_photo['relative_path'], $stored_photo['mime_type'], $stored_photo['file_size'], $user_id);
             $photo->execute();
             $photo->close();
         }

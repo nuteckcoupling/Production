@@ -98,15 +98,16 @@
       if (!ticket) return;
       selectedMaintenanceTicketId = Number(id);
       document.querySelectorAll('.maintenance-ticket-id').forEach(input => { input.value = ticket.id; });
+      document.getElementById('breakdownBeforeAttachmentForm').dataset.entityId = ticket.id;
+      document.getElementById('breakdownAfterAttachmentForm').dataset.entityId = ticket.id;
       document.getElementById('maintenanceDetailTitle').innerText = `${ticket.ticket_no} — ${ticket.machine_code}`;
       document.getElementById('maintenanceDetailStatus').innerText = ticket.status;
-      const photo = ticket.attachment_id ? `<a href="${API}/download_maintenance_attachment.php?id=${Number(ticket.attachment_id)}" target="_blank" rel="noopener">${escapeHtml(ticket.attachment_name)}</a>` : '-';
       document.getElementById('maintenanceDetailSummary').innerHTML = `
         <div><dt>Type</dt><dd>${escapeHtml(ticket.breakdown_type)}</dd></div><div><dt>Reported By</dt><dd>${escapeHtml(ticket.reported_by)}</dd></div>
         <div><dt>Breakdown Start</dt><dd>${escapeHtml(ticket.breakdown_started_at)}</dd></div><div><dt>Assigned To</dt><dd>${escapeHtml(ticket.assigned_staff_name || 'Unassigned')}</dd></div>
         <div><dt>Work Started</dt><dd>${escapeHtml(ticket.work_started_at || '-')}</dd></div><div><dt>Repair Completed</dt><dd>${escapeHtml(ticket.repair_completed_at || '-')}</dd></div>
         <div><dt>Downtime</dt><dd>${Number(ticket.downtime_minutes || 0)} min</dd></div><div><dt>Repair Time</dt><dd>${ticket.repair_minutes === null ? '-' : Number(ticket.repair_minutes) + ' min'}</dd></div>
-        <div class="full"><dt>Problem</dt><dd>${escapeHtml(ticket.problem_description)}</dd></div><div class="full"><dt>Breakdown Photo</dt><dd>${photo}</dd></div>
+        <div class="full"><dt>Problem</dt><dd>${escapeHtml(ticket.problem_description)}</dd></div>
         <div class="full"><dt>Repair Details</dt><dd>${escapeHtml(ticket.repair_details || '-')}</dd></div><div class="full"><dt>Spare Parts</dt><dd>${escapeHtml(ticket.spare_parts_used || '-')}</dd></div>
         <div class="full"><dt>Testing Remarks</dt><dd>${escapeHtml(ticket.testing_remarks || '-')}</dd></div>`;
       document.getElementById('maintenanceAssignedStaff').value = ticket.assigned_staff_id || '';
@@ -114,6 +115,7 @@
       document.getElementById('maintenanceStartAction').classList.toggle('hidden', !ticket.can_start_work);
       document.getElementById('maintenanceRepairForm').classList.toggle('hidden', !ticket.can_complete_repair);
       document.getElementById('maintenanceConfirmForm').classList.toggle('hidden', !ticket.can_confirm_running);
+      loadAttachmentList('maintenance_ticket', ticket.id, 'maintenanceAttachmentList');
       document.getElementById('maintenanceTicketDetail').classList.remove('hidden');
       document.getElementById('maintenanceTicketDetail').scrollIntoView({ behavior: 'smooth' });
     }

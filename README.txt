@@ -28,6 +28,7 @@ CURRENT FEATURES
 - Custom in-app confirmation popups and success/error toast notifications
 - V2 reliability dashboard with tracked database migrations and private error references
 - V2 Maintenance Management with breakdown tickets, repair ownership, MTTR and protected photos
+- V2 secure attachments for job drawings/photos, part photos, breakdown before/after photos and QC documents
 
 FOLDER GUIDE
 ------------
@@ -144,3 +145,12 @@ V2 MAINTENANCE MANAGEMENT
 - Operator/Supervisor enters mandatory testing remarks and confirms the machine Running.
 - Breakdown duration is added to the linked production shift downtime and shown in maintenance MTTR.
 - Admin/Director can monitor all tickets but cannot perform Operator or Maintenance actions.
+
+V2 SECURE ATTACHMENTS
+---------------------
+- Job Drawing, Job/Part Photograph, Breakdown Before/After and QC Inspection categories are supported.
+- Only PDF, JPG and PNG files up to 10 MB are accepted after server-side MIME validation.
+- Files are stored under protected storage/attachments; the database stores metadata only.
+- Downloads always pass through authenticated, role-checked API endpoints.
+- Operator/Supervisor uploads job, part and before-breakdown files; Maintenance uploads after-repair photos; Admin has read-only access.
+- Uploaded attachment metadata has no ordinary delete action, and linked records with attachments are protected from hard deletion.
