@@ -145,7 +145,7 @@
           </div>
           ${detailRows}
           <button type="button" class="machine-action" onclick="openMachineFromDashboard(${Number(machine.id)}, '${escapeHtml(machine.runtime_status)}', ${machine.job_id === null ? 'null' : Number(machine.job_id)})">
-            ${isAvailable && canOperate ? 'Start New Job' : (canAcceptHandover ? 'Accept Handover' : (isAvailable ? 'View Status' : 'Open Job'))}
+            ${isAvailable && canOperate ? 'Start New Job' : (canAcceptHandover ? 'Accept Handover' : (machine.runtime_status === 'Stopped' && canOperate ? 'Resume Job' : (isAvailable ? 'View Status' : 'Open Job')))}
           </button>
         </article>`;
       }).join('');

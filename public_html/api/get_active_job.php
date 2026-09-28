@@ -119,6 +119,11 @@ $job['can_accept_handover'] = ($user['role'] ?? '') === 'Operator/Supervisor'
     && (int)($user['operator_id'] ?? 0) !== (int)$job['current_operator_id']
     && $job['status'] === 'Handover Pending'
     && $job['shift_id'] === null;
+$job['can_resume_job'] = ($user['role'] ?? '') === 'Operator/Supervisor'
+    && $job['status'] === 'Stopped'
+    && $job['shift_id'] === null
+    && $job['cutter_change_id'] === null
+    && $job['setting_change_id'] === null;
 
 json_response($job);
 $conn->close();

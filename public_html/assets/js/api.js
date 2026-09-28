@@ -84,6 +84,7 @@
           [
             ['shift', '-- select --'],
             ['handover_shift', '-- select --'],
+            ['resume_shift', '-- select --'],
             ['weeklyPlanShift', '-- select --'],
             ['reportShift', 'All Shifts']
           ].forEach(([id, firstLabel]) => {

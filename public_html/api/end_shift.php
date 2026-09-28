@@ -89,7 +89,8 @@ try {
 
     $updateShift = $conn->prepare("UPDATE job_shifts SET ended_at = NOW(), status = 'Ended',
         total_qty = ?, ok_qty = ?, mc_reject_qty = ?, rm_defect_qty = ?, rework_qty = ?,
-        downtime_min = ?, machine_status = ?, job_outcome = ?, issue_code = ?, remarks = ?
+        downtime_min = ?, machine_status = ?, job_outcome = ?, issue_code = ?,
+        remarks = NULLIF(CONCAT_WS(' | End Shift: ', NULLIF(remarks, ''), ?), '')
         WHERE id = ? AND status = 'Running'");
     $updateShift->bind_param("iiiiiissssi", $values['total_qty'], $values['ok_qty'],
         $values['mc_reject_qty'], $values['rm_defect_qty'], $values['rework_qty'],

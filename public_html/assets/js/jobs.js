@@ -149,6 +149,7 @@
       const endPanel = document.getElementById('endShiftPanel');
       const handoverSummary = document.getElementById('handoverSummary');
       const acceptPanel = document.getElementById('acceptHandoverPanel');
+      const resumePanel = document.getElementById('resumeJobPanel');
       const machineActionPanel = document.getElementById('machineActionPanel');
       const machineActionSelect = document.getElementById('machineActionSelect');
       const cutterChangePanel = document.getElementById('cutterChangePanel');
@@ -161,6 +162,7 @@
       endPanel.classList.add('hidden');
       handoverSummary.classList.add('hidden');
       acceptPanel.classList.add('hidden');
+      resumePanel.classList.add('hidden');
       machineActionPanel.classList.add('hidden');
       machineActionSelect.value = '';
       cutterChangePanel.classList.add('hidden');
@@ -266,6 +268,14 @@
             updateHandoverShiftHours();
             acceptPanel.classList.remove('hidden');
             readOnly.className = 'banner';
+          } else if (job.can_resume_job) {
+            resumePanel.reset();
+            document.getElementById('resume_job_id').value = job.id;
+            document.getElementById('resume_operator').value = currentUser.operator_name || currentUser.username;
+            document.getElementById('resume_shift_date').value = today;
+            updateResumeShiftHours();
+            resumePanel.classList.remove('hidden');
+            readOnly.className = 'banner';
           } else {
             readOnly.className = 'banner success';
             if (currentUser?.role === 'Admin') {
@@ -325,6 +335,41 @@
         .finally(() => {
           button.disabled = false;
           button.innerText = 'Accept Handover & Start Shift';
+        });
+    }
+
+    function updateResumeShiftHours() {
+      const selected = activeShifts.find(shift => String(shift.code) === document.getElementById('resume_shift').value);
+      document.getElementById('resume_shift_hours').value = selected ? selected.shift_hours : '';
+    }
+
+    function handleResumeJob(event) {
+      event.preventDefault();
+      const form = event.target;
+      const button = document.getElementById('resumeJobButton');
+      const data = Object.fromEntries(new FormData(form).entries());
+      button.disabled = true;
+      button.innerText = 'Resuming Job...';
+
+      fetch(`${API}/resume_job.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+        .then(async response => ({ ok: response.ok, data: await response.json() }))
+        .then(result => {
+          if (!result.ok) throw new Error(result.data.error || 'Unable to resume job.');
+          dashboardFlashMessage = `Job resumed. ${result.data.operator_name} started ${['1', '2', '3'].includes(String(result.data.shift)) ? `Shift ${result.data.shift}` : result.data.shift}.`;
+          switchModule('dashboard');
+        })
+        .catch(error => {
+          const message = document.getElementById('activeJobMessage');
+          message.className = 'banner error';
+          message.innerText = error.message;
+        })
+        .finally(() => {
+          button.disabled = false;
+          button.innerText = 'Resume Job & Start Shift';
         });
     }
 

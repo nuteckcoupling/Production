@@ -62,6 +62,25 @@
         <button type="submit" class="submit handover-button" id="acceptHandoverButton">Accept Handover &amp; Start Shift</button>
       </form>
 
+      <form id="resumeJobPanel" class="card accept-handover-card hidden" onsubmit="handleResumeJob(event)">
+        <h2>Resume Job</h2>
+        <p>Part, operation, cutter, planned quantity and previous production will remain unchanged.</p>
+        <input type="hidden" name="job_id" id="resume_job_id" />
+        <div class="grid">
+          <label>Operator Name<input type="text" id="resume_operator" readonly /></label>
+          <label>Date<input type="date" name="shift_date" id="resume_shift_date" readonly required /></label>
+          <label>
+            Shift
+            <select name="shift" id="resume_shift" onchange="updateResumeShiftHours()" required>
+              <option value="">-- select --</option>
+            </select>
+          </label>
+          <label>Shift Hours<input type="number" id="resume_shift_hours" step="0.01" readonly /></label>
+          <label class="full">Resume Remarks<input type="text" name="remarks" id="resume_remarks" maxlength="255" placeholder="Why is this job being resumed?" /></label>
+        </div>
+        <button type="submit" class="submit" id="resumeJobButton">Resume Job &amp; Start Shift</button>
+      </form>
+
 
       <div id="machineActionPanel" class="card machine-action-card hidden">
         <h2>Machine Actions</h2>
