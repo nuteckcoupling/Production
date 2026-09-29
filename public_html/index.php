@@ -50,15 +50,15 @@
   <script src="assets/js/system-settings.js?v=20260924-2"></script>
   <script src="assets/js/reliability.js?v=20260928-1"></script>
   <script src="assets/js/backup-management.js?v=20260924-2"></script>
-  <script src="assets/js/attachments.js?v=20260930-1"></script>
-  <script src="assets/js/jobs.js?v=20260930-1"></script>
+  <script src="assets/js/attachments.js?v=20261001-1"></script>
+  <script src="assets/js/jobs.js?v=20261001-1"></script>
   <script src="assets/js/changes.js?v=20260928-1"></script>
   <script src="assets/js/reports.js?v=20260929-1"></script>
   <script src="assets/js/admin-analysis.js?v=20260924-2"></script>
   <script src="assets/js/maintenance.js?v=20260930-1"></script>
   <script src="assets/js/dashboard.js?v=20260928-3"></script>
   <script src="assets/js/cutters.js?v=20260928-1"></script>
-  <script src="assets/js/couplings.js?v=20260930-1"></script>
+  <script src="assets/js/couplings.js?v=20261001-1"></script>
   <script src="assets/js/app.js?v=20260923-2"></script>
 </body>
 </html>

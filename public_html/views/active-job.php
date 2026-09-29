@@ -29,6 +29,12 @@
       </div>
 
       <section class="card attachment-card">
+        <h2>Coupling Drawing</h2>
+        <p>The drawing attached to this coupling and component.</p>
+        <div id="activePartDrawingList" class="attachment-list"><div class="empty">Open a job to load the coupling drawing.</div></div>
+      </section>
+
+      <section class="card attachment-card">
         <h2>Job Attachments</h2>
         <p>Drawings, job photographs and QC inspection documents. PDF/JPG/PNG, maximum 10 MB.</p>
         <div id="jobAttachmentList" class="attachment-list"><div class="empty">Open a job to load attachments.</div></div>

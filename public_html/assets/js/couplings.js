@@ -28,12 +28,12 @@
             });
             const actions = document.createElement('td');
             actions.className = 'table-actions';
-            const photosButton = document.createElement('button');
-            photosButton.type = 'button';
-            photosButton.className = 'table-action edit';
-            photosButton.textContent = 'Photos';
-            photosButton.addEventListener('click', () => openPartAttachments(coupling));
-            actions.appendChild(photosButton);
+            const drawingsButton = document.createElement('button');
+            drawingsButton.type = 'button';
+            drawingsButton.className = 'table-action edit';
+            drawingsButton.textContent = 'Drawings';
+            drawingsButton.addEventListener('click', () => openPartAttachments(coupling));
+            actions.appendChild(drawingsButton);
             if (showCouplingTrash) {
               const restoreButton = document.createElement('button');
               restoreButton.type = 'button';
@@ -63,14 +63,26 @@
         });
     }
 
-    function openPartAttachments(coupling) {
+    async function openPartAttachments(coupling) {
       const panel = document.getElementById('partAttachmentPanel');
       const form = document.getElementById('partAttachmentForm');
+      const component = document.getElementById('partDrawingComponent');
       form.dataset.entityId = coupling.id;
       form.classList.toggle('hidden', showCouplingTrash || currentUser?.role !== 'Operator/Supervisor');
-      document.getElementById('partAttachmentTitle').innerText = `${coupling.part_name} — Part Photographs`;
+      document.getElementById('partAttachmentTitle').innerText = `${coupling.part_name} — Coupling Drawings`;
+      component.innerHTML = '<option value="">Loading...</option>';
       panel.classList.remove('hidden');
-      loadAttachmentList('part', coupling.id, 'partAttachmentList');
+      loadAttachmentList('part', coupling.id, 'partAttachmentList', { category: 'Coupling Drawing' });
+      try {
+        const response = await fetch(`${API}/get_part_components.php?part_id=${encodeURIComponent(coupling.id)}`);
+        const components = await response.json();
+        if (!response.ok) throw new Error(components.error || 'Unable to load components.');
+        component.innerHTML = '<option value="">-- select --</option>' + components
+          .map(item => `<option value="${escapeHtml(item.component_name)}">${escapeHtml(item.component_name)}</option>`).join('');
+      } catch (error) {
+        component.innerHTML = '<option value="">Unable to load</option>';
+        showToast('error', error.message);
+      }
       panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 

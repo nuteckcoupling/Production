@@ -49,12 +49,14 @@
       </div>
 
       <section class="card attachment-card hidden" id="partAttachmentPanel">
-        <div class="list-card-heading"><div><h2 id="partAttachmentTitle">Part Photographs</h2><span class="table-subtext">PDF/JPG/PNG, maximum 10 MB</span></div><button type="button" class="secondary-button" onclick="closePartAttachments()">Close</button></div>
+        <div class="list-card-heading"><div><h2 id="partAttachmentTitle">Coupling Drawings</h2><span class="table-subtext">PDF/JPG/PNG, maximum 10 MB</span></div><button type="button" class="secondary-button" onclick="closePartAttachments()">Close</button></div>
         <div id="partAttachmentList" class="attachment-list"></div>
         <form id="partAttachmentForm" class="grid management-grid operator-only" enctype="multipart/form-data"
           onsubmit="handleAttachmentUpload(event, 'part', this.dataset.entityId, 'partAttachmentList')">
-          <input type="hidden" name="category" value="Part Photo" />
-          <label>Part Photograph<input type="file" name="attachment" accept="image/jpeg,image/png" required /></label>
+          <input type="hidden" name="category" value="Coupling Drawing" />
+          <label>Component<select name="component" id="partDrawingComponent" required><option value="">-- select --</option></select></label>
+          <label>Drawing Number<input type="text" name="drawing_no" maxlength="100" required placeholder="e.g. GC-100-HUB-01" /></label>
+          <label>Drawing File<input type="file" name="attachment" accept="application/pdf,image/jpeg,image/png" required /></label>
           <div class="management-form-actions"><button type="submit" class="submit">Upload</button></div>
         </form>
       </section>

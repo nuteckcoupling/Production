@@ -438,7 +438,9 @@ CREATE TABLE IF NOT EXISTS attachments (
   id INT AUTO_INCREMENT PRIMARY KEY,
   entity_type ENUM('production_job','part','maintenance_ticket') NOT NULL,
   entity_id INT NOT NULL,
-  category ENUM('Job Drawing','Job Photo','Part Photo','Breakdown Before','Breakdown After','QC Inspection') NOT NULL,
+  category ENUM('Job Drawing','Job Photo','Part Photo','Coupling Drawing','Breakdown Before','Breakdown After','QC Inspection') NOT NULL,
+  component VARCHAR(50) DEFAULT NULL,
+  drawing_no VARCHAR(100) DEFAULT NULL,
   original_name VARCHAR(255) NOT NULL,
   stored_name VARCHAR(100) NOT NULL UNIQUE,
   relative_path VARCHAR(255) NOT NULL UNIQUE,
@@ -448,6 +450,7 @@ CREATE TABLE IF NOT EXISTS attachments (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   KEY idx_attachments_entity (entity_type, entity_id),
   KEY idx_attachments_category (category),
+  UNIQUE KEY unique_coupling_drawing (entity_type, entity_id, category, component, drawing_no),
   FOREIGN KEY (uploaded_by_user_id) REFERENCES users(id)
 );
 

@@ -69,7 +69,7 @@ function attachment_can_upload(array $user, string $entity_type, string $categor
     $role = (string)($user['role'] ?? '');
     $allowed = [
         'production_job' => ['Job Drawing', 'Job Photo', 'QC Inspection'],
-        'part' => ['Part Photo'],
+        'part' => ['Part Photo', 'Coupling Drawing'],
         'maintenance_ticket' => ['Breakdown Before', 'Breakdown After']
     ];
     if (!in_array($category, $allowed[$entity_type] ?? [], true)) return false;

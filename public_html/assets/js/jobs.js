@@ -191,6 +191,9 @@
           message.className = 'banner';
           document.getElementById('jobAttachmentForm').dataset.entityId = job.id;
           loadAttachmentList('production_job', job.id, 'jobAttachmentList');
+          loadAttachmentList('part', job.part_id, 'activePartDrawingList', {
+            category: 'Coupling Drawing', component: job.component
+          });
           setActiveJobValue('activeMachine', `${job.machine_code} — ${job.machine_name}`);
           const displayedStatus = job.setting_change_id !== null
             ? 'Setting Change'

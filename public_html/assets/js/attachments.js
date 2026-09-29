@@ -6,16 +6,18 @@
       return `${(size / 1048576).toFixed(1)} MB`;
     }
 
-    function loadAttachmentList(entityType, entityId, listId) {
+    function loadAttachmentList(entityType, entityId, listId, filters = {}) {
       const list = document.getElementById(listId);
       if (!list || !entityId) return Promise.resolve([]);
       list.innerHTML = '<div class="empty">Loading attachments...</div>';
-      return fetch(`${API}/get_attachments.php?entity_type=${encodeURIComponent(entityType)}&entity_id=${encodeURIComponent(entityId)}`)
+      const params = new URLSearchParams({ entity_type: entityType, entity_id: entityId });
+      Object.entries(filters).forEach(([key, value]) => { if (value) params.set(key, value); });
+      return fetch(`${API}/get_attachments.php?${params.toString()}`)
         .then(async response => ({ ok: response.ok, data: await response.json() }))
         .then(result => {
           if (!result.ok) throw new Error(result.data.error || 'Unable to load attachments.');
           list.innerHTML = result.data.length ? result.data.map(item => `<div class="attachment-row">
-            <div><strong>${escapeHtml(item.category)}</strong><span>${escapeHtml(item.original_name)} · ${attachmentSize(item.file_size)} · ${escapeHtml(item.uploaded_by || '-')} · ${escapeHtml(item.created_at)}</span></div>
+            <div><strong>${escapeHtml(item.category)}${item.drawing_no ? ` · Drawing No: ${escapeHtml(item.drawing_no)}` : ''}</strong><span>${item.component ? `${escapeHtml(item.component)} · ` : ''}${escapeHtml(item.original_name)} · ${attachmentSize(item.file_size)} · ${escapeHtml(item.uploaded_by || '-')} · ${escapeHtml(item.created_at)}</span></div>
             <a class="table-action edit" href="${API}/download_attachment.php?id=${Number(item.id)}">Download</a>
           </div>`).join('') : '<div class="empty">No attachments uploaded.</div>';
           return result.data;
@@ -41,7 +43,9 @@
           if (!result.ok) throw new Error(result.data.error || 'Upload failed.');
           form.reset();
           showToast('success', 'Attachment uploaded securely.');
-          return loadAttachmentList(entityType, entityId, listId);
+          const filters = entityType === 'part' && payload.get('category') === 'Coupling Drawing'
+            ? { category: 'Coupling Drawing' } : {};
+          return loadAttachmentList(entityType, entityId, listId, filters);
         })
         .catch(error => showToast('error', error.message))
         .finally(() => { button.disabled = false; button.innerText = 'Upload'; });
