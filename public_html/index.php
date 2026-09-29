@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>NU-TECK Couplings — Daily Production Entry</title>
+  <link rel="icon" type="image/png" href="assets/images/nuteck-gear-favicon.png?v=20261001-1" />
+  <link rel="apple-touch-icon" href="assets/images/nuteck-gear-favicon.png?v=20261001-1" />
   <link rel="stylesheet" href="style.css?v=20261001-1" />
 </head>
 <body>
