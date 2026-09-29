@@ -62,7 +62,11 @@ if ($shiftFilter !== '') {
 $stmt = $conn->prepare("SELECT
         s.id AS shift_id, s.shift_date, s.shift, s.shift_hours, s.total_qty, s.ok_qty,
         s.mc_reject_qty, s.rm_defect_qty, s.rework_qty, s.downtime_min,
+        s.remarks AS shift_remarks,
         j.id AS job_id, j.planned_qty, j.status AS job_status, j.component,
+        j.remarks AS job_remarks,
+        cc.remarks AS cutter_change_remarks,
+        sc.remarks AS setting_change_remarks,
         m.id AS machine_id, m.code AS machine_code, m.name AS machine_name,
         o.name AS operator_name, p.part_name
     FROM job_shifts s
@@ -70,6 +74,16 @@ $stmt = $conn->prepare("SELECT
     JOIN machines m ON m.id = j.machine_id
     JOIN operators o ON o.id = s.operator_id
     JOIN parts p ON p.id = j.part_id
+    LEFT JOIN (
+        SELECT shift_id, GROUP_CONCAT(DISTINCT NULLIF(TRIM(remarks), '') ORDER BY id SEPARATOR ' | ') AS remarks
+        FROM job_cutter_changes
+        GROUP BY shift_id
+    ) cc ON cc.shift_id = s.id
+    LEFT JOIN (
+        SELECT old_shift_id, GROUP_CONCAT(DISTINCT NULLIF(TRIM(remarks), '') ORDER BY id SEPARATOR ' | ') AS remarks
+        FROM job_setting_changes
+        GROUP BY old_shift_id
+    ) sc ON sc.old_shift_id = s.id
     WHERE s.shift_date BETWEEN ? AND ?
       AND (? = 0 OR m.id = ?)
       AND (? = '' OR s.shift = ?)
@@ -92,6 +106,7 @@ while ($record = $result->fetch_assoc()) {
             'machine_code' => $record['machine_code'],
             'machine_name' => $record['machine_name'],
             'operators' => [], 'parts' => [], 'components' => [], 'shifts' => [], 'statuses' => [],
+            'remarks' => [],
             'planned_jobs' => [], 'job_count' => 0, 'shift_count' => 0,
             'planned_qty' => 0, 'total_qty' => 0, 'ok_qty' => 0, 'mc_reject_qty' => 0,
             'rm_defect_qty' => 0, 'rework_qty' => 0, 'downtime_min' => 0
@@ -117,6 +132,17 @@ while ($record = $result->fetch_assoc()) {
     $shiftLabel = in_array($record['shift'], ['1', '2', '3'], true) ? 'Shift ' . $record['shift'] : $record['shift'];
     $row['shifts'][$shiftLabel] = true;
     $row['statuses'][$record['job_status']] = true;
+    foreach ([
+        'Shift' => $record['shift_remarks'],
+        'Job' => $record['job_remarks'],
+        'Cutter' => $record['cutter_change_remarks'],
+        'Setting' => $record['setting_change_remarks']
+    ] as $remarkType => $remark) {
+        $remark = trim((string)$remark);
+        if ($remark !== '') {
+            $row['remarks'][$remarkType . ': ' . $remark] = true;
+        }
+    }
     unset($row);
 }
 $stmt->close();
@@ -133,6 +159,7 @@ foreach ($machines as $machine) {
     $machine['components'] = implode(', ', array_keys($machine['components']));
     $machine['shifts'] = implode(', ', array_keys($machine['shifts']));
     $machine['statuses'] = implode(', ', array_keys($machine['statuses']));
+    $machine['remarks'] = implode(' | ', array_keys($machine['remarks']));
     unset($machine['planned_jobs']);
     $machine['pending_qty'] = max($machine['planned_qty'] - $machine['ok_qty'], 0);
     $machine['achievement_percent'] = $machine['planned_qty'] > 0

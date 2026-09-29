@@ -55,10 +55,10 @@
                 <th>Machine</th><th>Operators</th><th>Shifts</th><th>Parts</th><th>Components</th>
                 <th>Jobs</th><th>Planned</th><th>Total</th><th>OK</th><th>M.C. Reject</th>
                 <th>R.M. Defect</th><th>Rework</th><th>Pending</th><th>Downtime</th>
-                <th>Achievement</th><th>Status</th>
+                <th>Achievement</th><th>Status</th><th>Remarks</th>
               </tr></thead>
               <tbody id="reportTableBody">
-                <tr><td colspan="16" class="empty">Generate a report to view production data.</td></tr>
+                <tr><td colspan="17" class="empty">Generate a report to view production data.</td></tr>
               </tbody>
             </table>
           </div>

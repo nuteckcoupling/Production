@@ -91,7 +91,7 @@
       document.getElementById('reportGeneratedAt').innerText = `Generated: ${formatDashboardTime(data.generated_at)}`;
       const tbody = document.getElementById('reportTableBody');
       if (!data.rows.length) {
-        tbody.innerHTML = '<tr><td colspan="16" class="empty">No production records found for this period.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="17" class="empty">No production records found for this period.</td></tr>';
         return;
       }
       tbody.innerHTML = data.rows.map(row => `<tr>
@@ -102,6 +102,7 @@
         <td>${Number(row.ok_qty)}</td><td>${Number(row.mc_reject_qty)}</td><td>${Number(row.rm_defect_qty)}</td>
         <td>${Number(row.rework_qty)}</td><td>${Number(row.pending_qty)}</td><td>${Number(row.downtime_min)} min</td>
         <td>${Number(row.achievement_percent)}%</td><td>${escapeHtml(row.statuses || '-')}</td>
+        <td>${escapeHtml(row.remarks || '-')}</td>
       </tr>`).join('');
     }
 
@@ -113,7 +114,7 @@
       if (!currentReportData) return;
       const headers = ['Machine Number', 'Machine Name', 'Operators', 'Shifts', 'Parts', 'Components',
         'Jobs', 'Planned Qty', 'Total Qty', 'OK Qty', 'M.C. Reject', 'R.M. Defect', 'Rework',
-        'Pending Qty', 'Downtime Minutes', 'Achievement %', 'Status'];
+        'Pending Qty', 'Downtime Minutes', 'Achievement %', 'Status', 'Remarks'];
       const lines = [
         [csvCell(`${systemSettings.company_name} — ${systemSettings.report_heading}`)].join(','),
         [csvCell(systemSettings.company_address || '')].join(','),
@@ -125,14 +126,14 @@
           row.machine_code, row.machine_name, row.operators, row.shifts, row.parts, row.components,
           row.job_count, row.planned_qty, row.total_qty, row.ok_qty, row.mc_reject_qty,
           row.rm_defect_qty, row.rework_qty, row.pending_qty, row.downtime_min,
-          row.achievement_percent, row.statuses
+          row.achievement_percent, row.statuses, row.remarks
         ].map(csvCell).join(','));
       });
       const totals = currentReportData.totals;
       lines.push([
         'TOTAL', '', '', '', '', '', totals.job_count, totals.planned_qty, totals.total_qty,
         totals.ok_qty, totals.mc_reject_qty, totals.rm_defect_qty, totals.rework_qty,
-        totals.pending_qty, totals.downtime_min, totals.achievement_percent, ''
+        totals.pending_qty, totals.downtime_min, totals.achievement_percent, '', ''
       ].map(csvCell).join(','));
       const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
       const url = URL.createObjectURL(blob);
