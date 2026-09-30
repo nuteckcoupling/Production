@@ -64,7 +64,8 @@ $stmt = $conn->prepare("SELECT
         s.mc_reject_qty, s.rm_defect_qty, s.rework_qty, s.downtime_min,
         s.operator_id, s.started_at, s.ended_at, s.status AS shift_status, s.machine_status, s.job_outcome, s.issue_code,
         s.remarks AS shift_remarks,
-        s.report_edited_at, s.report_edit_reason, editor.username AS report_edited_by,
+        s.report_edited_at, s.report_edit_reason, s.report_original_data,
+        editor.username AS report_edited_by,
         j.id AS job_id, j.planned_qty, j.status AS job_status, j.component, j.drg_no, j.operation,
         j.remarks AS job_remarks,
         cc.remarks AS cutter_change_remarks,
@@ -104,6 +105,7 @@ $result = $stmt->get_result();
 $machines = [];
 $entries = [];
 while ($record = $result->fetch_assoc()) {
+    $originalData = json_decode((string)$record['report_original_data'], true);
     $entryRemarks = [];
     foreach ([
         'Shift' => $record['shift_remarks'],
@@ -133,6 +135,7 @@ while ($record = $result->fetch_assoc()) {
         'remarks' => implode(' | ', $entryRemarks),
         'edited_at' => $record['report_edited_at'], 'edit_reason' => $record['report_edit_reason'],
         'edited_by' => $record['report_edited_by'],
+        'original_data' => is_array($originalData) ? $originalData : null,
         'can_edit' => $record['shift_status'] === 'Ended' && $record['report_edited_at'] === null
             && (($user['role'] ?? '') === 'Admin'
                 || (($user['role'] ?? '') === 'Operator/Supervisor'

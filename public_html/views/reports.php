@@ -95,6 +95,19 @@
             </div>
             <div class="actions"><button type="submit" class="submit">Save One-Time Correction</button><button type="button" onclick="closeReportEntryEdit()">Cancel</button></div>
           </form>
+          <div id="reportCorrectionHistory" class="card hidden">
+            <div class="report-entry-heading">
+              <div><strong id="reportCorrectionTitle">Correction History</strong><span id="reportCorrectionMeta" class="table-subtext"></span></div>
+              <button type="button" onclick="closeReportCorrection()">Close</button>
+            </div>
+            <div class="table-wrap">
+              <table class="report-table">
+                <thead><tr><th>Field</th><th>Original Value</th><th>Corrected Value</th></tr></thead>
+                <tbody id="reportCorrectionTableBody"></tbody>
+              </table>
+            </div>
+            <p id="reportCorrectionReason" class="banner"></p>
+          </div>
         </div>
         <div id="reportGeneratedAt" class="report-generated"></div>
       </div>

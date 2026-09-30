@@ -128,7 +128,7 @@
         <td>${escapeHtml(entry.machine_status || entry.job_status || '-')}</td>
         <td>${escapeHtml([entry.issue_code, entry.remarks].filter(Boolean).join(' | ') || '-')}</td>
         <td>${entry.edited_at
-          ? `<strong>Edited Once</strong><br><span class="table-subtext">${escapeHtml(entry.edited_by || '')}: ${escapeHtml(entry.edit_reason || '')}</span>`
+          ? `<button type="button" onclick="showReportCorrection(${Number(entry.shift_id)})">View Correction</button><br><span class="table-subtext">Edited and locked</span>`
           : (entry.can_edit ? `<button type="button" onclick="openReportEntryEdit(${Number(entry.shift_id)})">Edit Once</button>` : 'Locked')}</td>
       </tr>`).join('');
       const panel = document.getElementById('reportEntryDetails');
@@ -139,12 +139,14 @@
     function closeReportEntries() {
       document.getElementById('reportEntryDetails')?.classList.add('hidden');
       closeReportEntryEdit();
+      closeReportCorrection();
     }
 
     function openReportEntryEdit(shiftId) {
       const entry = (currentReportData?.entries || []).find(row => Number(row.shift_id) === Number(shiftId));
       if (!entry?.can_edit) return;
       const form = document.getElementById('reportEntryEditForm');
+      closeReportCorrection();
       form.reset();
       form.elements.shift_id.value = entry.shift_id;
       ['total_qty', 'ok_qty', 'mc_reject_qty', 'rm_defect_qty', 'rework_qty', 'downtime_min'].forEach(field => {
@@ -159,6 +161,32 @@
 
     function closeReportEntryEdit() {
       document.getElementById('reportEntryEditForm')?.classList.add('hidden');
+    }
+
+    function showReportCorrection(shiftId) {
+      const entry = (currentReportData?.entries || []).find(row => Number(row.shift_id) === Number(shiftId));
+      if (!entry?.edited_at || !entry.original_data) return;
+      closeReportEntryEdit();
+      const fields = [
+        ['Total Qty', 'total_qty'], ['OK Qty', 'ok_qty'], ['M.C. Reject', 'mc_reject_qty'],
+        ['R.M. Defect', 'rm_defect_qty'], ['Rework', 'rework_qty'], ['Downtime (Minutes)', 'downtime_min'],
+        ['Issue / Code', 'issue_code'], ['Remarks', 'shift_remarks']
+      ];
+      document.getElementById('reportCorrectionTitle').innerText = `Entry #${entry.shift_id} Correction History`;
+      document.getElementById('reportCorrectionMeta').innerText =
+        `Edited by ${entry.edited_by || '-'} on ${formatDashboardTime(entry.edited_at)}`;
+      document.getElementById('reportCorrectionReason').innerText = `Correction reason: ${entry.edit_reason || '-'}`;
+      document.getElementById('reportCorrectionTableBody').innerHTML = fields.map(([label, field]) => {
+        const originalField = field === 'shift_remarks' ? 'remarks' : field;
+        return `<tr><td><strong>${label}</strong></td><td>${escapeHtml(entry.original_data[originalField] ?? '-')}</td><td>${escapeHtml(entry[field] ?? '-')}</td></tr>`;
+      }).join('');
+      const panel = document.getElementById('reportCorrectionHistory');
+      panel.classList.remove('hidden');
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function closeReportCorrection() {
+      document.getElementById('reportCorrectionHistory')?.classList.add('hidden');
     }
 
     document.getElementById('reportEntryEditForm').addEventListener('submit', async event => {
