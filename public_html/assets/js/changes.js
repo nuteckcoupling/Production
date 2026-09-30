@@ -134,7 +134,10 @@
       const componentSelect = document.getElementById('setting_new_component');
       componentSelect.innerHTML = '<option value="">-- select --</option>';
       componentSelect.disabled = true;
-      document.getElementById('setting_new_planned_qty').value = 0;
+      const plannedInput = document.getElementById('setting_new_planned_qty');
+      plannedInput.value = 0;
+      plannedInput.readOnly = true;
+      plannedInput.placeholder = '';
       if (!partId) return;
 
       fetch(API + '/get_part_components.php?part_id=' + encodeURIComponent(partId))
@@ -154,7 +157,10 @@
         .then(response => response.json())
         .then(result => {
           if (document.getElementById('setting_new_part_id').value === partId) {
-            document.getElementById('setting_new_planned_qty').value = Number(result.planned_qty || 0);
+            const plannedQty = Number(result.planned_qty || 0);
+            plannedInput.value = plannedQty || '';
+            plannedInput.readOnly = plannedQty > 0;
+            plannedInput.placeholder = plannedQty > 0 ? '' : 'Enter first 12-hour capacity';
           }
         });
     }

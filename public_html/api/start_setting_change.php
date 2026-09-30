@@ -108,12 +108,9 @@ try {
             || (int)$job['cutter_id'] === (int)$new_cutter_id);
     if ($sameSetting) throw new RuntimeException('Select a different part, component, operation or cutter', 400);
 
-    $plannedStmt = $conn->prepare("SELECT COALESCE(MAX(total_qty), 0) AS planned_qty
-        FROM daily_entries WHERE machine_id = ? AND part_id = ? AND shift_hours = 12");
-    $plannedStmt->bind_param("ii", $job['machine_id'], $new_part_id);
-    $plannedStmt->execute();
-    $new_planned_qty = (int)$plannedStmt->get_result()->fetch_assoc()['planned_qty'];
-    $plannedStmt->close();
+    $new_planned_qty = resolve_planned_qty(
+        $conn, (int)$job['machine_id'], (int)$new_part_id, $data['new_planned_qty'] ?? null
+    );
 
     $insert = $conn->prepare("INSERT INTO job_setting_changes
         (old_job_id, old_shift_id, machine_id, operator_id, new_part_id, new_component,

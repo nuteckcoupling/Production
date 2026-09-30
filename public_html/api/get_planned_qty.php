@@ -11,15 +11,6 @@ if ($machine_id <= 0 || $part_id <= 0) {
     exit;
 }
 
-$stmt = $conn->prepare("SELECT COALESCE(MAX(total_qty), 0) AS planned_qty
-                        FROM daily_entries
-                        WHERE machine_id = ? AND part_id = ? AND shift_hours = 12");
-$stmt->bind_param("ii", $machine_id, $part_id);
-$stmt->execute();
-$row = $stmt->get_result()->fetch_assoc();
-
-json_response(["planned_qty" => (int)$row['planned_qty']]);
-
-$stmt->close();
+json_response(["planned_qty" => get_planned_qty($conn, $machine_id, $part_id)]);
 $conn->close();
 ?>

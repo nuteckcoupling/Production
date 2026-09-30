@@ -71,13 +71,11 @@ $cutter_id = !empty($data['cutter_id']) ? (int)$data['cutter_id'] : null;
 
 $machine_id = (int)$data['machine_id'];
 $part_id = (int)$data['part_id'];
-$plannedQtyStmt = $conn->prepare("SELECT COALESCE(MAX(total_qty), 0) AS planned_qty
-                                  FROM daily_entries
-                                  WHERE machine_id = ? AND part_id = ? AND shift_hours = 12");
-$plannedQtyStmt->bind_param("ii", $machine_id, $part_id);
-$plannedQtyStmt->execute();
-$planned_qty = (int)$plannedQtyStmt->get_result()->fetch_assoc()['planned_qty'];
-$plannedQtyStmt->close();
+try {
+    $planned_qty = resolve_planned_qty($conn, $machine_id, $part_id, $data['planned_qty'] ?? null);
+} catch (RuntimeException $error) {
+    json_error($error->getMessage(), 400);
+}
 
 $total_qty = $data['total_qty'] === "" ? 0 : (int)$data['total_qty'];
 $ok_qty = $data['ok_qty'] === "" ? 0 : (int)$data['ok_qty'];

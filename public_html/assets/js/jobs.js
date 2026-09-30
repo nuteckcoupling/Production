@@ -71,13 +71,18 @@
       const machineId = machineSelect.value;
       const partId = partSelect.value;
       plannedQtyInput.value = 0;
+      plannedQtyInput.readOnly = true;
+      plannedQtyInput.placeholder = '';
       if (!machineId || !partId) return;
 
       fetch(`${API}/get_planned_qty.php?machine_id=${encodeURIComponent(machineId)}&part_id=${encodeURIComponent(partId)}`)
         .then(r => r.json())
         .then(result => {
           if (machineSelect.value === machineId && partSelect.value === partId) {
-            plannedQtyInput.value = Number(result.planned_qty || 0);
+            const plannedQty = Number(result.planned_qty || 0);
+            plannedQtyInput.value = plannedQty || '';
+            plannedQtyInput.readOnly = plannedQty > 0;
+            plannedQtyInput.placeholder = plannedQty > 0 ? '' : 'Enter first 12-hour capacity';
           }
         })
         .catch(err => console.error('Error loading planned quantity', err));
