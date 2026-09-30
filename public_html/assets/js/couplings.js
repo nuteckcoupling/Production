@@ -72,7 +72,9 @@
       document.getElementById('partAttachmentTitle').innerText = `${coupling.part_name} — Coupling Drawings`;
       component.innerHTML = '<option value="">Loading...</option>';
       panel.classList.remove('hidden');
-      loadAttachmentList('part', coupling.id, 'partAttachmentList', { category: 'Coupling Drawing' });
+      loadAttachmentList('part', coupling.id, 'partAttachmentList', { category: 'Coupling Drawing' }, {
+        allowDelete: !showCouplingTrash && currentUser?.role === 'Operator/Supervisor'
+      });
       try {
         const response = await fetch(`${API}/get_part_components.php?part_id=${encodeURIComponent(coupling.id)}`);
         const components = await response.json();
