@@ -29,12 +29,12 @@ if ($lead_angle !== '' && !is_numeric($lead_angle)) {
 }
 $lead_angle_value = $lead_angle === '' ? null : $lead_angle;
 
-$check = $conn->prepare("SELECT id FROM cutters WHERE cutter_num = ? AND id <> ? LIMIT 1");
-$check->bind_param("si", $cutter_num, $id);
+$check = $conn->prepare("SELECT id FROM cutters WHERE cutter_num = ? AND COALESCE(cutter_module, '') = ? AND id <> ? LIMIT 1");
+$check->bind_param("ssi", $cutter_num, $module, $id);
 $check->execute();
 if ($check->get_result()->num_rows > 0) {
     http_response_code(409);
-    json_response(['error' => 'Cutter Number already exists']);
+    json_response(['error' => 'This Cutter Number already exists for the selected Module']);
     exit;
 }
 $check->close();
@@ -62,7 +62,7 @@ try {
 } catch (mysqli_sql_exception $error) {
     if ($error->getCode() === 1062) {
         http_response_code(409);
-        json_response(['error' => 'Cutter Number already exists']);
+        json_response(['error' => 'This Cutter Number already exists for the selected Module']);
     } else {
         http_response_code(500);
         json_response(['error' => 'Unable to update cutter']);
