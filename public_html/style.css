@@ -257,6 +257,8 @@ body.modal-open { overflow: hidden; }
 .report-kpis span { display: block; color: #64748b; font-size: 10px; text-transform: uppercase; }
 .report-kpis strong { display: block; margin-top: 4px; font-size: 18px; }
 .report-table-card { padding: 0; overflow: hidden; }
+.report-entry-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-bottom: 1px solid #e2e8f0; }
+.report-entry-heading > div { display: grid; gap: 3px; }
 .report-table { font-size: 11px; }
 .report-table th, .report-table td { padding: 8px; vertical-align: top; }
 .table-subtext { color: #64748b; font-size: 10px; }

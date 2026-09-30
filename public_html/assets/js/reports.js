@@ -8,6 +8,7 @@
       document.getElementById('weeklyReportFilter').classList.toggle('hidden', period !== 'weekly');
       document.getElementById('monthlyReportFilter').classList.toggle('hidden', period !== 'monthly');
       currentReportData = null;
+      closeReportEntries();
       document.getElementById('downloadReportBtn').disabled = true;
       document.getElementById('printReportBtn').disabled = true;
     }
@@ -91,7 +92,8 @@
       document.getElementById('reportGeneratedAt').innerText = `Generated: ${formatDashboardTime(data.generated_at)}`;
       const tbody = document.getElementById('reportTableBody');
       if (!data.rows.length) {
-        tbody.innerHTML = '<tr><td colspan="17" class="empty">No production records found for this period.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="18" class="empty">No production records found for this period.</td></tr>';
+        closeReportEntries();
         return;
       }
       tbody.innerHTML = data.rows.map(row => `<tr>
@@ -103,7 +105,36 @@
         <td>${Number(row.rework_qty)}</td><td>${Number(row.pending_qty)}</td><td>${Number(row.downtime_min)} min</td>
         <td>${Number(row.achievement_percent)}%</td><td>${escapeHtml(row.statuses || '-')}</td>
         <td>${escapeHtml(row.remarks || '-')}</td>
+        <td><button type="button" onclick="showReportEntries(${Number(row.machine_id)})">View Entries</button></td>
       </tr>`).join('');
+    }
+
+    function showReportEntries(machineId) {
+      if (!currentReportData) return;
+      const entries = (currentReportData.entries || []).filter(entry => Number(entry.machine_id) === Number(machineId));
+      const machine = currentReportData.rows.find(row => Number(row.machine_id) === Number(machineId));
+      document.getElementById('reportEntryTitle').innerText = `${machine?.machine_code || 'Machine'} Production Entries`;
+      document.getElementById('reportEntryCount').innerText = `${entries.length} individual shift record${entries.length === 1 ? '' : 's'}`;
+      document.getElementById('reportEntryTableBody').innerHTML = entries.map(entry => `<tr>
+        <td>${escapeHtml(entry.shift_date)}</td>
+        <td>${escapeHtml(entry.shift)}<br><span class="table-subtext">${Number(entry.shift_hours)} hrs</span></td>
+        <td>${escapeHtml(entry.operator_name)}</td>
+        <td>#${Number(entry.job_id)}<br><span class="table-subtext">Entry #${Number(entry.shift_id)}</span></td>
+        <td>${escapeHtml(entry.part_name)}<br><span class="table-subtext">${escapeHtml(entry.component || '-')}</span></td>
+        <td>${escapeHtml(entry.operation || '-')}<br><span class="table-subtext">${escapeHtml(entry.cutter_num || 'No cutter')}</span></td>
+        <td>${Number(entry.planned_qty)}</td><td>${Number(entry.total_qty)}</td><td>${Number(entry.ok_qty)}</td>
+        <td>${Number(entry.mc_reject_qty)}</td><td>${Number(entry.rm_defect_qty)}</td><td>${Number(entry.rework_qty)}</td>
+        <td>${Number(entry.downtime_min)} min</td>
+        <td>${escapeHtml(entry.machine_status || entry.job_status || '-')}</td>
+        <td>${escapeHtml([entry.issue_code, entry.remarks].filter(Boolean).join(' | ') || '-')}</td>
+      </tr>`).join('');
+      const panel = document.getElementById('reportEntryDetails');
+      panel.classList.remove('hidden');
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function closeReportEntries() {
+      document.getElementById('reportEntryDetails')?.classList.add('hidden');
     }
 
     function csvCell(value) {

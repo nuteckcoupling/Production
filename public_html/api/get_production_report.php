@@ -62,18 +62,20 @@ if ($shiftFilter !== '') {
 $stmt = $conn->prepare("SELECT
         s.id AS shift_id, s.shift_date, s.shift, s.shift_hours, s.total_qty, s.ok_qty,
         s.mc_reject_qty, s.rm_defect_qty, s.rework_qty, s.downtime_min,
+        s.started_at, s.ended_at, s.machine_status, s.job_outcome, s.issue_code,
         s.remarks AS shift_remarks,
-        j.id AS job_id, j.planned_qty, j.status AS job_status, j.component,
+        j.id AS job_id, j.planned_qty, j.status AS job_status, j.component, j.drg_no, j.operation,
         j.remarks AS job_remarks,
         cc.remarks AS cutter_change_remarks,
         sc.remarks AS setting_change_remarks,
         m.id AS machine_id, m.code AS machine_code, m.name AS machine_name,
-        o.name AS operator_name, p.part_name
+        o.name AS operator_name, p.part_name, p.coupling_type, c.cutter_num
     FROM job_shifts s
     JOIN production_jobs j ON j.id = s.job_id
     JOIN machines m ON m.id = j.machine_id
     JOIN operators o ON o.id = s.operator_id
     JOIN parts p ON p.id = j.part_id
+    LEFT JOIN cutters c ON c.id = j.cutter_id
     LEFT JOIN (
         SELECT shift_id, GROUP_CONCAT(DISTINCT NULLIF(TRIM(remarks), '') ORDER BY id SEPARATOR ' | ') AS remarks
         FROM job_cutter_changes
@@ -98,7 +100,35 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 $machines = [];
+$entries = [];
 while ($record = $result->fetch_assoc()) {
+    $entryRemarks = [];
+    foreach ([
+        'Shift' => $record['shift_remarks'],
+        'Job' => $record['job_remarks'],
+        'Cutter' => $record['cutter_change_remarks'],
+        'Setting' => $record['setting_change_remarks']
+    ] as $remarkType => $remark) {
+        $remark = trim((string)$remark);
+        if ($remark !== '') $entryRemarks[] = $remarkType . ': ' . $remark;
+    }
+    $entries[] = [
+        'shift_id' => (int)$record['shift_id'], 'job_id' => (int)$record['job_id'],
+        'shift_date' => $record['shift_date'], 'shift' => $record['shift'],
+        'shift_hours' => (float)$record['shift_hours'], 'started_at' => $record['started_at'],
+        'ended_at' => $record['ended_at'], 'machine_id' => (int)$record['machine_id'],
+        'machine_code' => $record['machine_code'], 'machine_name' => $record['machine_name'],
+        'operator_name' => $record['operator_name'], 'coupling_type' => $record['coupling_type'],
+        'part_name' => $record['part_name'], 'component' => $record['component'],
+        'drg_no' => $record['drg_no'], 'operation' => $record['operation'],
+        'cutter_num' => $record['cutter_num'], 'planned_qty' => (int)$record['planned_qty'],
+        'total_qty' => (int)$record['total_qty'], 'ok_qty' => (int)$record['ok_qty'],
+        'mc_reject_qty' => (int)$record['mc_reject_qty'],
+        'rm_defect_qty' => (int)$record['rm_defect_qty'], 'rework_qty' => (int)$record['rework_qty'],
+        'downtime_min' => (int)$record['downtime_min'], 'machine_status' => $record['machine_status'],
+        'job_status' => $record['job_status'], 'job_outcome' => $record['job_outcome'],
+        'issue_code' => $record['issue_code'], 'remarks' => implode(' | ', $entryRemarks)
+    ];
     $machineId = (int)$record['machine_id'];
     if (!isset($machines[$machineId])) {
         $machines[$machineId] = [
@@ -132,17 +162,7 @@ while ($record = $result->fetch_assoc()) {
     $shiftLabel = in_array($record['shift'], ['1', '2', '3'], true) ? 'Shift ' . $record['shift'] : $record['shift'];
     $row['shifts'][$shiftLabel] = true;
     $row['statuses'][$record['job_status']] = true;
-    foreach ([
-        'Shift' => $record['shift_remarks'],
-        'Job' => $record['job_remarks'],
-        'Cutter' => $record['cutter_change_remarks'],
-        'Setting' => $record['setting_change_remarks']
-    ] as $remarkType => $remark) {
-        $remark = trim((string)$remark);
-        if ($remark !== '') {
-            $row['remarks'][$remarkType . ': ' . $remark] = true;
-        }
-    }
+    foreach ($entryRemarks as $remark) $row['remarks'][$remark] = true;
     unset($row);
 }
 $stmt->close();
@@ -185,6 +205,7 @@ json_response([
         'coupling_type' => $couplingFilter, 'part_id' => $partId
     ],
     'rows' => $rows,
+    'entries' => $entries,
     'totals' => $totals,
     'generated_at' => date('Y-m-d H:i:s')
 ]);

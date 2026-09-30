@@ -6,7 +6,7 @@
   <title>NU-TECK Couplings — Daily Production Entry</title>
   <link rel="icon" type="image/png" href="assets/images/nuteck-gear-favicon.png?v=20261001-1" />
   <link rel="apple-touch-icon" href="assets/images/nuteck-gear-favicon.png?v=20261001-1" />
-  <link rel="stylesheet" href="style.css?v=20261001-1" />
+  <link rel="stylesheet" href="style.css?v=20261002-1" />
 </head>
 <body>
   <?php require __DIR__ . '/views/login.php'; ?>
@@ -55,7 +55,7 @@
   <script src="assets/js/attachments.js?v=20261001-1"></script>
   <script src="assets/js/jobs.js?v=20261002-1"></script>
   <script src="assets/js/changes.js?v=20261002-1"></script>
-  <script src="assets/js/reports.js?v=20260929-1"></script>
+  <script src="assets/js/reports.js?v=20261002-1"></script>
   <script src="assets/js/admin-analysis.js?v=20260924-2"></script>
   <script src="assets/js/maintenance.js?v=20260930-1"></script>
   <script src="assets/js/dashboard.js?v=20260928-3"></script>

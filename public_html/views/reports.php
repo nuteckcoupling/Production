@@ -55,11 +55,27 @@
                 <th>Machine</th><th>Operators</th><th>Shifts</th><th>Parts</th><th>Components</th>
                 <th>Jobs</th><th>Planned</th><th>Total</th><th>OK</th><th>M.C. Reject</th>
                 <th>R.M. Defect</th><th>Rework</th><th>Pending</th><th>Downtime</th>
-                <th>Achievement</th><th>Status</th><th>Remarks</th>
+                <th>Achievement</th><th>Status</th><th>Remarks</th><th>Details</th>
               </tr></thead>
               <tbody id="reportTableBody">
-                <tr><td colspan="17" class="empty">Generate a report to view production data.</td></tr>
+                <tr><td colspan="18" class="empty">Generate a report to view production data.</td></tr>
               </tbody>
+            </table>
+          </div>
+        </div>
+        <div id="reportEntryDetails" class="card report-table-card hidden">
+          <div class="report-entry-heading">
+            <div><strong id="reportEntryTitle">Production Entries</strong><span id="reportEntryCount" class="table-subtext"></span></div>
+            <button type="button" onclick="closeReportEntries()">Close</button>
+          </div>
+          <div class="table-wrap">
+            <table class="report-table">
+              <thead><tr>
+                <th>Date</th><th>Shift</th><th>Operator</th><th>Job</th><th>Part / Component</th>
+                <th>Operation / Cutter</th><th>Planned</th><th>Total</th><th>OK</th><th>M.C. Reject</th>
+                <th>R.M. Defect</th><th>Rework</th><th>Downtime</th><th>Status</th><th>Issue / Remarks</th>
+              </tr></thead>
+              <tbody id="reportEntryTableBody"></tbody>
             </table>
           </div>
         </div>
