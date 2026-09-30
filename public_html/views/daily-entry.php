@@ -74,7 +74,7 @@
 
           <label>
             Drg No
-            <input type="text" name="drg_no" id="drg_no" />
+            <input type="text" name="drg_no" id="drg_no" readonly placeholder="Automatic from coupling drawing" />
           </label>
 
           <label>
@@ -160,6 +160,12 @@
             <input type="text" name="remarks" id="remarks" />
           </label>
         </div>
+
+        <section class="attachment-card">
+          <h2>Coupling Drawing</h2>
+          <p>Drawing Number and file will load automatically after selecting Part Name and Component.</p>
+          <div id="dailyPartDrawingList" class="attachment-list"><div class="empty">Select a part and component to load its drawing.</div></div>
+        </section>
 
         <div id="qtyErrorBanner" class="banner error"></div>
 

@@ -18,7 +18,7 @@
           if (!result.ok) throw new Error(result.data.error || 'Unable to load attachments.');
           list.innerHTML = result.data.length ? result.data.map(item => `<div class="attachment-row">
             <div><strong>${escapeHtml(item.category)}${item.drawing_no ? ` · Drawing No: ${escapeHtml(item.drawing_no)}` : ''}</strong><span>${item.component ? `${escapeHtml(item.component)} · ` : ''}${escapeHtml(item.original_name)} · ${attachmentSize(item.file_size)} · ${escapeHtml(item.uploaded_by || '-')} · ${escapeHtml(item.created_at)}</span></div>
-            <a class="table-action edit" href="${API}/download_attachment.php?id=${Number(item.id)}">Download</a>
+            <div class="table-actions"><a class="table-action edit" href="${API}/download_attachment.php?id=${Number(item.id)}&view=1" target="_blank" rel="noopener">View</a><a class="table-action edit" href="${API}/download_attachment.php?id=${Number(item.id)}">Download</a></div>
           </div>`).join('') : '<div class="empty">No attachments uploaded.</div>';
           return result.data;
         })

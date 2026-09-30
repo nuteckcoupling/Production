@@ -88,6 +88,27 @@
         .catch(err => console.error('Error loading planned quantity', err));
     }
 
+    function clearDailyPartDrawing(message = 'Select a part and component to load its drawing.') {
+      document.getElementById('drg_no').value = '';
+      document.getElementById('dailyPartDrawingList').innerHTML = `<div class="empty">${escapeHtml(message)}</div>`;
+    }
+
+    function loadDailyPartDrawing() {
+      const partId = partSelect.value;
+      const component = componentSelect.value;
+      if (!partId || !component) {
+        clearDailyPartDrawing();
+        return;
+      }
+      document.getElementById('drg_no').value = '';
+      loadAttachmentList('part', partId, 'dailyPartDrawingList', {
+        category: 'Coupling Drawing', component
+      }).then(drawings => {
+        if (partSelect.value !== partId || componentSelect.value !== component) return;
+        document.getElementById('drg_no').value = drawings[0]?.drawing_no || '';
+      }).catch(error => clearDailyPartDrawing(error.message));
+    }
+
     function operationForMachine(machineCode, defaultOperation = '') {
       const savedOperation = String(defaultOperation || '').trim();
       if (savedOperation && savedOperation.toUpperCase() !== 'OTHER') return savedOperation;
@@ -557,12 +578,14 @@
       partSelect.disabled = !startJobAvailable || !selectedType;
       componentSelect.innerHTML = '<option value="">-- select part first --</option>';
       componentSelect.disabled = true;
+      clearDailyPartDrawing();
       updatePlannedQty();
     });
 
     partSelect.addEventListener('change', () => {
       componentSelect.innerHTML = '<option value="">-- select --</option>';
       componentSelect.disabled = true;
+      clearDailyPartDrawing();
       updatePlannedQty();
       if (!partSelect.value) return;
 
@@ -579,6 +602,8 @@
         })
         .catch(err => console.error('Error loading components', err));
     });
+
+    componentSelect.addEventListener('change', loadDailyPartDrawing);
 
 
     function showMessage(type, text) {
@@ -639,6 +664,7 @@
           partSelect.disabled = true;
           componentSelect.innerHTML = '<option value="">-- select part first --</option>';
           componentSelect.disabled = true;
+          clearDailyPartDrawing();
           plannedQtyInput.value = 0;
           applyOperatorAccess();
           machineAvailabilityBanner.className = 'banner error';

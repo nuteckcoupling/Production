@@ -3,6 +3,7 @@ require __DIR__ . '/bootstrap.php';
 require_once __DIR__ . '/attachment_helpers.php';
 $user = require_auth();
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+$view = filter_input(INPUT_GET, 'view', FILTER_VALIDATE_BOOLEAN);
 if (!$id) json_error('Valid attachment is required', 400);
 $stmt = $conn->prepare('SELECT entity_type, original_name, relative_path, mime_type, file_size FROM attachments WHERE id = ?');
 $stmt->bind_param('i', $id);
@@ -21,7 +22,7 @@ $download_name = preg_replace('/[^a-zA-Z0-9._ -]/', '_', basename($attachment['o
 header_remove('Content-Type');
 header('Content-Type: ' . $attachment['mime_type']);
 header('Content-Length: ' . filesize($path));
-header('Content-Disposition: attachment; filename="' . addcslashes($download_name, '"\\') . '"');
+header('Content-Disposition: ' . ($view ? 'inline' : 'attachment') . '; filename="' . addcslashes($download_name, '"\\') . '"');
 header('X-Content-Type-Options: nosniff');
 readfile($path);
 $conn->close();
