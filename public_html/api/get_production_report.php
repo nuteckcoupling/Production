@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . "/bootstrap.php";
-require_auth();
+$user = require_auth();
 
 $period = $_GET['period'] ?? 'daily';
 $value = trim($_GET['value'] ?? '');
@@ -62,8 +62,9 @@ if ($shiftFilter !== '') {
 $stmt = $conn->prepare("SELECT
         s.id AS shift_id, s.shift_date, s.shift, s.shift_hours, s.total_qty, s.ok_qty,
         s.mc_reject_qty, s.rm_defect_qty, s.rework_qty, s.downtime_min,
-        s.started_at, s.ended_at, s.machine_status, s.job_outcome, s.issue_code,
+        s.operator_id, s.started_at, s.ended_at, s.status AS shift_status, s.machine_status, s.job_outcome, s.issue_code,
         s.remarks AS shift_remarks,
+        s.report_edited_at, s.report_edit_reason, editor.username AS report_edited_by,
         j.id AS job_id, j.planned_qty, j.status AS job_status, j.component, j.drg_no, j.operation,
         j.remarks AS job_remarks,
         cc.remarks AS cutter_change_remarks,
@@ -76,6 +77,7 @@ $stmt = $conn->prepare("SELECT
     JOIN operators o ON o.id = s.operator_id
     JOIN parts p ON p.id = j.part_id
     LEFT JOIN cutters c ON c.id = j.cutter_id
+    LEFT JOIN users editor ON editor.id = s.report_edited_by_user_id
     LEFT JOIN (
         SELECT shift_id, GROUP_CONCAT(DISTINCT NULLIF(TRIM(remarks), '') ORDER BY id SEPARATOR ' | ') AS remarks
         FROM job_cutter_changes
@@ -127,7 +129,14 @@ while ($record = $result->fetch_assoc()) {
         'rm_defect_qty' => (int)$record['rm_defect_qty'], 'rework_qty' => (int)$record['rework_qty'],
         'downtime_min' => (int)$record['downtime_min'], 'machine_status' => $record['machine_status'],
         'job_status' => $record['job_status'], 'job_outcome' => $record['job_outcome'],
-        'issue_code' => $record['issue_code'], 'remarks' => implode(' | ', $entryRemarks)
+        'issue_code' => $record['issue_code'], 'shift_remarks' => $record['shift_remarks'],
+        'remarks' => implode(' | ', $entryRemarks),
+        'edited_at' => $record['report_edited_at'], 'edit_reason' => $record['report_edit_reason'],
+        'edited_by' => $record['report_edited_by'],
+        'can_edit' => $record['shift_status'] === 'Ended' && $record['report_edited_at'] === null
+            && (($user['role'] ?? '') === 'Admin'
+                || (($user['role'] ?? '') === 'Operator/Supervisor'
+                    && (int)$user['operator_id'] === (int)$record['operator_id']))
     ];
     $machineId = (int)$record['machine_id'];
     if (!isset($machines[$machineId])) {

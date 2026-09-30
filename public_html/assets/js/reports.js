@@ -127,6 +127,9 @@
         <td>${Number(entry.downtime_min)} min</td>
         <td>${escapeHtml(entry.machine_status || entry.job_status || '-')}</td>
         <td>${escapeHtml([entry.issue_code, entry.remarks].filter(Boolean).join(' | ') || '-')}</td>
+        <td>${entry.edited_at
+          ? `<strong>Edited Once</strong><br><span class="table-subtext">${escapeHtml(entry.edited_by || '')}: ${escapeHtml(entry.edit_reason || '')}</span>`
+          : (entry.can_edit ? `<button type="button" onclick="openReportEntryEdit(${Number(entry.shift_id)})">Edit Once</button>` : 'Locked')}</td>
       </tr>`).join('');
       const panel = document.getElementById('reportEntryDetails');
       panel.classList.remove('hidden');
@@ -135,7 +138,56 @@
 
     function closeReportEntries() {
       document.getElementById('reportEntryDetails')?.classList.add('hidden');
+      closeReportEntryEdit();
     }
+
+    function openReportEntryEdit(shiftId) {
+      const entry = (currentReportData?.entries || []).find(row => Number(row.shift_id) === Number(shiftId));
+      if (!entry?.can_edit) return;
+      const form = document.getElementById('reportEntryEditForm');
+      form.reset();
+      form.elements.shift_id.value = entry.shift_id;
+      ['total_qty', 'ok_qty', 'mc_reject_qty', 'rm_defect_qty', 'rework_qty', 'downtime_min'].forEach(field => {
+        form.elements[field].value = Number(entry[field] || 0);
+      });
+      form.elements.issue_code.value = entry.issue_code || '';
+      form.elements.remarks.value = entry.shift_remarks || '';
+      document.getElementById('reportEditTitle').innerText = `Correct Entry #${entry.shift_id} — ${entry.machine_code}`;
+      form.classList.remove('hidden');
+      form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function closeReportEntryEdit() {
+      document.getElementById('reportEntryEditForm')?.classList.add('hidden');
+    }
+
+    document.getElementById('reportEntryEditForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const confirmed = await showConfirmDialog({
+        title: 'Save One-Time Correction?',
+        message: 'After saving, this production entry cannot be edited again.',
+        confirmText: 'Save and Lock'
+      });
+      if (!confirmed) return;
+      const button = form.querySelector('button[type="submit"]');
+      button.disabled = true;
+      try {
+        const response = await fetch(`${API}/update_report_entry.php`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(Object.fromEntries(new FormData(form)))
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Unable to correct production entry.');
+        closeReportEntryEdit();
+        showToast('success', 'Production entry corrected and permanently locked.');
+        loadProductionReport();
+      } catch (error) {
+        showToast('error', error.message);
+      } finally {
+        button.disabled = false;
+      }
+    });
 
     function csvCell(value) {
       return `"${String(value ?? '').replaceAll('"', '""')}"`;

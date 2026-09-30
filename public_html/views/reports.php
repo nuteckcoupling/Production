@@ -73,11 +73,28 @@
               <thead><tr>
                 <th>Date</th><th>Shift</th><th>Operator</th><th>Job</th><th>Part / Component</th>
                 <th>Operation / Cutter</th><th>Planned</th><th>Total</th><th>OK</th><th>M.C. Reject</th>
-                <th>R.M. Defect</th><th>Rework</th><th>Downtime</th><th>Status</th><th>Issue / Remarks</th>
+                <th>R.M. Defect</th><th>Rework</th><th>Downtime</th><th>Status</th><th>Issue / Remarks</th><th>Action</th>
               </tr></thead>
               <tbody id="reportEntryTableBody"></tbody>
             </table>
           </div>
+          <form id="reportEntryEditForm" class="card hidden">
+            <input type="hidden" name="shift_id" id="reportEditShiftId" />
+            <h3 id="reportEditTitle">Correct Production Entry</h3>
+            <p class="banner warning">This entry can be edited only once. Check every value before saving.</p>
+            <div class="grid">
+              <label>Total Qty<input type="number" name="total_qty" min="0" required /></label>
+              <label>OK Qty<input type="number" name="ok_qty" min="0" required /></label>
+              <label>M.C. Reject<input type="number" name="mc_reject_qty" min="0" required /></label>
+              <label>R.M. Defect<input type="number" name="rm_defect_qty" min="0" required /></label>
+              <label>Rework<input type="number" name="rework_qty" min="0" required /></label>
+              <label>Downtime (Minutes)<input type="number" name="downtime_min" min="0" required /></label>
+              <label>Issue / Code<select name="issue_code"><option value="">-- none --</option><option>No Operator</option><option>No Material</option><option>M/C Breakdown (Mechanical)</option><option>M/C Breakdown (Electrical)</option><option>No Power</option><option>New Setting</option><option>Other</option></select></label>
+              <label class="full">Remarks<input type="text" name="remarks" maxlength="255" /></label>
+              <label class="full">Correction Reason<input type="text" name="edit_reason" maxlength="255" required placeholder="Why is this entry being corrected?" /></label>
+            </div>
+            <div class="actions"><button type="submit" class="submit">Save One-Time Correction</button><button type="button" onclick="closeReportEntryEdit()">Cancel</button></div>
+          </form>
         </div>
         <div id="reportGeneratedAt" class="report-generated"></div>
       </div>
