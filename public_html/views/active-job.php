@@ -202,7 +202,7 @@
             <input type="text" name="new_operation" id="setting_new_operation" class="custom-operation hidden" maxlength="150" placeholder="Type operation" />
           </label>
           <label>Cutter Number<select name="new_cutter_id" id="setting_new_cutter_id"><option value="">-- no cutter --</option></select></label>
-          <label>Planned Qty (12 Hours)<input type="number" name="new_planned_qty" id="setting_new_planned_qty" value="0" min="1" readonly /></label>
+          <label>Planned Qty (12 Hours)<input type="number" name="new_planned_qty" id="setting_new_planned_qty" value="0" readonly /></label>
           <label>Reason
             <select name="reason" id="setting_change_reason" required>
               <option value="">-- select reason --</option>

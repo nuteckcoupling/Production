@@ -108,9 +108,7 @@ try {
             || (int)$job['cutter_id'] === (int)$new_cutter_id);
     if ($sameSetting) throw new RuntimeException('Select a different part, component, operation or cutter', 400);
 
-    $new_planned_qty = resolve_planned_qty(
-        $conn, (int)$job['machine_id'], (int)$new_part_id, $data['new_planned_qty'] ?? null
-    );
+    $new_planned_qty = get_planned_qty($conn, (int)$job['machine_id'], (int)$new_part_id);
 
     $insert = $conn->prepare("INSERT INTO job_setting_changes
         (old_job_id, old_shift_id, machine_id, operator_id, new_part_id, new_component,

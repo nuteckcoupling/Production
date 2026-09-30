@@ -94,7 +94,7 @@
 
           <label>
             Planned Qty (12 Hours)
-            <input type="number" name="planned_qty" id="planned_qty" value="0" min="1" readonly />
+            <input type="number" name="planned_qty" id="planned_qty" value="0" readonly />
           </label>
 
           <label>

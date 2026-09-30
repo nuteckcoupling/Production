@@ -71,11 +71,7 @@ $cutter_id = !empty($data['cutter_id']) ? (int)$data['cutter_id'] : null;
 
 $machine_id = (int)$data['machine_id'];
 $part_id = (int)$data['part_id'];
-try {
-    $planned_qty = resolve_planned_qty($conn, $machine_id, $part_id, $data['planned_qty'] ?? null);
-} catch (RuntimeException $error) {
-    json_error($error->getMessage(), 400);
-}
+$planned_qty = get_planned_qty($conn, $machine_id, $part_id);
 
 $total_qty = $data['total_qty'] === "" ? 0 : (int)$data['total_qty'];
 $ok_qty = $data['ok_qty'] === "" ? 0 : (int)$data['ok_qty'];

@@ -158,9 +158,9 @@
         .then(result => {
           if (document.getElementById('setting_new_part_id').value === partId) {
             const plannedQty = Number(result.planned_qty || 0);
-            plannedInput.value = plannedQty || '';
-            plannedInput.readOnly = plannedQty > 0;
-            plannedInput.placeholder = plannedQty > 0 ? '' : 'Enter first 12-hour capacity';
+            plannedInput.value = plannedQty;
+            plannedInput.readOnly = true;
+            plannedInput.placeholder = plannedQty > 0 ? '' : 'Automatic after first 12-hour shift ends';
           }
         });
     }

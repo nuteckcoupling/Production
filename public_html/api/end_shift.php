@@ -47,7 +47,7 @@ $job_outcome = $data['job_outcome'];
 try {
     $conn->begin_transaction();
 
-    $jobStmt = $conn->prepare("SELECT id, status, current_operator_id, cumulative_ok_qty FROM production_jobs WHERE id = ? FOR UPDATE");
+    $jobStmt = $conn->prepare("SELECT id, status, current_operator_id, cumulative_ok_qty, planned_qty FROM production_jobs WHERE id = ? FOR UPDATE");
     $jobStmt->bind_param("i", $job_id);
     $jobStmt->execute();
     $job = $jobStmt->get_result()->fetch_assoc();
@@ -77,7 +77,7 @@ try {
     if ($activeChange) throw new RuntimeException('Complete the cutter change before ending the shift', 409);
 
 
-    $shiftStmt = $conn->prepare("SELECT id FROM job_shifts WHERE job_id = ? AND status = 'Running' FOR UPDATE");
+    $shiftStmt = $conn->prepare("SELECT id, shift_hours FROM job_shifts WHERE job_id = ? AND status = 'Running' FOR UPDATE");
     $shiftStmt->bind_param("i", $job_id);
     $shiftStmt->execute();
     $shift = $shiftStmt->get_result()->fetch_assoc();
@@ -109,11 +109,15 @@ try {
         $new_status = 'Stopped';
     }
     $new_cumulative = (int)$job['cumulative_ok_qty'] + $values['ok_qty'];
+    $new_planned_qty = (int)$job['planned_qty'];
+    if ((float)$shift['shift_hours'] === 12.0) {
+        $new_planned_qty = max($new_planned_qty, $values['total_qty']);
+    }
 
-    $updateJob = $conn->prepare("UPDATE production_jobs SET cumulative_ok_qty = ?, status = ?,
+    $updateJob = $conn->prepare("UPDATE production_jobs SET cumulative_ok_qty = ?, planned_qty = ?, status = ?,
         status_changed_at = NOW(), completed_at = CASE WHEN ? = 'Completed' THEN NOW() ELSE NULL END,
         remarks = ? WHERE id = ?");
-    $updateJob->bind_param("isssi", $new_cumulative, $new_status, $new_status, $remarks, $job_id);
+    $updateJob->bind_param("iisssi", $new_cumulative, $new_planned_qty, $new_status, $new_status, $remarks, $job_id);
     $updateJob->execute();
     $updateJob->close();
 
@@ -122,7 +126,7 @@ try {
         'Ended shift for Job #' . $job_id . ' — ' . $job_outcome . ', status ' . $new_status .
         ', OK qty ' . $values['ok_qty'], 'production_job', (int)$job_id);
     json_response(['success' => true, 'job_id' => (int)$job_id, 'status' => $new_status,
-        'cumulative_ok_qty' => $new_cumulative]);
+        'cumulative_ok_qty' => $new_cumulative, 'planned_qty' => $new_planned_qty]);
 } catch (RuntimeException $error) {
     $conn->rollback();
     $code = $error->getCode();

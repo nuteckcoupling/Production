@@ -76,11 +76,7 @@ if ($cutter_id !== null) {
     $cutterCheck->close();
 }
 
-try {
-    $planned_qty = resolve_planned_qty($conn, $machine_id, $part_id, $data['planned_qty'] ?? null);
-} catch (RuntimeException $error) {
-    json_error($error->getMessage(), 400);
-}
+$planned_qty = get_planned_qty($conn, $machine_id, $part_id);
 
 try {
     $conn->begin_transaction();

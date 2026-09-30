@@ -80,9 +80,9 @@
         .then(result => {
           if (machineSelect.value === machineId && partSelect.value === partId) {
             const plannedQty = Number(result.planned_qty || 0);
-            plannedQtyInput.value = plannedQty || '';
-            plannedQtyInput.readOnly = plannedQty > 0;
-            plannedQtyInput.placeholder = plannedQty > 0 ? '' : 'Enter first 12-hour capacity';
+            plannedQtyInput.value = plannedQty;
+            plannedQtyInput.readOnly = true;
+            plannedQtyInput.placeholder = plannedQty > 0 ? '' : 'Automatic after first 12-hour shift ends';
           }
         })
         .catch(err => console.error('Error loading planned quantity', err));

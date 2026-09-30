@@ -16,13 +16,4 @@ function get_planned_qty(mysqli $conn, int $machine_id, int $part_id): int
     return $planned_qty;
 }
 
-function resolve_planned_qty(mysqli $conn, int $machine_id, int $part_id, mixed $manual_value): int
-{
-    $planned_qty = get_planned_qty($conn, $machine_id, $part_id);
-    if ($planned_qty > 0) return $planned_qty;
-    if (filter_var($manual_value, FILTER_VALIDATE_INT) === false || (int)$manual_value < 1) {
-        throw new RuntimeException('No 12-hour production history found. Enter Planned Qty manually.', 400);
-    }
-    return (int)$manual_value;
-}
 ?>
