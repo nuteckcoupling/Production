@@ -258,7 +258,7 @@ WHERE p.coupling_type = 'Roller Chain Coupling'
 
 CREATE TABLE IF NOT EXISTS cutters (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  cutter_num VARCHAR(50) NOT NULL UNIQUE,
+  cutter_num VARCHAR(50) NOT NULL,
   cutter_module VARCHAR(50) DEFAULT NULL,
   cutter_type VARCHAR(100),
   lead_angle DECIMAL(6,2) DEFAULT NULL,
@@ -266,7 +266,8 @@ CREATE TABLE IF NOT EXISTS cutters (
   status ENUM('Active','Not Active') DEFAULT 'Active',
   remarks VARCHAR(255) DEFAULT NULL,
   deleted_at DATETIME DEFAULT NULL,
-  KEY idx_cutters_deleted_at (deleted_at)
+  KEY idx_cutters_deleted_at (deleted_at),
+  UNIQUE KEY unique_cutter_number_module (cutter_num, cutter_module)
 );
 
 CREATE TABLE IF NOT EXISTS shifts (
