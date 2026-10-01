@@ -196,6 +196,16 @@ body.modal-open { overflow: hidden; }
 .coupling-inline-drawing h3 { margin: 0; font-size: 15px; }
 .coupling-inline-drawing h3 span { color: #64748b; font-size: 12px; font-weight: 600; }
 .coupling-inline-drawing p { margin: 4px 0 14px; color: #64748b; font-size: 12px; }
+.cutter-toolbar { grid-template-columns: minmax(220px, 1.4fr) minmax(180px, .8fr) auto auto; }
+.cutter-view-tabs button { padding-inline: 10px; }
+.cutter-details { display: grid; gap: 8px; margin: 16px 0; }
+.cutter-details div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.cutter-details span { color: #64748b; font-size: 11px; font-weight: 700; }
+.cutter-details strong { color: #1e293b; font-size: 12px; text-align: right; overflow-wrap: anywhere; }
+.cutter-status { flex: 0 0 auto; padding: 5px 8px; border-radius: 999px; font-size: 10px; font-weight: 800; }
+.cutter-status.active { background: #dcfce7; color: #166534; }
+.cutter-status.inactive { background: #f1f5f9; color: #475569; }
+.cutter-remarks { margin: 0 0 12px; padding: 8px 10px; border-radius: 6px; background: #fffbeb; color: #78350f; font-size: 11px; overflow-wrap: anywhere; }
 .list-card { margin-top: 20px; }
 .list-card h2 { margin: 0 0 14px; font-size: 17px; }
 .active-job-header { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 20px; }
@@ -372,7 +382,7 @@ th { background: #f8f9fb; font-weight: 600; }
   .status-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .machine-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .management-grid { grid-template-columns: repeat(2, 1fr); }
-  .coupling-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .coupling-toolbar, .cutter-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .coupling-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .active-job-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .report-header { align-items: flex-start; flex-direction: column; }
@@ -400,7 +410,7 @@ th { background: #f8f9fb; font-weight: 600; }
   .management-grid { grid-template-columns: 1fr; }
   .coupling-page-header { align-items: stretch; flex-direction: column; }
   .coupling-add-button { width: 100%; }
-  .coupling-toolbar, .coupling-card-grid { grid-template-columns: 1fr; }
+  .coupling-toolbar, .cutter-toolbar, .coupling-card-grid { grid-template-columns: 1fr; }
   .coupling-view-tabs button { flex: 1; }
   .coupling-result-count { text-align: center; }
   .management-dialog, .management-dialog.wide-dialog { width: calc(100vw - 20px); }
