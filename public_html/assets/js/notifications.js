@@ -3,9 +3,8 @@
 
     function closeConfirmDialog(result = false) {
       const overlay = document.getElementById('confirmOverlay');
-      if (overlay.classList.contains('hidden')) return;
-      overlay.classList.add('hidden');
-      overlay.setAttribute('aria-hidden', 'true');
+      if (!overlay.open) return;
+      overlay.close();
       document.body.classList.remove('modal-open');
       const resolver = activeConfirmResolve;
       activeConfirmResolve = null;
@@ -24,7 +23,7 @@
       document.getElementById('confirmIcon').innerText = tone === 'danger' ? '!' : '⚠';
       actionButton.innerText = confirmText;
       overlay.className = 'confirm-overlay confirm-' + (tone === 'danger' ? 'danger' : 'warning');
-      overlay.setAttribute('aria-hidden', 'false');
+      overlay.showModal();
       document.body.classList.add('modal-open');
       window.setTimeout(() => actionButton.focus(), 0);
       return new Promise(resolve => { activeConfirmResolve = resolve; });
@@ -63,8 +62,7 @@
     document.getElementById('confirmOverlay').addEventListener('click', event => {
       if (event.target.id === 'confirmOverlay') closeConfirmDialog(false);
     });
-    document.addEventListener('keydown', event => {
-      if (event.key === 'Escape' && !document.getElementById('confirmOverlay').classList.contains('hidden')) {
-        closeConfirmDialog(false);
-      }
+    document.getElementById('confirmOverlay').addEventListener('cancel', event => {
+      event.preventDefault();
+      closeConfirmDialog(false);
     });
