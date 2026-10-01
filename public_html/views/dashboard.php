@@ -5,10 +5,18 @@
           <p>Current status of every active production machine.</p>
         </div>
         <div class="dashboard-actions">
-          <span id="dashboardUpdated">Not refreshed yet</span>
+          <span id="dashboardUpdated">Auto-refresh every 30 seconds</span>
           <button type="button" id="refreshDashboardBtn" onclick="loadMachineDashboard()">Refresh</button>
         </div>
       </header>
+
+      <section class="card dashboard-toolbar" aria-label="Machine search">
+        <label>
+          Search Machine or Job
+          <input type="search" id="dashboardSearch" placeholder="Machine, part, operator, operation or cutter" autocomplete="off" />
+        </label>
+        <span id="dashboardResultCount">0 machines</span>
+      </section>
 
       <div class="status-summary" aria-label="Machine status totals">
         <button type="button" class="summary-card is-active" data-filter="All" onclick="setDashboardFilter('All')">

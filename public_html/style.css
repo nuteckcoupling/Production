@@ -94,6 +94,11 @@ body.modal-open { overflow: hidden; }
   border: 1px solid #b6ddcc; background: #fff; color: var(--brand-green-dark); border-radius: 7px; padding: 8px 14px; cursor: pointer;
 }
 .dashboard-actions button:disabled { opacity: .6; cursor: default; }
+.dashboard-toolbar { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 14px; padding: 13px 15px; }
+.dashboard-toolbar label { display: grid; flex: 1; gap: 5px; color: #475569; font-size: 12px; font-weight: 700; }
+.dashboard-toolbar input { width: 100%; padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 7px; font-size: 14px; }
+.dashboard-toolbar input:focus { border-color: var(--brand-green); outline: 3px solid rgba(0,173,99,.13); }
+#dashboardResultCount { color: #64748b; font-size: 12px; white-space: nowrap; }
 .status-summary { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 10px; margin-bottom: 18px; }
 .summary-card {
   min-width: 0; border: 1px solid #e2e8f0; border-top: 4px solid #64748b; border-radius: 9px; background: #fff;
@@ -137,6 +142,11 @@ body.modal-open { overflow: hidden; }
 .machine-details dt { color: #64748b; font-size: 10px; text-transform: uppercase; letter-spacing: .04em; }
 .machine-details dd { margin: 2px 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 600; }
 .machine-action { width: 100%; border: 1px solid #a8dfc8; background: var(--brand-green-soft); color: var(--brand-green-dark); border-radius: 7px; padding: 8px 10px; cursor: pointer; font-weight: 600; }
+.machine-progress { margin: 0 0 16px; }
+.machine-progress > div { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 5px; color: #64748b; font-size: 11px; }
+.machine-progress strong { color: #334155; }
+.machine-progress-track { display: block; height: 7px; border-radius: 999px; background: #e2e8f0; overflow: hidden; }
+.machine-progress-track > span { display: block; height: 100%; border-radius: inherit; background: var(--brand-green); }
 .dashboard-empty { grid-column: 1 / -1; padding: 42px 20px; border: 1px dashed #cbd5e1; border-radius: 10px; background: #fff; color: #64748b; text-align: center; }
 .error-text { color: #b91c1c; }
 .alerts-panel { margin-bottom: 18px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; padding: 15px; }
@@ -399,6 +409,8 @@ th { background: #f8f9fb; font-weight: 600; }
   .sidebar-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .wrap { padding: 18px 12px 40px; }
   .dashboard-header { align-items: flex-start; flex-direction: column; }
+  .dashboard-toolbar { align-items: stretch; flex-direction: column; }
+  #dashboardResultCount { text-align: center; }
   .alerts-heading { align-items: flex-start; flex-direction: column; }
   .alert-item { grid-template-columns: 28px 1fr; }
   .alert-time { grid-column: 2; }

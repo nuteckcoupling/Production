@@ -32,7 +32,7 @@
           dashboardMachines = data;
           updateDashboardCounts();
           renderMachineDashboard();
-          document.getElementById('dashboardUpdated').innerText = `Updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+          document.getElementById('dashboardUpdated').innerText = `Auto-refresh 30s · Updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
           const dashboardMessage = document.getElementById('dashboardMessage');
           if (dashboardFlashMessage) {
             dashboardMessage.className = 'banner success';
@@ -111,17 +111,26 @@
 
     function renderMachineDashboard() {
       const grid = document.getElementById('machineGrid');
-      const visibleMachines = dashboardFilter === 'All'
+      const search = document.getElementById('dashboardSearch').value.trim().toLowerCase();
+      const statusMachines = dashboardFilter === 'All'
         ? dashboardMachines
         : dashboardMachines.filter(machine => machine.runtime_status === dashboardFilter);
+      const visibleMachines = statusMachines.filter(machine => !search || [
+        machine.code, machine.name, machine.operator_name, machine.part_name,
+        machine.component, machine.operation, machine.cutter_num, machine.current_shift
+      ].some(value => String(value || '').toLowerCase().includes(search)));
+      document.getElementById('dashboardResultCount').innerText = `${visibleMachines.length} machine${visibleMachines.length === 1 ? '' : 's'} shown`;
 
       if (visibleMachines.length === 0) {
-        grid.innerHTML = `<div class="dashboard-empty">No ${escapeHtml(dashboardFilter === 'All' ? '' : dashboardFilter.toLowerCase() + ' ')}machines found.</div>`;
+        grid.innerHTML = `<div class="dashboard-empty">No matching ${escapeHtml(dashboardFilter === 'All' ? '' : dashboardFilter.toLowerCase() + ' ')}machines found.</div>`;
         return;
       }
 
       grid.innerHTML = visibleMachines.map(machine => {
         const isAvailable = machine.runtime_status === 'Available';
+        const planned = Number(machine.planned_qty || 0);
+        const completed = Number(machine.cumulative_ok_qty || 0);
+        const achievement = planned > 0 ? Math.round((completed / planned) * 100) : 0;
         const canOperate = currentUser?.role === 'Operator/Supervisor';
         const canAcceptHandover = machine.runtime_status === 'Handover Pending'
           && canOperate
@@ -130,16 +139,24 @@
         const detailRows = isAvailable
           ? '<p class="machine-available-text">No active job. Machine is ready.</p>'
           : `<dl class="machine-details">
+              <div><dt>Job</dt><dd>#${Number(machine.job_id)}</dd></div>
               <div><dt>Operator</dt><dd>${escapeHtml(machine.operator_name || '-')}</dd></div>
               <div><dt>Shift</dt><dd>${escapeHtml(machine.current_shift || '-')}</dd></div>
               <div><dt>Part</dt><dd>${escapeHtml(machine.part_name || '-')}</dd></div>
               <div><dt>Component</dt><dd>${escapeHtml(machine.component || '-')}</dd></div>
-              <div><dt>Planned</dt><dd>${Number(machine.planned_qty || 0)}</dd></div>
+              <div><dt>Operation</dt><dd>${escapeHtml(machine.operation || '-')}</dd></div>
+              <div><dt>Cutter</dt><dd>${escapeHtml(machine.cutter_num || '-')}</dd></div>
+              <div><dt>Planned</dt><dd>${planned}</dd></div>
+              <div><dt>Total OK</dt><dd>${completed}</dd></div>
               <div><dt>Pending</dt><dd>${Number(machine.pending_qty || 0)}</dd></div>
               <div><dt>Started</dt><dd>${escapeHtml(formatDashboardTime(machine.started_at))}</dd></div>
               <div><dt>Running For</dt><dd>${escapeHtml(formatRunningTime(machine.started_at))}</dd></div>
               ${machine.maintenance_ticket_id ? `<div><dt>Breakdown</dt><dd>${escapeHtml(machine.breakdown_type || '-')}</dd></div><div><dt>Problem</dt><dd>${escapeHtml(machine.breakdown_description || '-')}</dd></div>` : ''}
-            </dl>`;
+            </dl>
+            <div class="machine-progress" aria-label="Production achievement ${achievement}%">
+              <div><span>Achievement</span><strong>${achievement}%</strong></div>
+              <span class="machine-progress-track"><span style="width:${Math.min(achievement, 100)}%"></span></span>
+            </div>`;
         const primaryAction = isAvailable && canOperate ? 'Start New Job' : (canAcceptHandover ? 'Accept Handover' : (machine.takeover_pending ? 'Takeover Pending' : (machine.runtime_status === 'Stopped' && canOperate ? 'Resume Job' : (machine.maintenance_ticket_id ? 'Open Breakdown' : (isAvailable ? 'View Status' : 'Open Job')))));
         const breakdownButton = canOperate && !machine.maintenance_ticket_id && ['Available', 'Running'].includes(machine.runtime_status)
           ? `<button type="button" class="machine-action danger-button" onclick="openBreakdownForm(${Number(machine.id)})">Raise Breakdown</button>` : '';
@@ -153,6 +170,8 @@
         </article>`;
       }).join('');
     }
+
+    document.getElementById('dashboardSearch').addEventListener('input', renderMachineDashboard);
 
     function openMachineFromDashboard(machineId, status, jobId, maintenanceTicketId = null) {
       if (maintenanceTicketId) {
