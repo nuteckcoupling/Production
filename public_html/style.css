@@ -192,6 +192,10 @@ body.modal-open { overflow: hidden; }
 .dialog-actions { justify-content: flex-end; margin-top: 20px; }
 .dialog-actions .submit, .coupling-drawing-form .submit { margin-top: 0; }
 .coupling-drawing-form { margin-top: 18px; padding-top: 18px; border-top: 1px solid #e2e8f0; }
+.coupling-inline-drawing { margin-top: 20px; padding: 16px; border: 1px solid #dce6df; border-radius: 9px; background: #f8fbf9; }
+.coupling-inline-drawing h3 { margin: 0; font-size: 15px; }
+.coupling-inline-drawing h3 span { color: #64748b; font-size: 12px; font-weight: 600; }
+.coupling-inline-drawing p { margin: 4px 0 14px; color: #64748b; font-size: 12px; }
 .list-card { margin-top: 20px; }
 .list-card h2 { margin: 0 0 14px; font-size: 17px; }
 .active-job-header { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 20px; }

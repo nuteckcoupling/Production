@@ -79,10 +79,24 @@
       document.getElementById('coupling_edit_id').value = coupling?.id || '';
       document.getElementById('new_coupling_type').value = coupling?.coupling_type || '';
       document.getElementById('new_part_name').value = coupling?.part_name || '';
+      document.getElementById('newCouplingDrawingFields').classList.toggle('hidden', Boolean(coupling));
+      updateNewCouplingDrawingComponents();
       document.getElementById('couplingFormTitle').innerText = coupling ? 'Edit Coupling' : 'Add Coupling';
       document.getElementById('saveCouplingBtn').innerText = coupling ? 'Update Coupling' : 'Save Coupling';
       if (!dialog.open) dialog.showModal();
       document.getElementById(coupling ? 'new_part_name' : 'new_coupling_type').focus();
+    }
+
+    function updateNewCouplingDrawingComponents() {
+      const range = document.getElementById('new_coupling_type').value;
+      const component = document.getElementById('newCouplingDrawingComponent');
+      const components = range === 'GC Gear Coupling' || range === 'NA Gear Coupling'
+        ? ['Hub', 'Sleeve']
+        : range === 'Roller Chain Coupling' || range === 'Sprocket'
+          ? ['Sprocket']
+          : range === 'Gear' ? ['Gear'] : [];
+      component.innerHTML = '<option value="">-- select --</option>' + components
+        .map(item => `<option value="${item}">${item}</option>`).join('');
     }
 
     function startCouplingEdit(coupling) {
@@ -160,28 +174,63 @@
         }).catch(error => showCouplingMessage('error', error.message));
     }
 
-    function handleCouplingSubmit(event) {
+    async function handleCouplingSubmit(event) {
       event.preventDefault();
       const button = document.getElementById('saveCouplingBtn');
-      const data = Object.fromEntries(new FormData(event.target).entries());
+      const formData = new FormData(event.target);
+      const data = {
+        id: formData.get('id'),
+        coupling_type: formData.get('coupling_type'),
+        part_name: formData.get('part_name')
+      };
       const isEditing = Boolean(data.id);
+      const drawingFile = formData.get('drawing_file');
+      const hasDrawing = !isEditing && drawingFile instanceof File && drawingFile.size > 0;
+      if (hasDrawing && (!formData.get('drawing_component') || !formData.get('drawing_no')?.trim())) {
+        showCouplingMessage('error', 'Component and Drawing Number are required with a drawing file.');
+        return;
+      }
       button.disabled = true;
       button.innerText = isEditing ? 'Updating...' : 'Saving...';
-      fetch(`${API}/${isEditing ? 'update_coupling.php' : 'add_coupling.php'}`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
-      }).then(async response => ({ ok: response.ok, data: await response.json() }))
-        .then(result => {
-          if (!result.ok) throw new Error(result.data.error || 'Save failed.');
-          cancelCouplingEdit();
-          showCouplingMessage('success', isEditing ? 'Coupling updated successfully.' : 'Coupling added successfully.');
-          loadCouplings();
-          fetchParts();
-        }).catch(error => showCouplingMessage('error', error.message))
-        .finally(() => {
-          button.disabled = false;
-          button.innerText = document.getElementById('coupling_edit_id').value ? 'Update Coupling' : 'Save Coupling';
+      try {
+        const response = await fetch(`${API}/${isEditing ? 'update_coupling.php' : 'add_coupling.php'}`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
         });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Save failed.');
+
+        if (hasDrawing) {
+          button.innerText = 'Uploading Drawing...';
+          const drawing = new FormData();
+          drawing.set('entity_type', 'part');
+          drawing.set('entity_id', result.id);
+          drawing.set('category', 'Coupling Drawing');
+          drawing.set('component', formData.get('drawing_component'));
+          drawing.set('drawing_no', formData.get('drawing_no').trim());
+          drawing.set('attachment', drawingFile);
+          const uploadResponse = await fetch(`${API}/upload_attachment.php`, { method: 'POST', body: drawing });
+          const uploadResult = await uploadResponse.json();
+          if (!uploadResponse.ok) {
+            cancelCouplingEdit();
+            showCouplingMessage('error', `Coupling saved, but drawing upload failed: ${uploadResult.error || 'Upload failed.'}`);
+            loadCouplings();
+            fetchParts();
+            return;
+          }
+        }
+
+        cancelCouplingEdit();
+        showCouplingMessage('success', isEditing ? 'Coupling updated successfully.' : `Coupling added successfully${hasDrawing ? ' with drawing' : ''}.`);
+        loadCouplings();
+        fetchParts();
+      } catch (error) {
+        showCouplingMessage('error', error.message);
+      } finally {
+        button.disabled = false;
+        button.innerText = document.getElementById('coupling_edit_id').value ? 'Update Coupling' : 'Save Coupling';
+      }
     }
 
     document.getElementById('couplingSearch').addEventListener('input', renderCouplings);
     document.getElementById('couplingRangeFilter').addEventListener('change', renderCouplings);
+    document.getElementById('new_coupling_type').addEventListener('change', updateNewCouplingDrawingComponents);

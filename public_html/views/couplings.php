@@ -42,7 +42,7 @@
             <div><h2 id="couplingFormTitle">Add Coupling</h2><p>Enter the range and unique coupling code.</p></div>
             <button type="button" class="dialog-close" aria-label="Close" onclick="cancelCouplingEdit()">&times;</button>
           </header>
-          <form id="couplingForm" onsubmit="handleCouplingSubmit(event)">
+          <form id="couplingForm" enctype="multipart/form-data" onsubmit="handleCouplingSubmit(event)">
             <input type="hidden" name="id" id="coupling_edit_id" />
             <div class="grid compact-grid">
               <label>
@@ -61,6 +61,29 @@
                 <input type="text" name="part_name" id="new_part_name" required placeholder="e.g. GC-119" />
               </label>
             </div>
+            <section id="newCouplingDrawingFields" class="coupling-inline-drawing">
+              <div>
+                <h3>Add Drawing <span>(optional)</span></h3>
+                <p>The drawing will be attached after the new coupling is saved.</p>
+              </div>
+              <div class="grid compact-grid">
+                <label>
+                  Component
+                  <select name="drawing_component" id="newCouplingDrawingComponent">
+                    <option value="">-- select range first --</option>
+                  </select>
+                </label>
+                <label>
+                  Drawing Number
+                  <input type="text" name="drawing_no" id="newCouplingDrawingNo" maxlength="100" placeholder="e.g. GC-119-HUB-01" />
+                </label>
+                <label>
+                  Drawing File
+                  <input type="file" name="drawing_file" id="newCouplingDrawingFile" accept="application/pdf,image/jpeg,image/png" />
+                  <span class="table-subtext">PDF/JPG/PNG, maximum 10 MB</span>
+                </label>
+              </div>
+            </section>
             <div class="management-form-actions dialog-actions">
               <button type="button" class="secondary-button" onclick="cancelCouplingEdit()">Cancel</button>
               <button type="submit" class="submit" id="saveCouplingBtn">Save Coupling</button>
