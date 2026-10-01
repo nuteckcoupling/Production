@@ -51,7 +51,7 @@
         .catch(error => showToast('error', error.message));
     }
 
-    function handleAttachmentUpload(event, entityType, entityId, listId) {
+    function handleAttachmentUpload(event, entityType, entityId, listId, filters = {}, options = {}) {
       event.preventDefault();
       const form = event.target;
       const button = form.querySelector('button[type="submit"]');
@@ -66,9 +66,9 @@
           if (!result.ok) throw new Error(result.data.error || 'Upload failed.');
           form.reset();
           showToast('success', 'Attachment uploaded securely.');
-          const filters = entityType === 'part' && payload.get('category') === 'Coupling Drawing'
-            ? { category: 'Coupling Drawing' } : {};
-          return loadAttachmentList(entityType, entityId, listId, filters);
+          const listFilters = Object.keys(filters).length ? filters
+            : (entityType === 'part' && payload.get('category') === 'Coupling Drawing' ? { category: 'Coupling Drawing' } : {});
+          return loadAttachmentList(entityType, entityId, listId, listFilters, options);
         })
         .catch(error => showToast('error', error.message))
         .finally(() => { button.disabled = false; button.innerText = 'Upload'; });
