@@ -22,6 +22,9 @@ $sql = "SELECT
             j.started_at,
             j.status_changed_at,
             j.current_operator_id,
+            (SELECT previous_s.shift_date FROM job_shifts previous_s
+             WHERE previous_s.job_id = j.id AND previous_s.status = 'Ended'
+             ORDER BY previous_s.id DESC LIMIT 1) AS last_ended_shift_date,
             mt.id AS maintenance_ticket_id,
             mt.ticket_no AS maintenance_ticket_no,
             mt.breakdown_type,

@@ -132,10 +132,13 @@
         const completed = Number(machine.cumulative_ok_qty || 0);
         const achievement = planned > 0 ? Math.round((completed / planned) * 100) : 0;
         const canOperate = currentUser?.role === 'Operator/Supervisor';
+        const now = new Date();
+        const localToday = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-');
         const canAcceptHandover = machine.runtime_status === 'Handover Pending'
           && canOperate
           && !machine.takeover_pending
-          && Number(machine.current_operator_id) !== Number(currentUser.operator_id);
+          && (Number(machine.current_operator_id) !== Number(currentUser.operator_id)
+            || (machine.last_ended_shift_date && machine.last_ended_shift_date < localToday));
         const detailRows = isAvailable
           ? '<p class="machine-available-text">No active job. Machine is ready.</p>'
           : `<dl class="machine-details">

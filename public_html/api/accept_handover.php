@@ -22,7 +22,11 @@ $shift_hours = (float)$shift_master['shift_hours'];
 try {
     $conn->begin_transaction();
 
-    $jobStmt = $conn->prepare("SELECT id, status, current_operator_id FROM production_jobs WHERE id = ? FOR UPDATE");
+    $jobStmt = $conn->prepare("SELECT id, status, current_operator_id,
+        (SELECT previous_s.shift_date FROM job_shifts previous_s
+         WHERE previous_s.job_id = production_jobs.id AND previous_s.status = 'Ended'
+         ORDER BY previous_s.id DESC LIMIT 1) AS last_ended_shift_date
+        FROM production_jobs WHERE id = ? FOR UPDATE");
     $jobStmt->bind_param("i", $job_id);
     $jobStmt->execute();
     $job = $jobStmt->get_result()->fetch_assoc();
@@ -34,7 +38,10 @@ try {
     if ($job['status'] !== 'Handover Pending') {
         throw new RuntimeException('This job is not waiting for handover', 409);
     }
-    if ((int)$job['current_operator_id'] === $operator_id) {
+    $same_operator = (int)$job['current_operator_id'] === $operator_id;
+    if ($same_operator && (!$job['last_ended_shift_date']
+        || $shift_date <= $job['last_ended_shift_date']
+        || $shift_date > date('Y-m-d'))) {
         throw new RuntimeException('Handover must be accepted by the next operator', 403);
     }
 
