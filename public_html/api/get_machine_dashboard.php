@@ -25,6 +25,8 @@ $sql = "SELECT
             (SELECT previous_s.shift_date FROM job_shifts previous_s
              WHERE previous_s.job_id = j.id AND previous_s.status = 'Ended'
              ORDER BY previous_s.id DESC LIMIT 1) AS last_ended_shift_date,
+            EXISTS(SELECT 1 FROM shifts alternate_s
+                   WHERE alternate_s.status = 'Active' AND alternate_s.code <> j.current_shift) AS has_alternate_handover_shift,
             mt.id AS maintenance_ticket_id,
             mt.ticket_no AS maintenance_ticket_no,
             mt.breakdown_type,
@@ -63,6 +65,7 @@ while ($row = $result->fetch_assoc()) {
     $row['current_operator_id'] = $row['current_operator_id'] === null ? null : (int)$row['current_operator_id'];
     $row['maintenance_ticket_id'] = $row['maintenance_ticket_id'] === null ? null : (int)$row['maintenance_ticket_id'];
     $row['takeover_pending'] = (bool)$row['takeover_pending'];
+    $row['has_alternate_handover_shift'] = (bool)$row['has_alternate_handover_shift'];
     $row['setting_change_id'] = $row['setting_change_id'] === null ? null : (int)$row['setting_change_id'];
     $row['cutter_change_id'] = $row['cutter_change_id'] === null ? null : (int)$row['cutter_change_id'];
     $rows[] = $row;

@@ -138,7 +138,8 @@
           && canOperate
           && !machine.takeover_pending
           && (Number(machine.current_operator_id) !== Number(currentUser.operator_id)
-            || (machine.last_ended_shift_date && machine.last_ended_shift_date < localToday));
+            || (machine.last_ended_shift_date && machine.last_ended_shift_date < localToday)
+            || machine.has_alternate_handover_shift);
         const detailRows = isAvailable
           ? '<p class="machine-available-text">No active job. Machine is ready.</p>'
           : `<dl class="machine-details">

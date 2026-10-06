@@ -325,6 +325,10 @@
             document.getElementById('handover_job_id').value = job.id;
             document.getElementById('handover_operator').value = currentUser.operator_name || currentUser.username;
             document.getElementById('handover_shift_date').value = today;
+            if (Number(currentUser.operator_id) === Number(job.current_operator_id)) {
+              const nextShift = activeShifts.find(shift => String(shift.code) !== String(job.last_shift));
+              if (nextShift) document.getElementById('handover_shift').value = nextShift.code;
+            }
             updateHandoverShiftHours();
             acceptPanel.classList.remove('hidden');
             readOnly.className = 'banner';

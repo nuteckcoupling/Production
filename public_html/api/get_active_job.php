@@ -23,6 +23,8 @@ $stmt = $conn->prepare("SELECT
              THEN GREATEST(TIMESTAMPDIFF(SECOND, NOW(), s.started_at), 0) ELSE 0 END AS takeover_seconds_remaining,
         last_s.id AS last_shift_id, last_s.shift_date AS last_shift_date,
         last_s.shift AS last_shift, last_s.shift_hours AS last_shift_hours,
+        EXISTS(SELECT 1 FROM shifts available_s
+               WHERE available_s.status = 'Active' AND available_s.code <> last_s.shift) AS has_alternate_handover_shift,
         last_s.started_at AS last_shift_started_at, last_s.ended_at AS last_shift_ended_at,
         last_s.total_qty AS last_total_qty, last_s.ok_qty AS last_ok_qty,
         last_s.mc_reject_qty AS last_mc_reject_qty, last_s.rm_defect_qty AS last_rm_defect_qty,
@@ -127,7 +129,8 @@ $job['can_accept_handover'] = ($user['role'] ?? '') === 'Operator/Supervisor'
     && $job['status'] === 'Handover Pending'
     && $job['shift_id'] === null
     && ((int)($user['operator_id'] ?? 0) !== (int)$job['current_operator_id']
-        || ($job['last_shift_date'] && $job['last_shift_date'] < date('Y-m-d')));
+        || ($job['last_shift_date'] && $job['last_shift_date'] < date('Y-m-d'))
+        || (bool)$job['has_alternate_handover_shift']);
 $job['can_resume_job'] = ($user['role'] ?? '') === 'Operator/Supervisor'
     && $job['status'] === 'Stopped'
     && $job['shift_id'] === null

@@ -25,7 +25,10 @@ try {
     $jobStmt = $conn->prepare("SELECT id, status, current_operator_id,
         (SELECT previous_s.shift_date FROM job_shifts previous_s
          WHERE previous_s.job_id = production_jobs.id AND previous_s.status = 'Ended'
-         ORDER BY previous_s.id DESC LIMIT 1) AS last_ended_shift_date
+         ORDER BY previous_s.id DESC LIMIT 1) AS last_ended_shift_date,
+        (SELECT previous_s.shift FROM job_shifts previous_s
+         WHERE previous_s.job_id = production_jobs.id AND previous_s.status = 'Ended'
+         ORDER BY previous_s.id DESC LIMIT 1) AS last_ended_shift
         FROM production_jobs WHERE id = ? FOR UPDATE");
     $jobStmt->bind_param("i", $job_id);
     $jobStmt->execute();
@@ -40,8 +43,9 @@ try {
     }
     $same_operator = (int)$job['current_operator_id'] === $operator_id;
     if ($same_operator && (!$job['last_ended_shift_date']
-        || $shift_date <= $job['last_ended_shift_date']
-        || $shift_date > date('Y-m-d'))) {
+        || $shift_date < $job['last_ended_shift_date']
+        || $shift_date > date('Y-m-d')
+        || ($shift_date === $job['last_ended_shift_date'] && $shift === $job['last_ended_shift']))) {
         throw new RuntimeException('Handover must be accepted by the next operator', 403);
     }
 
