@@ -35,9 +35,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $cutter_id = filter_input(INPUT_GET, 'cutter_id', FILTER_VALIDATE_INT);
-$report_date = trim((string)($_GET['date'] ?? date('Y-m-d')));
-$date = DateTime::createFromFormat('!Y-m-d', $report_date);
-if (!$cutter_id || !$date || $date->format('Y-m-d') !== $report_date) json_error('Invalid cutter or report date', 400);
+$period = $_GET['period'] ?? 'daily';
+$value = trim((string)($_GET['value'] ?? date('Y-m-d')));
+if (!$cutter_id || !in_array($period, ['daily', 'weekly', 'monthly', 'yearly'], true)) json_error('Invalid cutter or report period', 400);
+if ($period === 'daily' || $period === 'weekly') {
+    $date = DateTime::createFromFormat('!Y-m-d', $value);
+    if (!$date || $date->format('Y-m-d') !== $value) json_error('Invalid report date', 400);
+    $start = clone $date;
+    if ($period === 'weekly') $start->modify('monday this week');
+    $end = clone $start;
+    if ($period === 'weekly') $end->modify('+6 days');
+    $label = $period === 'weekly' ? $start->format('d M Y') . ' - ' . $end->format('d M Y') : $start->format('d M Y');
+} elseif ($period === 'monthly') {
+    $date = DateTime::createFromFormat('!Y-m', $value);
+    if (!$date || $date->format('Y-m') !== $value) json_error('Invalid report month', 400);
+    $start = clone $date;
+    $end = (clone $start)->modify('last day of this month');
+    $label = $start->format('F Y');
+} else {
+    if (!preg_match('/^\d{4}$/', $value) || (int)$value < 1000) json_error('Invalid report year', 400);
+    $start = DateTime::createFromFormat('!Y', $value);
+    $end = (clone $start)->setDate((int)$value, 12, 31);
+    $label = $value;
+}
+$start_date = $start->format('Y-m-d');
+$end_date = $end->format('Y-m-d');
 
 $stmt = $conn->prepare("SELECT c.*, (SELECT MIN(entry_date) FROM daily_entries WHERE cutter_id = c.id) AS first_used_date
     FROM cutters c WHERE c.id = ? AND c.deleted_at IS NULL LIMIT 1");
@@ -63,9 +85,9 @@ $stmt->close();
 $stmt = $conn->prepare("SELECT m.code AS machine_no, COALESCE(NULLIF(d.drg_no, ''), NULLIF(p.drg_no, ''), '-') AS part_no,
     p.part_name, SUM(d.total_qty) AS qty FROM daily_entries d
     JOIN machines m ON m.id = d.machine_id JOIN parts p ON p.id = d.part_id
-    WHERE d.cutter_id = ? AND d.entry_date = ?
+    WHERE d.cutter_id = ? AND d.entry_date BETWEEN ? AND ?
     GROUP BY m.id, m.code, d.part_id, d.drg_no, p.drg_no, p.part_name ORDER BY m.code, p.part_name");
-$stmt->bind_param('is', $cutter_id, $report_date);
+$stmt->bind_param('iss', $cutter_id, $start_date, $end_date);
 $stmt->execute();
 $monitoring_rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
@@ -88,7 +110,8 @@ json_response([
         for ($i = count($events) - 1; $i >= 0; $i--) if ($events[$i]['event_type'] === 'Coating') return $events[$i]['event_date'];
         return null;
     })(),
-    'monitoring' => ['date' => $report_date, 'rows' => $monitoring_rows,
+    'monitoring' => ['period' => $period, 'value' => $value, 'label' => $label,
+        'start_date' => $start_date, 'end_date' => $end_date, 'rows' => $monitoring_rows,
         'total_qty' => array_sum(array_map(static fn($row) => (int)$row['qty'], $monitoring_rows))],
     'events' => $events,
     'current_cycle' => ['from_date' => $cycle_start, 'qty' => $cycle_qty],

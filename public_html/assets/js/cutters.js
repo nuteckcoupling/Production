@@ -188,7 +188,7 @@
     document.getElementById('cutterSearch').addEventListener('input', renderCutters);
     document.getElementById('cutterModuleFilter').addEventListener('change', renderCutters);
 
-    async function openCutterToolRecord(cutter, view, date = today) {
+    async function openCutterToolRecord(cutter, view, period = 'daily', value = today) {
       const dialog = document.getElementById('cutterToolDialog');
       const content = document.getElementById('cutterToolContent');
       const title = view === 'monitoring' ? 'Tool Monitoring Report' : 'Tool History Card';
@@ -197,43 +197,78 @@
       content.innerHTML = '<p>Loading tool records...</p>';
       if (!dialog.open) dialog.showModal();
       try {
-        const response = await fetch(`${API}/cutter_tool_tracking.php?cutter_id=${encodeURIComponent(cutter.id)}&date=${encodeURIComponent(date)}`);
+        const query = new URLSearchParams({cutter_id: cutter.id, period, value});
+        const response = await fetch(`${API}/cutter_tool_tracking.php?${query}`);
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Unable to load cutter records.');
-        if (view === 'monitoring') renderCutterMonitoring(data);
+        if (view === 'monitoring') renderCutterMonitoring(data, cutter);
         else renderCutterHistory(data);
       } catch (error) {
         content.innerHTML = `<p class="error-text">${escapeHtml(error.message)}</p>`;
       }
     }
 
-    function renderCutterMonitoring(data) {
-      const { cutter, monitoring } = data;
+    function renderCutterMonitoring(data, selectedCutter) {
+      const cutter = data.cutter;
+      const { monitoring } = data;
       const rows = monitoring.rows.map(row => `<tr><td>${escapeHtml(row.machine_no)}</td><td>${escapeHtml(row.part_no)}</td><td>${escapeHtml(row.part_name)}</td><td>${escapeHtml(row.qty)}</td></tr>`).join('');
       document.getElementById('cutterToolContent').innerHTML = `
-        <div class="grid management-grid cutter-tool-filters"><label>Report Date<input id="toolMonitoringDate" type="date" value="${escapeHtml(monitoring.date)}"></label><button id="loadToolMonitoringDate" class="secondary-button" type="button">Load Date</button></div>
-        <div id="cutterMonitoringPrint" class="cutter-print-sheet"><h2>Tool Monitoring Report</h2><p><b>Cutter Name:</b> ${escapeHtml(cutter.cutter_name || cutter.cutter_type || '-')} &nbsp; <b>Date:</b> ${escapeHtml(monitoring.date)}</p>
+        <div class="grid management-grid cutter-tool-filters"><label>Report Period<select id="toolMonitoringPeriod"><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option><option value="yearly">Yearly</option></select></label><label id="toolMonitoringValueLabel">Date<input id="toolMonitoringValue" type="date" value="${escapeHtml(monitoring.value)}"></label><button id="loadToolMonitoringDate" class="secondary-button" type="button">Load Report</button></div>
+        <div id="cutterMonitoringPrint" class="cutter-print-sheet"><h2>Tool Monitoring Report</h2><p><b>Cutter Name:</b> ${escapeHtml(cutter.cutter_name || cutter.cutter_type || '-')} &nbsp; <b>Period:</b> ${escapeHtml(monitoring.label)}</p>
         <p><b>Cutter No.:</b> ${escapeHtml(cutter.cutter_num)} &nbsp; <b>Module/Pitch:</b> ${escapeHtml(cutter.cutter_module || '-')} &nbsp; <b>Cutter Coated:</b> ${data.is_coated ? 'Yes' : 'No'} &nbsp; <b>Coated Date:</b> ${escapeHtml(data.latest_coating_date || '-')}</p>
         <p><b>No. of Teeth:</b> ${escapeHtml(cutter.cutter_tooth_count || '-')} &nbsp; <b>Cutter Tooth Thickness:</b> ${escapeHtml(cutter.cutter_tooth_thickness || '-')}</p>
         <div class="table-scroll"><table class="report-table"><thead><tr><th>Sr. No.</th><th>Machine No.</th><th>Part No.</th><th>Part Name</th><th>Qty.</th></tr></thead><tbody>${rows || '<tr><td colspan="5">No production entries for this cutter on the selected date.</td></tr>'}</tbody><tfoot><tr><th colspan="4">Total Qty</th><th>${escapeHtml(monitoring.total_qty)}</th></tr></tfoot></table></div>
         <label class="tool-remarks">Remarks<textarea id="toolMonitoringRemarks" maxlength="255"></textarea></label><p class="tool-signatures">Maintenance: __________________ &nbsp; Production: __________________ &nbsp; Quality: __________________</p></div>
         <div class="dialog-actions"><button class="submit" type="button" onclick="printCutterMonitoring()">Print / Save PDF</button></div>`;
+      const periodSelect = document.getElementById('toolMonitoringPeriod');
+      const valueInput = document.getElementById('toolMonitoringValue');
+      periodSelect.value = monitoring.period;
+      periodSelect.addEventListener('change', () => {
+        const period = periodSelect.value;
+        valueInput.type = period === 'monthly' ? 'month' : period === 'yearly' ? 'number' : 'date';
+        valueInput.value = period === 'monthly' ? today.slice(0, 7) : period === 'yearly' ? today.slice(0, 4) : today;
+        valueInput.min = period === 'yearly' ? '1000' : '';
+        valueInput.max = period === 'yearly' ? '9999' : '';
+        document.getElementById('toolMonitoringValueLabel').firstChild.textContent = period === 'weekly' ? 'Week containing date' : period === 'monthly' ? 'Month' : period === 'yearly' ? 'Year' : 'Date';
+      });
+      periodSelect.dispatchEvent(new Event('change'));
+      valueInput.value = monitoring.value;
       document.getElementById('loadToolMonitoringDate').addEventListener('click', () => {
-        const selectedDate = document.getElementById('toolMonitoringDate').value;
-        if (selectedDate) openCutterToolRecord(cutter, 'monitoring', selectedDate);
+        const selectedValue = valueInput.value;
+        if (selectedValue) openCutterToolRecord(selectedCutter, 'monitoring', periodSelect.value, selectedValue);
       });
     }
 
     function renderCutterHistory(data) {
-      const { cutter, events, current_cycle } = data;
+      const { cutter, monitoring, current_cycle } = data;
+      const events = data.events.filter(event => event.event_date >= monitoring.start_date && event.event_date <= monitoring.end_date);
       const rows = events.map(event => `<tr><td>${escapeHtml(event.event_date)}</td><td>${escapeHtml(event.event_type)}</td><td>${escapeHtml(event.qty_since_previous)}</td><td>${escapeHtml(event.remarks || '-')}</td></tr>`).join('');
+      const productionRows = monitoring.rows.map(row => `<tr><td>${escapeHtml(row.machine_no)}</td><td>${escapeHtml(row.part_no)}</td><td>${escapeHtml(row.part_name)}</td><td>${escapeHtml(row.qty)}</td></tr>`).join('');
       document.getElementById('cutterToolContent').innerHTML = `
-        <div class="cutter-print-sheet"><h2>Tool History Card</h2><p><b>Cutter Name:</b> ${escapeHtml(cutter.cutter_name || cutter.cutter_type || '-')} &nbsp; <b>Cutter No.:</b> ${escapeHtml(cutter.cutter_num)} &nbsp; <b>Module/Pitch:</b> ${escapeHtml(cutter.cutter_module || '-')}</p>
+        <div class="grid management-grid cutter-tool-filters"><label>Report Period<select id="toolMonitoringPeriod"><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option><option value="yearly">Yearly</option></select></label><label id="toolMonitoringValueLabel">Date<input id="toolMonitoringValue" type="date" value="${escapeHtml(monitoring.value)}"></label><button id="loadToolMonitoringDate" class="secondary-button" type="button">Load Report</button></div>
+        <div class="cutter-print-sheet"><h2>Tool History Card</h2><p><b>Cutter Name:</b> ${escapeHtml(cutter.cutter_name || cutter.cutter_type || '-')} &nbsp; <b>Cutter No.:</b> ${escapeHtml(cutter.cutter_num)} &nbsp; <b>Module/Pitch:</b> ${escapeHtml(cutter.cutter_module || '-')} &nbsp; <b>Period:</b> ${escapeHtml(monitoring.label)}</p>
         <p><b>Start Using Date:</b> ${escapeHtml(cutter.first_used_date || '-')} &nbsp; <b>No. of Teeth:</b> ${escapeHtml(cutter.cutter_tooth_count || '-')} &nbsp; <b>Cutter Tooth Thickness:</b> ${escapeHtml(cutter.cutter_tooth_thickness || '-')}</p>
         <p><b>Purchase Date:</b> ${escapeHtml(cutter.purchase_date || '-')} &nbsp; <b>Scrap Date:</b> ${escapeHtml(cutter.scrap_date || '-')}</p>
-        <div class="table-scroll"><table class="report-table"><thead><tr><th>Sr. No.</th><th>Coating / Grinding Date</th><th>Service</th><th>Qty. Since Previous Service</th><th>Remarks</th></tr></thead><tbody>${rows || '<tr><td colspan="5">No coating or grinding history recorded.</td></tr>'}</tbody></table></div>
-        <p><b>Current cycle since ${escapeHtml(current_cycle.from_date || 'first use')}:</b> ${escapeHtml(current_cycle.qty)} pcs</p></div>
+        <h3>Coating / Grinding Events in Selected Period</h3><div class="table-scroll"><table class="report-table"><thead><tr><th>Sr. No.</th><th>Coating / Grinding Date</th><th>Service</th><th>Qty. Since Previous Service</th><th>Remarks</th></tr></thead><tbody>${rows || '<tr><td colspan="5">No coating or grinding events in the selected period.</td></tr>'}</tbody></table></div>
+        <h3>Production During Selected Period</h3><div class="table-scroll"><table class="report-table"><thead><tr><th>Machine No.</th><th>Part No.</th><th>Part Name</th><th>Qty.</th></tr></thead><tbody>${productionRows || '<tr><td colspan="4">No production entries in the selected period.</td></tr>'}</tbody><tfoot><tr><th colspan="3">Period Total</th><th>${escapeHtml(monitoring.total_qty)}</th></tr></tfoot></table></div>
+        <p><b>Current service cycle since ${escapeHtml(current_cycle.from_date || 'first use')} (overall):</b> ${escapeHtml(current_cycle.qty)} pcs</p></div>
         <form id="cutterServiceEventForm" class="grid management-grid"><input type="hidden" name="cutter_id" value="${escapeHtml(cutter.id)}"><label>Service Type<select name="event_type" required><option value="Coating">Cutter Coating</option><option value="Grinding">Cutter Grinding</option></select></label><label>Service Date<input type="date" name="event_date" max="${today}" value="${today}" required></label><label>Remarks<input name="remarks" maxlength="255" placeholder="Optional"></label><div class="dialog-actions"><button class="submit" type="submit">Save Service Event</button><button class="secondary-button" type="button" onclick="printCutterHistory()">Print / Save PDF</button></div></form>`;
+      const periodSelect = document.getElementById('toolMonitoringPeriod');
+      const valueInput = document.getElementById('toolMonitoringValue');
+      periodSelect.value = monitoring.period;
+      periodSelect.addEventListener('change', () => {
+        const period = periodSelect.value;
+        valueInput.type = period === 'monthly' ? 'month' : period === 'yearly' ? 'number' : 'date';
+        valueInput.value = period === 'monthly' ? today.slice(0, 7) : period === 'yearly' ? today.slice(0, 4) : today;
+        valueInput.min = period === 'yearly' ? '1000' : '';
+        valueInput.max = period === 'yearly' ? '9999' : '';
+        document.getElementById('toolMonitoringValueLabel').firstChild.textContent = period === 'weekly' ? 'Week containing date' : period === 'monthly' ? 'Month' : period === 'yearly' ? 'Year' : 'Date';
+      });
+      periodSelect.dispatchEvent(new Event('change'));
+      valueInput.value = monitoring.value;
+      document.getElementById('loadToolMonitoringDate').addEventListener('click', () => {
+        if (valueInput.value) openCutterToolRecord(cutter, 'history', periodSelect.value, valueInput.value);
+      });
       document.getElementById('cutterServiceEventForm').addEventListener('submit', saveCutterServiceEvent);
     }
 
@@ -248,7 +283,7 @@
         if (!response.ok) throw new Error(data.error || 'Unable to save service event.');
         const cutter = cutterRecords.find(item => String(item.id) === form.elements.cutter_id.value);
         showToast('success', 'Cutter service event saved.');
-        await openCutterToolRecord(cutter, 'history');
+        await openCutterToolRecord(cutter, 'history', document.getElementById('toolMonitoringPeriod')?.value || 'daily', document.getElementById('toolMonitoringValue')?.value || today);
       } catch (error) {
         showToast('error', error.message);
       } finally { button.disabled = false; }
