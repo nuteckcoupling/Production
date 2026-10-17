@@ -4,8 +4,9 @@ require_auth();
 
 $trash = ($_GET['trash'] ?? '') === '1';
 $where = $trash ? 'deleted_at IS NOT NULL' : 'deleted_at IS NULL';
-$result = $conn->query("SELECT id, cutter_num, cutter_module AS module, cutter_type, lead_angle, hob_pressure_angle,
-    cutter_inner_diameter, cutter_outer_diameter, cutter_thickness, rpm_stroke, status, remarks, deleted_at
+$result = $conn->query("SELECT id, cutter_num, cutter_name, cutter_module AS module, cutter_type, lead_angle, hob_pressure_angle,
+    cutter_inner_diameter, cutter_outer_diameter, cutter_thickness, cutter_tooth_count, cutter_tooth_thickness,
+    purchase_date, scrap_date, rpm_stroke, status, remarks, deleted_at
     FROM cutters WHERE $where ORDER BY cutter_module, cutter_num");
 $rows = [];
 while ($row = $result->fetch_assoc()) {

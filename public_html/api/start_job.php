@@ -65,7 +65,7 @@ if ($componentCheck->get_result()->num_rows !== 1) {
 $componentCheck->close();
 
 if ($cutter_id !== null) {
-    $cutterCheck = $conn->prepare("SELECT id FROM cutters WHERE id = ? AND status = 'Active'");
+    $cutterCheck = $conn->prepare("SELECT id FROM cutters WHERE id = ? AND status = 'Active' AND scrap_date IS NULL AND deleted_at IS NULL");
     $cutterCheck->bind_param("i", $cutter_id);
     $cutterCheck->execute();
     if ($cutterCheck->get_result()->num_rows !== 1) {

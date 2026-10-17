@@ -259,6 +259,7 @@ WHERE p.coupling_type = 'Roller Chain Coupling'
 CREATE TABLE IF NOT EXISTS cutters (
   id INT AUTO_INCREMENT PRIMARY KEY,
   cutter_num VARCHAR(50) NOT NULL,
+  cutter_name VARCHAR(100) DEFAULT NULL,
   cutter_module VARCHAR(50) DEFAULT NULL,
   cutter_type VARCHAR(100),
   lead_angle DECIMAL(6,2) DEFAULT NULL,
@@ -266,12 +267,29 @@ CREATE TABLE IF NOT EXISTS cutters (
   cutter_inner_diameter DECIMAL(8,2) DEFAULT NULL,
   cutter_outer_diameter DECIMAL(8,2) DEFAULT NULL,
   cutter_thickness DECIMAL(8,2) DEFAULT NULL,
+  cutter_tooth_count INT UNSIGNED DEFAULT NULL,
+  cutter_tooth_thickness DECIMAL(8,2) DEFAULT NULL,
+  purchase_date DATE DEFAULT NULL,
+  scrap_date DATE DEFAULT NULL,
   rpm_stroke VARCHAR(50) DEFAULT NULL,
   status ENUM('Active','Not Active') DEFAULT 'Active',
   remarks VARCHAR(255) DEFAULT NULL,
   deleted_at DATETIME DEFAULT NULL,
   KEY idx_cutters_deleted_at (deleted_at),
   UNIQUE KEY unique_cutter_number_module (cutter_num, cutter_module)
+);
+
+CREATE TABLE IF NOT EXISTS cutter_service_events (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  cutter_id INT NOT NULL,
+  event_type ENUM('Coating','Grinding') NOT NULL,
+  event_date DATE NOT NULL,
+  remarks VARCHAR(255) DEFAULT NULL,
+  created_by_user_id INT DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_cutter_service_history (cutter_id, event_date, id),
+  FOREIGN KEY (cutter_id) REFERENCES cutters(id),
+  FOREIGN KEY (created_by_user_id) REFERENCES users(id)
 );
 
 CREATE TABLE IF NOT EXISTS shifts (

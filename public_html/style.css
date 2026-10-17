@@ -214,6 +214,11 @@ body.modal-open { overflow: hidden; }
 .cutter-details div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .cutter-details span { color: #64748b; font-size: 11px; font-weight: 700; }
 .cutter-details strong { color: #1e293b; font-size: 12px; text-align: right; overflow-wrap: anywhere; }
+.cutter-tool-filters { grid-template-columns: minmax(200px, 280px) auto; align-items: end; margin-bottom: 16px; }
+.cutter-print-sheet h2 { margin-bottom: 12px; }
+.cutter-print-sheet p { line-height: 1.8; }
+.tool-remarks textarea { min-height: 70px; }
+.tool-signatures { margin-top: 42px; }
 .cutter-status { flex: 0 0 auto; padding: 5px 8px; border-radius: 999px; font-size: 10px; font-weight: 800; }
 .cutter-status.active { background: #dcfce7; color: #166534; }
 .cutter-status.inactive { background: #f1f5f9; color: #475569; }
@@ -441,6 +446,11 @@ th { background: #f8f9fb; font-weight: 600; }
 @media print {
   @page { size: landscape; margin: 10mm; }
   body { background: #fff; }
+  body.cutter-tool-print #cutterToolDialog, body.cutter-tool-print #cutterToolDialog * { visibility: visible; }
+  body.cutter-tool-print #cutterToolDialog { position: fixed; inset: 0; width: 100%; max-width: none; max-height: none; margin: 0; display: block; }
+  body.cutter-tool-print #cutterToolDialog .dialog-header, body.cutter-tool-print #cutterToolDialog .dialog-actions,
+  body.cutter-tool-print #cutterServiceEventForm, body.cutter-tool-print .cutter-tool-filters { display: none !important; }
+  body.cutter-tool-print #cutterToolContent { padding: 0; }
   body * { visibility: hidden; }
   #reportModule, #reportModule * { visibility: visible; }
   #reportModule { position: absolute; inset: 0; width: 100%; }

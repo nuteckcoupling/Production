@@ -68,6 +68,13 @@ $stmt = $conn->prepare("INSERT INTO daily_entries
     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
 $cutter_id = !empty($data['cutter_id']) ? (int)$data['cutter_id'] : null;
+if ($cutter_id !== null) {
+    $cutter_check = $conn->prepare("SELECT id FROM cutters WHERE id = ? AND status = 'Active' AND scrap_date IS NULL AND deleted_at IS NULL");
+    $cutter_check->bind_param('i', $cutter_id);
+    $cutter_check->execute();
+    if ($cutter_check->get_result()->num_rows !== 1) json_error('Select a valid active cutter');
+    $cutter_check->close();
+}
 
 $machine_id = (int)$data['machine_id'];
 $part_id = (int)$data['part_id'];

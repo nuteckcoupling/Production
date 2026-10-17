@@ -51,7 +51,7 @@
       const filtered = cutterRecords.filter(cutter =>
         (showCutterTrash || cutter.status === cutterStatusView)
         && (!module || cutter.module === module)
-        && (!search || [cutter.cutter_num, cutter.module, cutter.cutter_type, cutter.hob_pressure_angle, cutter.cutter_inner_diameter, cutter.cutter_outer_diameter, cutter.cutter_thickness, cutter.remarks]
+        && (!search || [cutter.cutter_num, cutter.cutter_name, cutter.module, cutter.cutter_type, cutter.hob_pressure_angle, cutter.cutter_inner_diameter, cutter.cutter_outer_diameter, cutter.cutter_thickness, cutter.cutter_tooth_count, cutter.cutter_tooth_thickness, cutter.remarks]
           .some(value => String(value || '').toLowerCase().includes(search))));
       const label = showCutterTrash ? 'deleted' : cutterStatusView.toLowerCase();
       document.getElementById('cutterResultCount').innerText = `${filtered.length} ${label} cutter${filtered.length === 1 ? '' : 's'}`;
@@ -70,21 +70,27 @@
             <span class="cutter-status ${cutter.status === 'Active' ? 'active' : 'inactive'}">${escapeHtml(cutter.status)}</span>
           </div>
           <div class="cutter-details">
+            <div><span>Cutter Name</span><strong>${escapeHtml(cutter.cutter_name || '-')}</strong></div>
             <div><span>Type</span><strong>${escapeHtml(cutter.cutter_type || '-')}</strong></div>
             <div><span>Lead Angle</span><strong>${cutter.lead_angle === null ? '-' : `${escapeHtml(cutter.lead_angle)}°`}</strong></div>
             <div><span>Hob Pressure Angle</span><strong>${cutter.hob_pressure_angle === null ? '-' : `${escapeHtml(cutter.hob_pressure_angle)}°`}</strong></div>
             <div><span>Cutter I.D.</span><strong>${cutter.cutter_inner_diameter === null ? '-' : `${escapeHtml(cutter.cutter_inner_diameter)} mm`}</strong></div>
             <div><span>Cutter O.D.</span><strong>${cutter.cutter_outer_diameter === null ? '-' : `${escapeHtml(cutter.cutter_outer_diameter)} mm`}</strong></div>
             <div><span>Cutter Thickness</span><strong>${cutter.cutter_thickness === null ? '-' : `${escapeHtml(cutter.cutter_thickness)} mm`}</strong></div>
+            <div><span>No. of Teeth</span><strong>${escapeHtml(cutter.cutter_tooth_count || '-')}</strong></div>
+            <div><span>Cutter Tooth Thickness</span><strong>${cutter.cutter_tooth_thickness === null ? '-' : `${escapeHtml(cutter.cutter_tooth_thickness)} mm`}</strong></div>
             <div><span>RPM / Stroke</span><strong>${escapeHtml(cutter.rpm_stroke || '-')}</strong></div>
           </div>
           ${cutter.remarks ? `<p class="cutter-remarks">${escapeHtml(cutter.remarks)}</p>` : ''}
           <div class="coupling-card-actions">
+            ${!showCutterTrash ? '<button type="button" class="table-action tool-monitoring">Monitoring Report</button><button type="button" class="table-action tool-history">Tool History</button>' : ''}
             ${showCutterTrash
               ? '<button type="button" class="table-action restore restore-cutter">Restore</button>'
               : '<button type="button" class="table-action edit edit-cutter">Edit</button><button type="button" class="table-action delete delete-cutter">Delete</button>'}
           </div>`;
         card.querySelector('.edit-cutter')?.addEventListener('click', () => openCutterEditor(cutter));
+        card.querySelector('.tool-monitoring')?.addEventListener('click', () => openCutterToolRecord(cutter, 'monitoring'));
+        card.querySelector('.tool-history')?.addEventListener('click', () => openCutterToolRecord(cutter, 'history'));
         card.querySelector('.delete-cutter')?.addEventListener('click', () => deleteCutter(cutter));
         card.querySelector('.restore-cutter')?.addEventListener('click', () => restoreCutter(cutter));
         list.appendChild(card);
@@ -96,6 +102,7 @@
       form.reset();
       document.getElementById('cutter_edit_id').value = cutter?.id || '';
       document.getElementById('cutter_num').value = cutter?.cutter_num || '';
+      document.getElementById('cutter_name').value = cutter?.cutter_name || '';
       document.getElementById('cutter_module').value = cutter?.module || '';
       document.getElementById('cutter_type').value = cutter?.cutter_type || '';
       document.getElementById('lead_angle').value = cutter?.lead_angle ?? '';
@@ -103,6 +110,10 @@
       document.getElementById('cutter_inner_diameter').value = cutter?.cutter_inner_diameter ?? '';
       document.getElementById('cutter_outer_diameter').value = cutter?.cutter_outer_diameter ?? '';
       document.getElementById('cutter_thickness').value = cutter?.cutter_thickness ?? '';
+      document.getElementById('cutter_tooth_count').value = cutter?.cutter_tooth_count ?? '';
+      document.getElementById('cutter_tooth_thickness').value = cutter?.cutter_tooth_thickness ?? '';
+      document.getElementById('cutter_purchase_date').value = cutter?.purchase_date || '';
+      document.getElementById('cutter_scrap_date').value = cutter?.scrap_date || '';
       document.getElementById('rpm_stroke').value = cutter?.rpm_stroke || '';
       document.getElementById('cutter_status').value = cutter?.status || 'Active';
       document.getElementById('cutter_remarks').value = cutter?.remarks || '';
@@ -176,3 +187,82 @@
 
     document.getElementById('cutterSearch').addEventListener('input', renderCutters);
     document.getElementById('cutterModuleFilter').addEventListener('change', renderCutters);
+
+    async function openCutterToolRecord(cutter, view, date = today) {
+      const dialog = document.getElementById('cutterToolDialog');
+      const content = document.getElementById('cutterToolContent');
+      const title = view === 'monitoring' ? 'Tool Monitoring Report' : 'Tool History Card';
+      document.getElementById('cutterToolTitle').innerText = title;
+      document.getElementById('cutterToolSubtitle').innerText = `${cutter.cutter_num} · ${cutter.module || 'Module not set'}`;
+      content.innerHTML = '<p>Loading tool records...</p>';
+      if (!dialog.open) dialog.showModal();
+      try {
+        const response = await fetch(`${API}/cutter_tool_tracking.php?cutter_id=${encodeURIComponent(cutter.id)}&date=${encodeURIComponent(date)}`);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Unable to load cutter records.');
+        if (view === 'monitoring') renderCutterMonitoring(data);
+        else renderCutterHistory(data);
+      } catch (error) {
+        content.innerHTML = `<p class="error-text">${escapeHtml(error.message)}</p>`;
+      }
+    }
+
+    function renderCutterMonitoring(data) {
+      const { cutter, monitoring } = data;
+      const rows = monitoring.rows.map(row => `<tr><td>${escapeHtml(row.machine_no)}</td><td>${escapeHtml(row.part_no)}</td><td>${escapeHtml(row.part_name)}</td><td>${escapeHtml(row.qty)}</td></tr>`).join('');
+      document.getElementById('cutterToolContent').innerHTML = `
+        <div class="grid management-grid cutter-tool-filters"><label>Report Date<input id="toolMonitoringDate" type="date" value="${escapeHtml(monitoring.date)}"></label><button id="loadToolMonitoringDate" class="secondary-button" type="button">Load Date</button></div>
+        <div id="cutterMonitoringPrint" class="cutter-print-sheet"><h2>Tool Monitoring Report</h2><p><b>Cutter Name:</b> ${escapeHtml(cutter.cutter_name || cutter.cutter_type || '-')} &nbsp; <b>Date:</b> ${escapeHtml(monitoring.date)}</p>
+        <p><b>Cutter No.:</b> ${escapeHtml(cutter.cutter_num)} &nbsp; <b>Module/Pitch:</b> ${escapeHtml(cutter.cutter_module || '-')} &nbsp; <b>Cutter Coated:</b> ${data.is_coated ? 'Yes' : 'No'} &nbsp; <b>Coated Date:</b> ${escapeHtml(data.latest_coating_date || '-')}</p>
+        <p><b>No. of Teeth:</b> ${escapeHtml(cutter.cutter_tooth_count || '-')} &nbsp; <b>Cutter Tooth Thickness:</b> ${escapeHtml(cutter.cutter_tooth_thickness || '-')}</p>
+        <div class="table-scroll"><table class="report-table"><thead><tr><th>Sr. No.</th><th>Machine No.</th><th>Part No.</th><th>Part Name</th><th>Qty.</th></tr></thead><tbody>${rows || '<tr><td colspan="5">No production entries for this cutter on the selected date.</td></tr>'}</tbody><tfoot><tr><th colspan="4">Total Qty</th><th>${escapeHtml(monitoring.total_qty)}</th></tr></tfoot></table></div>
+        <label class="tool-remarks">Remarks<textarea id="toolMonitoringRemarks" maxlength="255"></textarea></label><p class="tool-signatures">Maintenance: __________________ &nbsp; Production: __________________ &nbsp; Quality: __________________</p></div>
+        <div class="dialog-actions"><button class="submit" type="button" onclick="printCutterMonitoring()">Print / Save PDF</button></div>`;
+      document.getElementById('loadToolMonitoringDate').addEventListener('click', () => {
+        const selectedDate = document.getElementById('toolMonitoringDate').value;
+        if (selectedDate) openCutterToolRecord(cutter, 'monitoring', selectedDate);
+      });
+    }
+
+    function renderCutterHistory(data) {
+      const { cutter, events, current_cycle } = data;
+      const rows = events.map(event => `<tr><td>${escapeHtml(event.event_date)}</td><td>${escapeHtml(event.event_type)}</td><td>${escapeHtml(event.qty_since_previous)}</td><td>${escapeHtml(event.remarks || '-')}</td></tr>`).join('');
+      document.getElementById('cutterToolContent').innerHTML = `
+        <div class="cutter-print-sheet"><h2>Tool History Card</h2><p><b>Cutter Name:</b> ${escapeHtml(cutter.cutter_name || cutter.cutter_type || '-')} &nbsp; <b>Cutter No.:</b> ${escapeHtml(cutter.cutter_num)} &nbsp; <b>Module/Pitch:</b> ${escapeHtml(cutter.cutter_module || '-')}</p>
+        <p><b>Start Using Date:</b> ${escapeHtml(cutter.first_used_date || '-')} &nbsp; <b>No. of Teeth:</b> ${escapeHtml(cutter.cutter_tooth_count || '-')} &nbsp; <b>Cutter Tooth Thickness:</b> ${escapeHtml(cutter.cutter_tooth_thickness || '-')}</p>
+        <p><b>Purchase Date:</b> ${escapeHtml(cutter.purchase_date || '-')} &nbsp; <b>Scrap Date:</b> ${escapeHtml(cutter.scrap_date || '-')}</p>
+        <div class="table-scroll"><table class="report-table"><thead><tr><th>Sr. No.</th><th>Coating / Grinding Date</th><th>Service</th><th>Qty. Since Previous Service</th><th>Remarks</th></tr></thead><tbody>${rows || '<tr><td colspan="5">No coating or grinding history recorded.</td></tr>'}</tbody></table></div>
+        <p><b>Current cycle since ${escapeHtml(current_cycle.from_date || 'first use')}:</b> ${escapeHtml(current_cycle.qty)} pcs</p></div>
+        <form id="cutterServiceEventForm" class="grid management-grid"><input type="hidden" name="cutter_id" value="${escapeHtml(cutter.id)}"><label>Service Type<select name="event_type" required><option value="Coating">Cutter Coating</option><option value="Grinding">Cutter Grinding</option></select></label><label>Service Date<input type="date" name="event_date" max="${today}" value="${today}" required></label><label>Remarks<input name="remarks" maxlength="255" placeholder="Optional"></label><div class="dialog-actions"><button class="submit" type="submit">Save Service Event</button><button class="secondary-button" type="button" onclick="printCutterHistory()">Print / Save PDF</button></div></form>`;
+      document.getElementById('cutterServiceEventForm').addEventListener('submit', saveCutterServiceEvent);
+    }
+
+    async function saveCutterServiceEvent(event) {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const button = form.querySelector('[type="submit"]');
+      button.disabled = true;
+      try {
+        const response = await fetch(`${API}/cutter_tool_tracking.php`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(Object.fromEntries(new FormData(form))) });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Unable to save service event.');
+        const cutter = cutterRecords.find(item => String(item.id) === form.elements.cutter_id.value);
+        showToast('success', 'Cutter service event saved.');
+        await openCutterToolRecord(cutter, 'history');
+      } catch (error) {
+        showToast('error', error.message);
+      } finally { button.disabled = false; }
+    }
+
+    function printCutterMonitoring() { printCutterToolSheet('cutterMonitoringPrint', 'Tool Monitoring Report'); }
+    function printCutterHistory() { printCutterToolSheet('cutterToolContent', 'Tool History Card'); }
+    function printCutterToolSheet(elementId, title) {
+      const source = document.getElementById(elementId);
+      if (!source) return;
+      const printable = source.cloneNode(true);
+      printable.querySelectorAll('textarea').forEach(field => { field.textContent = field.value; });
+      const popup = window.open('', '_blank', 'width=1100,height=800');
+      if (!popup) { showToast('error', 'Allow pop-ups to print this form.'); return; }
+      popup.document.write(`<!doctype html><html><head><title>${escapeHtml(title)}</title><style>body{font:14px Arial,sans-serif;padding:24px;color:#111}h2{text-align:center}.report-table{width:100%;border-collapse:collapse;margin-top:16px}.report-table th,.report-table td{border:1px solid #555;padding:7px;text-align:left}.tool-remarks{display:block;margin-top:24px}.tool-remarks textarea{display:block;width:100%;height:60px}.tool-signatures{margin-top:48px}.dialog-actions,.cutter-tool-filters,#cutterServiceEventForm{display:none!important}@media print{@page{size:landscape;margin:12mm}}</style></head><body>${printable.innerHTML}<script>window.onload=()=>window.print()<\/script></body></html>`);
+      popup.document.close();
+    }
