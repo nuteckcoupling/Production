@@ -73,11 +73,11 @@
             <div><span>Cutter Name</span><strong>${escapeHtml(cutter.cutter_name || '-')}</strong></div>
             <div><span>Type</span><strong>${escapeHtml(cutter.cutter_type || '-')}</strong></div>
             <div><span>Lead Angle</span><strong>${cutter.lead_angle === null ? '-' : `${escapeHtml(cutter.lead_angle)}°`}</strong></div>
-            <div><span>Hob Pressure Angle</span><strong>${cutter.hob_pressure_angle === null ? '-' : `${escapeHtml(cutter.hob_pressure_angle)}°`}</strong></div>
+            <div><span>Hob/Cutter Pressure Angle</span><strong>${cutter.hob_pressure_angle === null ? '-' : `${escapeHtml(cutter.hob_pressure_angle)}°`}</strong></div>
             <div><span>Cutter I.D.</span><strong>${cutter.cutter_inner_diameter === null ? '-' : `${escapeHtml(cutter.cutter_inner_diameter)} mm`}</strong></div>
             <div><span>Cutter O.D.</span><strong>${cutter.cutter_outer_diameter === null ? '-' : `${escapeHtml(cutter.cutter_outer_diameter)} mm`}</strong></div>
             <div><span>Cutter Thickness</span><strong>${cutter.cutter_thickness === null ? '-' : `${escapeHtml(cutter.cutter_thickness)} mm`}</strong></div>
-            <div><span>No. of Teeth</span><strong>${escapeHtml(cutter.cutter_tooth_count || '-')}</strong></div>
+            <div><span>Cutter Number of Teeth</span><strong>${escapeHtml(cutter.cutter_tooth_count || '-')}</strong></div>
             <div><span>Cutter Tooth Thickness</span><strong>${cutter.cutter_tooth_thickness === null ? '-' : `${escapeHtml(cutter.cutter_tooth_thickness)} mm`}</strong></div>
             <div><span>RPM / Stroke</span><strong>${escapeHtml(cutter.rpm_stroke || '-')}</strong></div>
           </div>
@@ -216,7 +216,7 @@
         <div class="grid management-grid cutter-tool-filters"><label>Report Period<select id="toolMonitoringPeriod"><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option><option value="yearly">Yearly</option></select></label><label id="toolMonitoringValueLabel">Date<input id="toolMonitoringValue" type="date" value="${escapeHtml(monitoring.value)}"></label><button id="loadToolMonitoringDate" class="secondary-button" type="button">Load Report</button></div>
         <div id="cutterMonitoringPrint" class="cutter-print-sheet"><h2>Tool Monitoring Report</h2><p><b>Cutter Name:</b> ${escapeHtml(cutter.cutter_name || cutter.cutter_type || '-')} &nbsp; <b>Period:</b> ${escapeHtml(monitoring.label)}</p>
         <p><b>Cutter No.:</b> ${escapeHtml(cutter.cutter_num)} &nbsp; <b>Module/Pitch:</b> ${escapeHtml(cutter.cutter_module || '-')} &nbsp; <b>Cutter Coated:</b> ${data.is_coated ? 'Yes' : 'No'} &nbsp; <b>Coated Date:</b> ${escapeHtml(data.latest_coating_date || '-')}</p>
-        <p><b>No. of Teeth:</b> ${escapeHtml(cutter.cutter_tooth_count || '-')} &nbsp; <b>Cutter Tooth Thickness:</b> ${escapeHtml(cutter.cutter_tooth_thickness || '-')}</p>
+        <p><b>Cutter Number of Teeth:</b> ${escapeHtml(cutter.cutter_tooth_count || '-')} &nbsp; <b>Cutter Tooth Thickness:</b> ${escapeHtml(cutter.cutter_tooth_thickness || '-')}</p>
         <div class="table-scroll"><table class="report-table"><thead><tr><th>Sr. No.</th><th>Machine No.</th><th>Part No.</th><th>Part Name</th><th>Qty.</th></tr></thead><tbody>${rows || '<tr><td colspan="5">No production entries for this cutter on the selected date.</td></tr>'}</tbody><tfoot><tr><th colspan="4">Total Qty</th><th>${escapeHtml(monitoring.total_qty)}</th></tr></tfoot></table></div>
         <label class="tool-remarks">Remarks<textarea id="toolMonitoringRemarks" maxlength="255"></textarea></label><p class="tool-signatures">Maintenance: __________________ &nbsp; Production: __________________ &nbsp; Quality: __________________</p></div>
         <div class="dialog-actions"><button class="submit" type="button" onclick="printCutterMonitoring()">Print / Save PDF</button></div>`;
@@ -247,7 +247,7 @@
       document.getElementById('cutterToolContent').innerHTML = `
         <div class="grid management-grid cutter-tool-filters"><label>Report Period<select id="toolMonitoringPeriod"><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option><option value="yearly">Yearly</option></select></label><label id="toolMonitoringValueLabel">Date<input id="toolMonitoringValue" type="date" value="${escapeHtml(monitoring.value)}"></label><button id="loadToolMonitoringDate" class="secondary-button" type="button">Load Report</button></div>
         <div class="cutter-print-sheet"><h2>Tool History Card</h2><p><b>Cutter Name:</b> ${escapeHtml(cutter.cutter_name || cutter.cutter_type || '-')} &nbsp; <b>Cutter No.:</b> ${escapeHtml(cutter.cutter_num)} &nbsp; <b>Module/Pitch:</b> ${escapeHtml(cutter.cutter_module || '-')} &nbsp; <b>Period:</b> ${escapeHtml(monitoring.label)}</p>
-        <p><b>Start Using Date:</b> ${escapeHtml(cutter.first_used_date || '-')} &nbsp; <b>No. of Teeth:</b> ${escapeHtml(cutter.cutter_tooth_count || '-')} &nbsp; <b>Cutter Tooth Thickness:</b> ${escapeHtml(cutter.cutter_tooth_thickness || '-')}</p>
+        <p><b>Start Using Date:</b> ${escapeHtml(cutter.first_used_date || '-')} &nbsp; <b>Cutter Number of Teeth:</b> ${escapeHtml(cutter.cutter_tooth_count || '-')} &nbsp; <b>Cutter Tooth Thickness:</b> ${escapeHtml(cutter.cutter_tooth_thickness || '-')}</p>
         <p><b>Purchase Date:</b> ${escapeHtml(cutter.purchase_date || '-')} &nbsp; <b>Scrap Date:</b> ${escapeHtml(cutter.scrap_date || '-')}</p>
         <h3>Coating / Grinding Events in Selected Period</h3><div class="table-scroll"><table class="report-table"><thead><tr><th>Sr. No.</th><th>Coating / Grinding Date</th><th>Service</th><th>Qty. Since Previous Service</th><th>Remarks</th></tr></thead><tbody>${rows || '<tr><td colspan="5">No coating or grinding events in the selected period.</td></tr>'}</tbody></table></div>
         <h3>Production During Selected Period</h3><div class="table-scroll"><table class="report-table"><thead><tr><th>Machine No.</th><th>Part No.</th><th>Part Name</th><th>Qty.</th></tr></thead><tbody>${productionRows || '<tr><td colspan="4">No production entries in the selected period.</td></tr>'}</tbody><tfoot><tr><th colspan="3">Period Total</th><th>${escapeHtml(monitoring.total_qty)}</th></tr></tfoot></table></div>

@@ -40,15 +40,15 @@ if ($lead_angle !== '' && !is_numeric($lead_angle)) {
 $lead_angle_value = $lead_angle === '' ? null : $lead_angle;
 
 foreach ([
-    'Hob Pressure Angle' => $hob_pressure_angle,
+    'Hob/Cutter Pressure Angle' => $hob_pressure_angle,
     'Cutter I.D.' => $cutter_inner_diameter,
     'Cutter O.D.' => $cutter_outer_diameter,
     'Cutter Thickness' => $cutter_thickness,
     'Cutter Tooth Thickness' => $cutter_tooth_thickness,
 ] as $label => $value) {
-    if ($value !== '' && (!is_numeric($value) || (float)$value <= 0 || ($label === 'Hob Pressure Angle' && (float)$value > 90))) {
+    if ($value !== '' && (!is_numeric($value) || (float)$value <= 0 || ($label === 'Hob/Cutter Pressure Angle' && (float)$value > 90))) {
         http_response_code(400);
-        json_response(['error' => $label . ' must be a positive number' . ($label === 'Hob Pressure Angle' ? ' up to 90' : '')]);
+        json_response(['error' => $label . ' must be a positive number' . ($label === 'Hob/Cutter Pressure Angle' ? ' up to 90' : '')]);
         exit;
     }
 }

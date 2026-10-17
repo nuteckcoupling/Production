@@ -38,11 +38,11 @@
               <label>Module<input type="text" name="module" id="cutter_module" placeholder="e.g. 2.5 MOD" /></label>
               <label>Cutter Type<input type="text" name="cutter_type" id="cutter_type" placeholder="e.g. Hobbing Cutter" /></label>
               <label>Lead Angle (degrees)<input type="number" name="lead_angle" id="lead_angle" step="0.01" placeholder="e.g. 15.50" /></label>
-              <label>Hob Pressure Angle (degrees)<input type="number" name="hob_pressure_angle" id="hob_pressure_angle" min="0" max="90" step="0.01" placeholder="e.g. 20" /></label>
+              <label>Hob/Cutter Pressure Angle (degrees)<input type="number" name="hob_pressure_angle" id="hob_pressure_angle" min="0" max="90" step="0.01" placeholder="e.g. 20" /></label>
               <label>Cutter I.D. (mm)<input type="number" name="cutter_inner_diameter" id="cutter_inner_diameter" min="0.01" step="0.01" placeholder="e.g. 32.00" /></label>
               <label>Cutter O.D. (mm)<input type="number" name="cutter_outer_diameter" id="cutter_outer_diameter" min="0.01" step="0.01" placeholder="e.g. 108.50" /></label>
               <label>Cutter Thickness (mm)<input type="number" name="cutter_thickness" id="cutter_thickness" min="0.01" step="0.01" placeholder="e.g. 35.50" /></label>
-              <label>No. of Teeth<input type="number" name="cutter_tooth_count" id="cutter_tooth_count" min="1" step="1" /></label>
+              <label>Cutter Number of Teeth<input type="number" name="cutter_tooth_count" id="cutter_tooth_count" min="1" step="1" /></label>
               <label>Cutter Tooth Thickness (mm)<input type="number" name="cutter_tooth_thickness" id="cutter_tooth_thickness" min="0.01" step="0.01" /></label>
               <label>Purchase Date<input type="date" name="purchase_date" id="cutter_purchase_date" /></label>
               <label>Scrap Date<input type="date" name="scrap_date" id="cutter_scrap_date" /></label>
