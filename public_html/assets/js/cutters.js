@@ -51,7 +51,7 @@
       const filtered = cutterRecords.filter(cutter =>
         (showCutterTrash || cutter.status === cutterStatusView)
         && (!module || cutter.module === module)
-        && (!search || [cutter.cutter_num, cutter.module, cutter.cutter_type, cutter.remarks]
+        && (!search || [cutter.cutter_num, cutter.module, cutter.cutter_type, cutter.hob_pressure_angle, cutter.cutter_inner_diameter, cutter.cutter_outer_diameter, cutter.cutter_thickness, cutter.remarks]
           .some(value => String(value || '').toLowerCase().includes(search))));
       const label = showCutterTrash ? 'deleted' : cutterStatusView.toLowerCase();
       document.getElementById('cutterResultCount').innerText = `${filtered.length} ${label} cutter${filtered.length === 1 ? '' : 's'}`;
@@ -72,6 +72,10 @@
           <div class="cutter-details">
             <div><span>Type</span><strong>${escapeHtml(cutter.cutter_type || '-')}</strong></div>
             <div><span>Lead Angle</span><strong>${cutter.lead_angle === null ? '-' : `${escapeHtml(cutter.lead_angle)}°`}</strong></div>
+            <div><span>Hob Pressure Angle</span><strong>${cutter.hob_pressure_angle === null ? '-' : `${escapeHtml(cutter.hob_pressure_angle)}°`}</strong></div>
+            <div><span>Cutter I.D.</span><strong>${cutter.cutter_inner_diameter === null ? '-' : `${escapeHtml(cutter.cutter_inner_diameter)} mm`}</strong></div>
+            <div><span>Cutter O.D.</span><strong>${cutter.cutter_outer_diameter === null ? '-' : `${escapeHtml(cutter.cutter_outer_diameter)} mm`}</strong></div>
+            <div><span>Cutter Thickness</span><strong>${cutter.cutter_thickness === null ? '-' : `${escapeHtml(cutter.cutter_thickness)} mm`}</strong></div>
             <div><span>RPM / Stroke</span><strong>${escapeHtml(cutter.rpm_stroke || '-')}</strong></div>
           </div>
           ${cutter.remarks ? `<p class="cutter-remarks">${escapeHtml(cutter.remarks)}</p>` : ''}
@@ -95,6 +99,10 @@
       document.getElementById('cutter_module').value = cutter?.module || '';
       document.getElementById('cutter_type').value = cutter?.cutter_type || '';
       document.getElementById('lead_angle').value = cutter?.lead_angle ?? '';
+      document.getElementById('hob_pressure_angle').value = cutter?.hob_pressure_angle ?? '';
+      document.getElementById('cutter_inner_diameter').value = cutter?.cutter_inner_diameter ?? '';
+      document.getElementById('cutter_outer_diameter').value = cutter?.cutter_outer_diameter ?? '';
+      document.getElementById('cutter_thickness').value = cutter?.cutter_thickness ?? '';
       document.getElementById('rpm_stroke').value = cutter?.rpm_stroke || '';
       document.getElementById('cutter_status').value = cutter?.status || 'Active';
       document.getElementById('cutter_remarks').value = cutter?.remarks || '';
