@@ -69,10 +69,11 @@ $stmt = $conn->prepare("INSERT INTO daily_entries
 
 $cutter_id = !empty($data['cutter_id']) ? (int)$data['cutter_id'] : null;
 if ($cutter_id !== null) {
-    $cutter_check = $conn->prepare("SELECT id FROM cutters WHERE id = ? AND status = 'Active' AND scrap_date IS NULL AND deleted_at IS NULL");
+    $cutter_check = $conn->prepare("SELECT c.id FROM cutters c WHERE c.id = ? AND c.status = 'Active' AND c.scrap_date IS NULL AND c.deleted_at IS NULL
+        AND NOT EXISTS (SELECT 1 FROM cutter_service_challan_items i WHERE i.cutter_id = c.id AND i.received_at IS NULL)");
     $cutter_check->bind_param('i', $cutter_id);
     $cutter_check->execute();
-    if ($cutter_check->get_result()->num_rows !== 1) json_error('Select a valid active cutter');
+    if ($cutter_check->get_result()->num_rows !== 1) json_error('Select an available active cutter. This cutter may be out for service.', 400);
     $cutter_check->close();
 }
 

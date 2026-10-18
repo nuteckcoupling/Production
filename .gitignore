@@ -6,6 +6,7 @@ backups/
 *.log
 node_modules/
 react-source/node_modules/
+.local/production-sessions/
 .env
 .env.*
 !.env.example

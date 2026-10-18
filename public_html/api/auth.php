@@ -7,7 +7,19 @@ const SESSION_IDLE_TIMEOUT_SECONDS = 3600;
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
     $custom_session_path = getenv('PRODUCTION_SESSION_PATH');
-    if ($custom_session_path) session_save_path($custom_session_path);
+    $session_path = $custom_session_path ?: session_save_path();
+    if (!$session_path || !is_dir($session_path) || !is_writable($session_path)) {
+        // Local PHP runs may not be allowed to write to XAMPP's global temp folder.
+        $local_session_path = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . '.local' . DIRECTORY_SEPARATOR . 'production-sessions';
+        if (!is_dir($local_session_path)) @mkdir($local_session_path, 0700, true);
+        if (is_dir($local_session_path) && is_writable($local_session_path)) {
+            $session_path = $local_session_path;
+        }
+    }
+    if (!$session_path || !is_dir($session_path) || !is_writable($session_path)) {
+        json_error('Unable to access PHP session storage. Check the session folder permissions.', 500);
+    }
+    session_save_path($session_path);
     session_set_cookie_params([
         'httponly' => true,
         'samesite' => 'Lax',

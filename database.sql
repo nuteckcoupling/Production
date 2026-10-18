@@ -282,7 +282,7 @@ CREATE TABLE IF NOT EXISTS cutters (
 CREATE TABLE IF NOT EXISTS cutter_service_events (
   id INT AUTO_INCREMENT PRIMARY KEY,
   cutter_id INT NOT NULL,
-  event_type ENUM('Coating','Grinding') NOT NULL,
+  event_type ENUM('Coating','Grinding','Both') NOT NULL,
   event_date DATE NOT NULL,
   remarks VARCHAR(255) DEFAULT NULL,
   created_by_user_id INT DEFAULT NULL,
@@ -290,6 +290,55 @@ CREATE TABLE IF NOT EXISTS cutter_service_events (
   KEY idx_cutter_service_history (cutter_id, event_date, id),
   FOREIGN KEY (cutter_id) REFERENCES cutters(id),
   FOREIGN KEY (created_by_user_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS cutter_service_vendors (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  address VARCHAR(500) NOT NULL,
+  phone VARCHAR(30) DEFAULT NULL,
+  status ENUM('Active','Inactive') NOT NULL DEFAULT 'Active',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_cutter_service_vendors_status (status),
+  KEY idx_cutter_service_vendors_name (name)
+);
+
+CREATE TABLE IF NOT EXISTS cutter_service_challans (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  challan_no VARCHAR(32) DEFAULT NULL UNIQUE,
+  vendor_id INT NOT NULL,
+  dispatch_date DATE NOT NULL,
+  expected_return_date DATE DEFAULT NULL,
+  status ENUM('Issued','Partially Returned','Returned','Cancelled') NOT NULL DEFAULT 'Issued',
+  remarks VARCHAR(255) DEFAULT NULL,
+  created_by_user_id INT DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_cutter_service_challan_vendor (vendor_id, dispatch_date),
+  KEY idx_cutter_service_challan_status (status),
+  FOREIGN KEY (vendor_id) REFERENCES cutter_service_vendors(id),
+  FOREIGN KEY (created_by_user_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS cutter_service_challan_items (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  challan_id INT NOT NULL,
+  cutter_id INT NOT NULL,
+  service_type ENUM('Coating','Grinding','Both') NOT NULL,
+  sent_remarks VARCHAR(255) DEFAULT NULL,
+  received_at DATETIME DEFAULT NULL,
+  service_done TINYINT(1) DEFAULT NULL,
+  service_date DATE DEFAULT NULL,
+  return_condition VARCHAR(80) DEFAULT NULL,
+  return_remarks VARCHAR(255) DEFAULT NULL,
+  service_event_id INT DEFAULT NULL UNIQUE,
+  received_by_user_id INT DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_cutter_service_items_open (cutter_id, received_at),
+  KEY idx_cutter_service_items_challan (challan_id, id),
+  FOREIGN KEY (challan_id) REFERENCES cutter_service_challans(id),
+  FOREIGN KEY (cutter_id) REFERENCES cutters(id),
+  FOREIGN KEY (service_event_id) REFERENCES cutter_service_events(id),
+  FOREIGN KEY (received_by_user_id) REFERENCES users(id)
 );
 
 CREATE TABLE IF NOT EXISTS shifts (

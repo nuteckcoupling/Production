@@ -66,7 +66,7 @@ try {
         $break_shift->close();
     }
 
-    if (isset($_FILES['breakdown_photo'])) {
+    if (isset($_FILES['breakdown_photo']) && ($_FILES['breakdown_photo']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
         $stored_photo = store_secure_attachment($_FILES['breakdown_photo']);
         if ($stored_photo) {
             $entity_type = 'maintenance_ticket';

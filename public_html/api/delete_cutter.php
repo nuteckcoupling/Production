@@ -25,6 +25,16 @@ try {
         exit;
     }
 
+    $serviceCheck = $conn->prepare('SELECT id FROM cutter_service_challan_items WHERE cutter_id = ? AND received_at IS NULL LIMIT 1 FOR UPDATE');
+    $serviceCheck->bind_param('i', $id);
+    $serviceCheck->execute();
+    $outstandingService = $serviceCheck->get_result()->fetch_assoc();
+    $serviceCheck->close();
+    if ($outstandingService) {
+        $conn->rollback();
+        json_error('This cutter is out for service. Receive it from the vendor before moving it to Trash.', 409);
+    }
+
     $update = $conn->prepare("UPDATE cutters SET status = 'Not Active', deleted_at = NOW()
         WHERE id = ? AND deleted_at IS NULL");
     $update->bind_param("i", $id);

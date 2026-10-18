@@ -48,6 +48,21 @@ body.modal-open { overflow: hidden; }
   width: 230px; flex: 0 0 230px; padding: 24px 14px; background: var(--brand-charcoal); color: #fff;
 }
 
+.cutter-challan-section { margin-top: 22px; }
+.cutter-challan-section .full-width, .management-dialog .full-width { grid-column: 1 / -1; }
+.cutter-challan-section > .module-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.cutter-challan-section .module-header h2 { margin: 0; }
+.cutter-challan-detail > td { background: #f7faf9; padding: 10px !important; }
+.cutter-challan-detail .report-table { margin: 0; }
+.cutter-challan-choices { display: grid; gap: 10px; max-height: 360px; overflow: auto; }
+.cutter-challan-choice { display: grid; grid-template-columns: minmax(180px, 1.2fr) minmax(140px, .8fr) minmax(180px, 1fr); align-items: end; gap: 12px; padding: 12px; border: 1px solid #dce5e1; border-radius: 10px; background: #fbfdfc; }
+.cutter-challan-check { display: flex; align-items: center; gap: 10px; min-height: 42px; }
+.cutter-challan-check input { width: 18px; height: 18px; accent-color: #00ad69; }
+.cutter-challan-check span { display: grid; }
+.cutter-challan-check small { color: #667085; }
+.cutter-challan-choice select:disabled, .cutter-challan-choice input:disabled { background: #f1f3f2; color: #858b88; }
+@media (max-width: 760px) { .cutter-challan-choice { grid-template-columns: 1fr; } }
+
 .attachment-card { margin-top: 18px; }
 .attachment-list { display: grid; gap: 8px; margin: 12px 0; }
 .attachment-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid #dce6df; border-radius: 8px; background: #f9fcfa; }

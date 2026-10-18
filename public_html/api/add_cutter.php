@@ -44,7 +44,7 @@ foreach ([
     'Hob/Cutter Pressure Angle' => $hob_pressure_angle,
     'Cutter I.D.' => $cutter_inner_diameter,
     'Cutter O.D.' => $cutter_outer_diameter,
-    'Cutter Thickness' => $cutter_thickness,
+    'Cutter Thickness / Length' => $cutter_thickness,
     'Cutter Tooth Thickness' => $cutter_tooth_thickness,
 ] as $label => $value) {
     if ($value !== '' && (!is_numeric($value) || (float)$value <= 0 || ($label === 'Hob/Cutter Pressure Angle' && (float)$value > 90))) {

@@ -121,6 +121,7 @@ while ($record = $result->fetch_assoc()) {
         'shift_date' => $record['shift_date'], 'shift' => $record['shift'],
         'shift_hours' => (float)$record['shift_hours'], 'started_at' => $record['started_at'],
         'ended_at' => $record['ended_at'], 'machine_id' => (int)$record['machine_id'],
+        'operator_id' => (int)$record['operator_id'],
         'machine_code' => $record['machine_code'], 'machine_name' => $record['machine_name'],
         'operator_name' => $record['operator_name'], 'coupling_type' => $record['coupling_type'],
         'part_name' => $record['part_name'], 'component' => $record['component'],
@@ -206,6 +207,64 @@ foreach ($machines as $machine) {
 }
 $totals['achievement_percent'] = $totals['planned_qty'] > 0
     ? round(($totals['ok_qty'] / $totals['planned_qty']) * 100, 1) : 0;
+
+// Daily reports are a 24-hour view: keep each machine/shift/operator on its own row.
+$shiftRows = [];
+if ($period === 'daily') {
+    foreach ($entries as $entry) {
+        $key = implode('|', [$entry['machine_id'], $entry['shift_date'], $entry['shift'], $entry['operator_id']]);
+        if (!isset($shiftRows[$key])) {
+            $shiftRows[$key] = [
+                'machine_id' => $entry['machine_id'], 'machine_code' => $entry['machine_code'],
+                'machine_name' => $entry['machine_name'], 'operators' => $entry['operator_name'],
+                'shifts' => in_array($entry['shift'], ['1', '2', '3'], true) ? 'Shift ' . $entry['shift'] : $entry['shift'],
+                'parts' => [], 'components' => [], 'statuses' => [], 'remarks' => [], 'entry_ids' => [],
+                'planned_jobs' => [], 'job_count' => 0, 'shift_count' => 1,
+                'planned_qty' => 0, 'total_qty' => 0, 'ok_qty' => 0, 'mc_reject_qty' => 0,
+                'rm_defect_qty' => 0, 'rework_qty' => 0, 'downtime_min' => 0
+            ];
+        }
+        $row =& $shiftRows[$key];
+        $row['entry_ids'][] = $entry['shift_id'];
+        if (!isset($row['planned_jobs'][$entry['job_id']])) {
+            $row['planned_jobs'][$entry['job_id']] = true;
+            $row['planned_qty'] += $entry['planned_qty'];
+            $row['job_count']++;
+        }
+        $row['parts'][$entry['part_name']] = true;
+        if ($entry['component'] !== null && $entry['component'] !== '') $row['components'][$entry['component']] = true;
+        $row['statuses'][$entry['job_status']] = true;
+        if ($entry['remarks'] !== '') $row['remarks'][$entry['remarks']] = true;
+        foreach (['total_qty', 'ok_qty', 'mc_reject_qty', 'rm_defect_qty', 'rework_qty', 'downtime_min'] as $field) {
+            $row[$field] += $entry[$field];
+        }
+        unset($row);
+    }
+    $shiftRows = array_values(array_map(static function ($row) {
+        unset($row['planned_jobs']);
+        foreach (['parts', 'components', 'statuses', 'remarks'] as $field) {
+            $row[$field] = implode(', ', array_keys($row[$field]));
+        }
+        $row['pending_qty'] = max($row['planned_qty'] - $row['ok_qty'], 0);
+        $row['achievement_percent'] = $row['planned_qty'] > 0
+            ? round(($row['ok_qty'] / $row['planned_qty']) * 100, 1) : 0;
+        return $row;
+    }, $shiftRows));
+    $totals = [
+        'machine_count' => count(array_unique(array_column($shiftRows, 'machine_id'))),
+        'job_count' => 0, 'shift_count' => count($shiftRows), 'planned_qty' => 0, 'total_qty' => 0,
+        'ok_qty' => 0, 'mc_reject_qty' => 0, 'rm_defect_qty' => 0, 'rework_qty' => 0,
+        'pending_qty' => 0, 'downtime_min' => 0, 'achievement_percent' => 0
+    ];
+    foreach ($shiftRows as $row) {
+        foreach (['job_count', 'planned_qty', 'total_qty', 'ok_qty', 'mc_reject_qty', 'rm_defect_qty', 'rework_qty', 'pending_qty', 'downtime_min'] as $field) {
+            $totals[$field] += $row[$field];
+        }
+    }
+    $totals['achievement_percent'] = $totals['planned_qty'] > 0
+        ? round(($totals['ok_qty'] / $totals['planned_qty']) * 100, 1) : 0;
+    $rows = $shiftRows;
+}
 
 json_response([
     'period' => $period,

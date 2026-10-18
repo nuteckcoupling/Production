@@ -105,13 +105,15 @@
         <td>${Number(row.rework_qty)}</td><td>${Number(row.pending_qty)}</td><td>${Number(row.downtime_min)} min</td>
         <td>${Number(row.achievement_percent)}%</td><td>${escapeHtml(row.statuses || '-')}</td>
         <td>${escapeHtml(row.remarks || '-')}</td>
-        <td><button type="button" onclick="showReportEntries(${Number(row.machine_id)})">View Entries</button></td>
+        <td><button type="button" onclick='showReportEntries(${Number(row.machine_id)}, ${JSON.stringify(row.entry_ids || [])})'>View Entries</button></td>
       </tr>`).join('');
     }
 
-    function showReportEntries(machineId) {
+    function showReportEntries(machineId, entryIds = null) {
       if (!currentReportData) return;
-      const entries = (currentReportData.entries || []).filter(entry => Number(entry.machine_id) === Number(machineId));
+      const selectedIds = Array.isArray(entryIds) && entryIds.length ? new Set(entryIds.map(Number)) : null;
+      const entries = (currentReportData.entries || []).filter(entry => Number(entry.machine_id) === Number(machineId)
+        && (!selectedIds || selectedIds.has(Number(entry.shift_id))));
       const machine = currentReportData.rows.find(row => Number(row.machine_id) === Number(machineId));
       document.getElementById('reportEntryTitle').innerText = `${machine?.machine_code || 'Machine'} Production Entries`;
       document.getElementById('reportEntryCount').innerText = `${entries.length} individual shift record${entries.length === 1 ? '' : 's'}`;

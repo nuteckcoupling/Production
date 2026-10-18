@@ -65,12 +65,13 @@ if ($componentCheck->get_result()->num_rows !== 1) {
 $componentCheck->close();
 
 if ($cutter_id !== null) {
-    $cutterCheck = $conn->prepare("SELECT id FROM cutters WHERE id = ? AND status = 'Active' AND scrap_date IS NULL AND deleted_at IS NULL");
+    $cutterCheck = $conn->prepare("SELECT c.id FROM cutters c WHERE c.id = ? AND c.status = 'Active' AND c.scrap_date IS NULL AND c.deleted_at IS NULL
+        AND NOT EXISTS (SELECT 1 FROM cutter_service_challan_items i WHERE i.cutter_id = c.id AND i.received_at IS NULL)");
     $cutterCheck->bind_param("i", $cutter_id);
     $cutterCheck->execute();
     if ($cutterCheck->get_result()->num_rows !== 1) {
         http_response_code(400);
-        json_response(['error' => 'Select a valid active cutter']);
+        json_response(['error' => 'Select an available active cutter. This cutter may be out for service.']);
         exit;
     }
     $cutterCheck->close();

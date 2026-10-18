@@ -53,7 +53,8 @@ try {
     if (!$shift) throw new RuntimeException('Running shift not found for this operator', 409);
     $shift_id = (int)$shift['id'];
 
-    $cutterStmt = $conn->prepare("SELECT id, cutter_num FROM cutters WHERE id = ? AND status = 'Active' AND scrap_date IS NULL AND deleted_at IS NULL");
+    $cutterStmt = $conn->prepare("SELECT c.id, c.cutter_num FROM cutters c WHERE c.id = ? AND c.status = 'Active' AND c.scrap_date IS NULL AND c.deleted_at IS NULL
+        AND NOT EXISTS (SELECT 1 FROM cutter_service_challan_items i WHERE i.cutter_id = c.id AND i.received_at IS NULL)");
     $cutterStmt->bind_param("i", $new_cutter_id);
     $cutterStmt->execute();
     $newCutter = $cutterStmt->get_result()->fetch_assoc();

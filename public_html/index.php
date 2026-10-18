@@ -39,7 +39,7 @@
   </div>
 
   <script src="assets/js/notifications.js?v=20261006-1"></script>
-  <script src="assets/js/core.js?v=20260928-1"></script>
+  <script src="assets/js/core.js?v=20261018-2"></script>
   <script src="assets/js/api.js?v=20260928-3"></script>
   <script src="assets/js/auth.js?v=20260928-1"></script>
   <script src="assets/js/weekly-plan.js?v=20260924-2"></script>
@@ -55,11 +55,11 @@
   <script src="assets/js/attachments.js?v=20261006-1"></script>
   <script src="assets/js/jobs.js?v=20261006-1"></script>
   <script src="assets/js/changes.js?v=20261005-1"></script>
-  <script src="assets/js/reports.js?v=20261004-1"></script>
+  <script src="assets/js/reports.js?v=20261006-1"></script>
   <script src="assets/js/admin-analysis.js?v=20260924-2"></script>
   <script src="assets/js/maintenance.js?v=20260930-1"></script>
   <script src="assets/js/dashboard.js?v=20261006-3"></script>
-  <script src="assets/js/cutters.js?v=20261017-5"></script>
+  <script src="assets/js/cutters.js?v=20261018-6"></script>
   <script src="assets/js/couplings.js?v=20261006-2"></script>
   <script src="assets/js/app.js?v=20260923-2"></script>
 </body>

@@ -3,35 +3,7 @@ require __DIR__ . '/bootstrap.php';
 $user = require_auth();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $user = require_operator_supervisor();
-    $data = json_input();
-    $cutter_id = filter_var($data['cutter_id'] ?? null, FILTER_VALIDATE_INT);
-    $event_type = $data['event_type'] ?? '';
-    $event_date = trim((string)($data['event_date'] ?? ''));
-    $remarks = trim((string)($data['remarks'] ?? ''));
-    $date = DateTime::createFromFormat('!Y-m-d', $event_date);
-    if (!$cutter_id || !in_array($event_type, ['Coating', 'Grinding'], true)
-        || !$date || $date->format('Y-m-d') !== $event_date || $event_date > date('Y-m-d')
-        || strlen($remarks) > 255) {
-        json_error('Enter a valid service type, date, and remarks (255 characters max)', 400);
-    }
-    $exists = $conn->prepare('SELECT cutter_num FROM cutters WHERE id = ? AND deleted_at IS NULL LIMIT 1');
-    $exists->bind_param('i', $cutter_id);
-    $exists->execute();
-    $cutter = $exists->get_result()->fetch_assoc();
-    $exists->close();
-    if (!$cutter) json_error('Cutter not found', 404);
-
-    $stmt = $conn->prepare('INSERT INTO cutter_service_events (cutter_id, event_type, event_date, remarks, created_by_user_id) VALUES (?, ?, ?, ?, ?)');
-    $stmt->bind_param('isssi', $cutter_id, $event_type, $event_date, $remarks, $user['id']);
-    $stmt->execute();
-    audit_log($conn, $user, 'Cutter Management', 'Service Event Added',
-        $event_type . ' recorded for cutter ' . $cutter['cutter_num'] . ' on ' . $event_date,
-        'cutter', $cutter_id);
-    json_response(['success' => true, 'id' => (int)$stmt->insert_id]);
-    $stmt->close();
-    $conn->close();
-    exit;
+    json_error('Service history is recorded automatically when a cutter is returned through its challan.', 405);
 }
 
 $cutter_id = filter_input(INPUT_GET, 'cutter_id', FILTER_VALIDATE_INT);
@@ -70,13 +42,17 @@ $stmt->close();
 if (!$cutter) json_error('Cutter not found', 404);
 
 // shortcut: production entries have dates but no event times, so same-day output cannot be split between service events; upgrade when entries store timestamps.
-$stmt = $conn->prepare("SELECT e.id, e.event_type, e.event_date, e.remarks,
+$stmt = $conn->prepare("SELECT e.id, e.event_type, e.event_date, e.remarks, ch.challan_no, v.name AS vendor_name,
     COALESCE((SELECT SUM(d.total_qty) FROM daily_entries d WHERE d.cutter_id = e.cutter_id
         AND d.entry_date > COALESCE((SELECT MAX(p.event_date) FROM cutter_service_events p
             WHERE p.cutter_id = e.cutter_id AND (p.event_date < e.event_date OR (p.event_date = e.event_date AND p.id < e.id))),
             (SELECT MIN(u.entry_date) FROM daily_entries u WHERE u.cutter_id = e.cutter_id) - INTERVAL 1 DAY)
         AND d.entry_date <= e.event_date), 0) AS qty_since_previous
-    FROM cutter_service_events e WHERE e.cutter_id = ? ORDER BY e.event_date, e.id");
+    FROM cutter_service_events e
+    LEFT JOIN cutter_service_challan_items ci ON ci.service_event_id = e.id
+    LEFT JOIN cutter_service_challans ch ON ch.id = ci.challan_id
+    LEFT JOIN cutter_service_vendors v ON v.id = ch.vendor_id
+    WHERE e.cutter_id = ? ORDER BY e.event_date, e.id");
 $stmt->bind_param('i', $cutter_id);
 $stmt->execute();
 $events = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -105,9 +81,9 @@ if ($cycle_start) {
 
 json_response([
     'cutter' => $cutter,
-    'is_coated' => $latest_event !== null && $latest_event['event_type'] === 'Coating',
+    'is_coated' => $latest_event !== null && in_array($latest_event['event_type'], ['Coating', 'Both'], true),
     'latest_coating_date' => (function () use ($events) {
-        for ($i = count($events) - 1; $i >= 0; $i--) if ($events[$i]['event_type'] === 'Coating') return $events[$i]['event_date'];
+        for ($i = count($events) - 1; $i >= 0; $i--) if (in_array($events[$i]['event_type'], ['Coating', 'Both'], true)) return $events[$i]['event_date'];
         return null;
     })(),
     'monitoring' => ['period' => $period, 'value' => $value, 'label' => $label,

@@ -14,6 +14,7 @@
         <button type="button" id="navMaintenance" class="sidebar-item" onclick="switchModule('maintenance')">Maintenance</button>
         <button type="button" id="navAdminAnalysis" class="sidebar-item admin-only" onclick="switchModule('adminAnalysis')">Admin Analysis</button>
         <button type="button" id="navCutter" class="sidebar-item operator-only" onclick="switchModule('cutter')">Cutter Data</button>
+        <button type="button" id="navCutterService" class="sidebar-item operator-only" onclick="switchModule('cutterService')">Cutter Service Challans</button>
         <button type="button" id="navCoupling" class="sidebar-item operator-only" onclick="switchModule('coupling')">Coupling Add</button>
         <button type="button" id="navShiftManagement" class="sidebar-item admin-only" onclick="switchModule('shiftManagement')">Shift Management</button>
         <button type="button" id="navMachineManagement" class="sidebar-item admin-only" onclick="switchModule('machineManagement')">Machine Management</button>
