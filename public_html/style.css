@@ -55,6 +55,8 @@ body.modal-open { overflow: hidden; }
 .cutter-challan-detail > td { background: #f7faf9; padding: 10px !important; }
 .cutter-challan-detail .report-table { margin: 0; }
 .cutter-challan-choices { display: grid; gap: 10px; max-height: 360px; overflow: auto; }
+.challan-cutter-search { display: grid; gap: 5px; margin: 10px 0; font-weight: 600; }
+.challan-cutter-search input { width: 100%; }
 .cutter-challan-choice { display: grid; grid-template-columns: minmax(180px, 1.2fr) minmax(140px, .8fr) minmax(180px, 1fr); align-items: end; gap: 12px; padding: 12px; border: 1px solid #dce5e1; border-radius: 10px; background: #fbfdfc; }
 .cutter-challan-check { display: flex; align-items: center; gap: 10px; min-height: 42px; }
 .cutter-challan-check input { width: 18px; height: 18px; accent-color: #00ad69; }

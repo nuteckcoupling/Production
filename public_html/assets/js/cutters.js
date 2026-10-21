@@ -342,14 +342,41 @@
 
     function renderChallanCutterChoices() {
       const choices = document.getElementById('challanCutterChoices');
+      const search = document.getElementById('challanCutterSearch');
+      const searchWrap = document.getElementById('challanCutterSearchWrap');
       const available = cutterRecords.filter(c => c.status === 'Active' && !c.deleted_at && !c.scrap_date && cutterAvailableIds.has(Number(c.id)));
       document.getElementById('challanCutterEmpty').textContent = available.length ? 'Choose the cutters being sent. Each physical cutter can be selected only once.' : 'No available active cutters. Add/activate a cutter or receive an outstanding challan first.';
-      choices.innerHTML = available.map(c => `<div class="cutter-challan-choice"><label class="cutter-challan-check"><input type="checkbox" class="challan-cutter-check" value="${Number(c.id)}"><span><b>${escapeHtml(c.cutter_num)}${c.module ? ` — ${escapeHtml(c.module)}` : ''}${c.cutter_type ? ` - ${escapeHtml(c.cutter_type)}` : ''}</b></span></label><label>Service<select class="challan-service-type" disabled><option value="Grinding">Grinding</option><option value="Coating">Coating</option><option value="Both">Both</option></select></label><label>Dispatch remarks<input class="challan-sent-remarks" maxlength="255" placeholder="Optional" disabled></label></div>`).join('');
+      searchWrap.classList.toggle('hidden', !available.length);
+      search.value = '';
+      choices.innerHTML = available.map(c => `<div class="cutter-challan-choice" data-cutter-id="${Number(c.id)}"><label class="cutter-challan-check"><input type="checkbox" class="challan-cutter-check" value="${Number(c.id)}"><span><b>${escapeHtml(c.cutter_num)}${c.module ? ` — ${escapeHtml(c.module)}` : ''}${c.cutter_type ? ` - ${escapeHtml(c.cutter_type)}` : ''}</b></span></label><label>Service<select class="challan-service-type" disabled><option value="Grinding">Grinding</option><option value="Coating">Coating</option><option value="Both">Both</option></select></label><label>Dispatch remarks<input class="challan-sent-remarks" maxlength="255" placeholder="Optional" disabled></label></div>`).join('');
+      available.forEach(c => {
+        const row = choices.querySelector(`[data-cutter-id="${Number(c.id)}"]`);
+        row.dataset.search = [c.cutter_num, c.module, c.cutter_type].filter(Boolean).join(' ').toLocaleLowerCase();
+      });
+      if (!search.dataset.bound) {
+        search.addEventListener('input', filterChallanCutterChoices);
+        search.dataset.bound = '1';
+      }
+      filterChallanCutterChoices();
       choices.querySelectorAll('.challan-cutter-check').forEach(check => check.addEventListener('change', () => {
         const row = check.closest('.cutter-challan-choice');
         row.querySelector('.challan-service-type').disabled = !check.checked;
         row.querySelector('.challan-sent-remarks').disabled = !check.checked;
       }));
+    }
+
+    function filterChallanCutterChoices() {
+      const choices = document.getElementById('challanCutterChoices');
+      const term = document.getElementById('challanCutterSearch').value.trim().toLocaleLowerCase();
+      let visible = 0;
+      choices.querySelectorAll('.cutter-challan-choice').forEach(row => {
+        const matches = !term || row.dataset.search.includes(term);
+        row.classList.toggle('hidden', !matches);
+        if (matches) visible++;
+      });
+      const empty = document.getElementById('challanCutterSearchEmpty');
+      empty.classList.toggle('hidden', !term || visible > 0);
+      if (term && visible === 0) empty.textContent = `No cutters match “${document.getElementById('challanCutterSearch').value.trim()}”.`;
     }
 
     async function createCutterChallan(event) {

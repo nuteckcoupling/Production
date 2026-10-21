@@ -55,7 +55,7 @@
           <label>Dispatch Date<input type="date" name="dispatch_date" value="<?php echo date('Y-m-d'); ?>" required></label>
           <label>Expected Return (optional)<input type="date" name="expected_return_date"></label>
           <label class="full-width">Challan Remarks<input name="remarks" maxlength="255" placeholder="Optional"></label>
-        </div><h3>Cutters to Send</h3><p id="challanCutterEmpty" class="muted">Loading available cutters...</p><div id="challanCutterChoices" class="cutter-challan-choices"></div>
+        </div><h3>Cutters to Send</h3><p id="challanCutterEmpty" class="muted">Loading available cutters...</p><label id="challanCutterSearchWrap" class="challan-cutter-search">Search cutters<input type="search" id="challanCutterSearch" placeholder="Cutter number, module, or type"></label><p id="challanCutterSearchEmpty" class="muted hidden">No cutters match your search.</p><div id="challanCutterChoices" class="cutter-challan-choices"></div>
         <div class="dialog-actions"><button type="button" class="secondary-button" onclick="document.getElementById('cutterChallanDialog').close()">Cancel</button><button class="submit" type="submit">Create &amp; Print Challan</button></div></form>
       </div></dialog>
 
