@@ -40,7 +40,7 @@
 
   <script src="assets/js/notifications.js?v=20261006-1"></script>
   <script src="assets/js/core.js?v=20261018-2"></script>
-  <script src="assets/js/api.js?v=20260928-3"></script>
+  <script src="assets/js/api.js?v=20261019-1"></script>
   <script src="assets/js/auth.js?v=20260928-1"></script>
   <script src="assets/js/weekly-plan.js?v=20260924-2"></script>
   <script src="assets/js/monthly-plan.js?v=20260924-2"></script>
@@ -53,7 +53,7 @@
   <script src="assets/js/reliability.js?v=20260928-1"></script>
   <script src="assets/js/backup-management.js?v=20260924-2"></script>
   <script src="assets/js/attachments.js?v=20261006-1"></script>
-  <script src="assets/js/jobs.js?v=20261006-1"></script>
+  <script src="assets/js/jobs.js?v=20261021-1"></script>
   <script src="assets/js/changes.js?v=20261005-1"></script>
   <script src="assets/js/reports.js?v=20261021-1"></script>
   <script src="assets/js/admin-analysis.js?v=20260924-2"></script>

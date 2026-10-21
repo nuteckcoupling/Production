@@ -69,7 +69,7 @@
     function refreshDailyCutters() {
       const select = document.getElementById('cutter_id');
       select.innerHTML = '<option value="">-- select --</option>';
-      return fetchData(`${API}/get_cutters.php`, 'cutter_id', c => `<option value="${c.id}">${c.cutter_num}${c.module ? ' — ' + c.module : ''}</option>`);
+      return fetchData(`${API}/get_cutters.php`, 'cutter_id', c => `<option value="${Number(c.id)}">${escapeHtml(c.cutter_num)}${c.module ? ' — ' + escapeHtml(c.module) : ''}${c.cutter_type ? ' - ' + escapeHtml(c.cutter_type) : ''}</option>`);
     }
 
     function refreshShiftOptions() {

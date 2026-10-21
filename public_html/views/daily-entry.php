@@ -24,7 +24,8 @@
 
           <label>
             Shift Hours
-            <input type="number" name="shift_hours" id="shift_hours" step="0.01" readonly />
+            <input type="text" id="shift_hours_display" readonly placeholder="Auto-calculated from selected shift" />
+            <input type="hidden" name="shift_hours" id="shift_hours" />
           </label>
 
           <label>

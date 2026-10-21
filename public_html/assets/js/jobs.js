@@ -54,7 +54,18 @@
 
     function updateShiftHours() {
       const option = shiftSelect.selectedOptions[0];
-      shiftHoursInput.value = option?.dataset.hours || '';
+      const rawHours = option?.dataset.hours || '';
+      shiftHoursInput.value = rawHours;
+      const display = document.getElementById('shift_hours_display');
+      if (!display) return;
+      if (!rawHours) {
+        display.value = '';
+        return;
+      }
+      const totalMinutes = Math.round(Number(rawHours) * 60);
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      display.value = `${hours} ${hours === 1 ? 'hr' : 'hrs'} ${minutes} ${minutes === 1 ? 'min' : 'mins'}`;
     }
 
     shiftSelect.addEventListener('change', updateShiftHours);
