@@ -7,12 +7,15 @@ if (!in_array($user['role'] ?? '', ['Admin', 'Operator/Supervisor'], true)) {
 
 $data = json_input();
 $shift_id = filter_var($data['shift_id'] ?? null, FILTER_VALIDATE_INT);
+$period = trim((string)($data['period'] ?? ''));
+$report_date = trim((string)($data['report_date'] ?? ''));
 $reason = trim((string)($data['edit_reason'] ?? ''));
 $remarks = trim((string)($data['remarks'] ?? ''));
 $allowed_issues = ['', 'No Operator', 'No Material', 'M/C Breakdown (Mechanical)',
     'M/C Breakdown (Electrical)', 'No Power', 'New Setting', 'Other'];
 $issue_code = trim((string)($data['issue_code'] ?? ''));
-if (!$shift_id || $reason === '' || strlen($reason) > 255 || strlen($remarks) > 255
+if (!$shift_id || $period !== 'daily' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $report_date)
+    || $reason === '' || strlen($reason) > 255 || strlen($remarks) > 255
     || !in_array($issue_code, $allowed_issues, true)) {
     json_error('Valid entry, correction reason and production details are required', 400);
 }
@@ -31,7 +34,7 @@ if ($values['ok_qty'] + $values['mc_reject_qty'] + $values['rm_defect_qty'] + $v
 
 try {
     $conn->begin_transaction();
-    $stmt = $conn->prepare("SELECT id, job_id, operator_id, status, total_qty, ok_qty,
+    $stmt = $conn->prepare("SELECT id, job_id, operator_id, shift_date, status, total_qty, ok_qty,
         mc_reject_qty, rm_defect_qty, rework_qty, downtime_min, issue_code, remarks, report_edited_at
         FROM job_shifts WHERE id = ? FOR UPDATE");
     $stmt->bind_param('i', $shift_id);
@@ -39,10 +42,23 @@ try {
     $entry = $stmt->get_result()->fetch_assoc();
     $stmt->close();
     if (!$entry) throw new RuntimeException('Production entry not found', 404);
+    if ($entry['shift_date'] !== $report_date) {
+        throw new RuntimeException('Open the matching daily report date to correct this entry', 403);
+    }
     if ($entry['status'] !== 'Ended') throw new RuntimeException('Only an ended shift can be corrected', 409);
     if ($entry['report_edited_at'] !== null) throw new RuntimeException('This entry has already been edited once', 409);
-    if (($user['role'] ?? '') !== 'Admin' && (int)$entry['operator_id'] !== (int)$user['operator_id']) {
-        throw new RuntimeException('You can edit only your own production entry', 403);
+    if (($user['role'] ?? '') !== 'Admin') {
+        $nextShift = $conn->prepare('SELECT id FROM job_shifts WHERE job_id = ? AND id > ? LIMIT 1');
+        $nextShift->bind_param('ii', $entry['job_id'], $shift_id);
+        $nextShift->execute();
+        $hasNextShift = (bool)$nextShift->get_result()->fetch_assoc();
+        $nextShift->close();
+        if ($hasNextShift) {
+            throw new RuntimeException('The next shift has already taken over. Ask Admin to correct this entry.', 403);
+        }
+        if ((int)$entry['operator_id'] !== (int)($user['operator_id'] ?? 0)) {
+            throw new RuntimeException('You can edit only your own production entry', 403);
+        }
     }
 
     $original = json_encode([

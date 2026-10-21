@@ -50,12 +50,12 @@
         </div>
         <div class="card report-table-card">
           <div class="table-wrap">
-            <table class="report-table">
+            <table class="report-table report-entry-table">
               <thead><tr>
                 <th>Machine</th><th>Operators</th><th>Shifts</th><th>Parts</th><th>Components</th>
                 <th>Jobs</th><th>Planned</th><th>Total</th><th>OK</th><th>M.C. Reject</th>
                 <th>R.M. Defect</th><th>Rework</th><th>Pending</th><th>Downtime</th>
-                <th>Achievement</th><th>Status</th><th>Remarks</th><th>Details</th>
+                <th>Achievement</th><th>Status</th><th>Remarks</th><th>Action</th>
               </tr></thead>
               <tbody id="reportTableBody">
                 <tr><td colspan="18" class="empty">Generate a report to view production data.</td></tr>
@@ -63,22 +63,7 @@
             </table>
           </div>
         </div>
-        <div id="reportEntryDetails" class="card report-table-card hidden">
-          <div class="report-entry-heading">
-            <div><strong id="reportEntryTitle">Production Entries</strong><span id="reportEntryCount" class="table-subtext"></span></div>
-            <button type="button" onclick="closeReportEntries()">Close</button>
-          </div>
-          <div class="table-wrap">
-            <table class="report-table">
-              <thead><tr>
-                <th>Date</th><th>Shift</th><th>Operator</th><th>Job</th><th>Part / Component</th>
-                <th>Operation / Cutter</th><th>Planned</th><th>Total</th><th>OK</th><th>M.C. Reject</th>
-                <th>R.M. Defect</th><th>Rework</th><th>Downtime</th><th>Status</th><th>Issue / Remarks</th><th>Action</th>
-              </tr></thead>
-              <tbody id="reportEntryTableBody"></tbody>
-            </table>
-          </div>
-          <form id="reportEntryEditForm" class="card hidden">
+        <form id="reportEntryEditForm" class="card hidden">
             <input type="hidden" name="shift_id" id="reportEditShiftId" />
             <h3 id="reportEditTitle">Correct Production Entry</h3>
             <p class="banner warning">This entry can be edited only once. Check every value before saving.</p>
@@ -94,8 +79,8 @@
               <label class="full">Correction Reason<input type="text" name="edit_reason" maxlength="255" required placeholder="Why is this entry being corrected?" /></label>
             </div>
             <div class="actions"><button type="submit" class="submit">Save One-Time Correction</button><button type="button" onclick="closeReportEntryEdit()">Cancel</button></div>
-          </form>
-          <div id="reportCorrectionHistory" class="card hidden">
+        </form>
+        <div id="reportCorrectionHistory" class="card hidden">
             <div class="report-entry-heading">
               <div><strong id="reportCorrectionTitle">Correction History</strong><span id="reportCorrectionMeta" class="table-subtext"></span></div>
               <button type="button" onclick="closeReportCorrection()">Close</button>
@@ -107,7 +92,6 @@
               </table>
             </div>
             <p id="reportCorrectionReason" class="banner"></p>
-          </div>
         </div>
         <div id="reportGeneratedAt" class="report-generated"></div>
       </div>

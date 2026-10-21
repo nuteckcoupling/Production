@@ -8,7 +8,7 @@
       document.getElementById('weeklyReportFilter').classList.toggle('hidden', period !== 'weekly');
       document.getElementById('monthlyReportFilter').classList.toggle('hidden', period !== 'monthly');
       currentReportData = null;
-      closeReportEntries();
+      closeReportPanels();
       document.getElementById('downloadReportBtn').disabled = true;
       document.getElementById('printReportBtn').disabled = true;
     }
@@ -79,6 +79,7 @@
     }
 
     function renderProductionReport(data) {
+      closeReportPanels();
       const totals = data.totals;
       document.getElementById('reportPeriodLabel').innerText = `${data.period.charAt(0).toUpperCase() + data.period.slice(1)} · ${data.period_label}`;
       document.getElementById('reportMachines').innerText = totals.machine_count;
@@ -93,7 +94,7 @@
       const tbody = document.getElementById('reportTableBody');
       if (!data.rows.length) {
         tbody.innerHTML = '<tr><td colspan="18" class="empty">No production records found for this period.</td></tr>';
-        closeReportEntries();
+        closeReportPanels();
         return;
       }
       tbody.innerHTML = data.rows.map(row => `<tr>
@@ -105,41 +106,24 @@
         <td>${Number(row.rework_qty)}</td><td>${Number(row.pending_qty)}</td><td>${Number(row.downtime_min)} min</td>
         <td>${Number(row.achievement_percent)}%</td><td>${escapeHtml(row.statuses || '-')}</td>
         <td>${escapeHtml(row.remarks || '-')}</td>
-        <td><button type="button" onclick='showReportEntries(${Number(row.machine_id)}, ${JSON.stringify(row.entry_ids || [])})'>View Entries</button></td>
+        <td>${renderReportRowActions(row)}</td>
       </tr>`).join('');
     }
 
-    function showReportEntries(machineId, entryIds = null) {
+    function renderReportRowActions(row) {
       if (!currentReportData) return;
-      const selectedIds = Array.isArray(entryIds) && entryIds.length ? new Set(entryIds.map(Number)) : null;
-      const entries = (currentReportData.entries || []).filter(entry => Number(entry.machine_id) === Number(machineId)
-        && (!selectedIds || selectedIds.has(Number(entry.shift_id))));
-      const machine = currentReportData.rows.find(row => Number(row.machine_id) === Number(machineId));
-      document.getElementById('reportEntryTitle').innerText = `${machine?.machine_code || 'Machine'} Production Entries`;
-      document.getElementById('reportEntryCount').innerText = `${entries.length} individual shift record${entries.length === 1 ? '' : 's'}`;
-      document.getElementById('reportEntryTableBody').innerHTML = entries.map(entry => `<tr>
-        <td>${escapeHtml(entry.shift_date)}</td>
-        <td>${escapeHtml(entry.shift)}<br><span class="table-subtext">${Number(entry.shift_hours)} hrs</span></td>
-        <td>${escapeHtml(entry.operator_name)}</td>
-        <td>#${Number(entry.job_id)}<br><span class="table-subtext">Entry #${Number(entry.shift_id)}</span></td>
-        <td>${escapeHtml(entry.part_name)}<br><span class="table-subtext">${escapeHtml(entry.component || '-')}</span></td>
-        <td>${escapeHtml(entry.operation || '-')}<br><span class="table-subtext">${escapeHtml(entry.cutter_num || 'No cutter')}</span></td>
-        <td>${Number(entry.planned_qty)}</td><td>${Number(entry.total_qty)}</td><td>${Number(entry.ok_qty)}</td>
-        <td>${Number(entry.mc_reject_qty)}</td><td>${Number(entry.rm_defect_qty)}</td><td>${Number(entry.rework_qty)}</td>
-        <td>${Number(entry.downtime_min)} min</td>
-        <td>${escapeHtml(entry.machine_status || entry.job_status || '-')}</td>
-        <td>${escapeHtml([entry.issue_code, entry.remarks].filter(Boolean).join(' | ') || '-')}</td>
-        <td>${entry.edited_at
-          ? `<button type="button" onclick="showReportCorrection(${Number(entry.shift_id)})">View Correction</button><br><span class="table-subtext">Edited and locked</span>`
-          : (entry.can_edit ? `<button type="button" onclick="openReportEntryEdit(${Number(entry.shift_id)})">Edit Once</button>` : 'Locked')}</td>
-      </tr>`).join('');
-      const panel = document.getElementById('reportEntryDetails');
-      panel.classList.remove('hidden');
-      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const ids = new Set((row.entry_ids || []).map(Number));
+      const entries = (currentReportData.entries || []).filter(entry => ids.has(Number(entry.shift_id)));
+      if (currentReportData.period !== 'daily') return '<span class="table-subtext">Daily only</span>';
+      return entries.map(entry => entry.edited_at
+        ? `<button type="button" onclick="showReportCorrection(${Number(entry.shift_id)})">View Correction</button>`
+        : (entry.can_edit
+          ? `<button type="button" onclick="openReportEntryEdit(${Number(entry.shift_id)})">${entries.length === 1 ? 'Edit Once' : `Edit #${Number(entry.shift_id)}`}</button>`
+          : (entry.has_next_shift ? '<span class="table-subtext">Taken over — ask Admin</span>' : '<span class="table-subtext">Locked</span>'))
+      ).join('<br>') || '<span class="table-subtext">No entry</span>';
     }
 
-    function closeReportEntries() {
-      document.getElementById('reportEntryDetails')?.classList.add('hidden');
+    function closeReportPanels() {
       closeReportEntryEdit();
       closeReportCorrection();
     }
@@ -205,7 +189,8 @@
       try {
         const response = await fetch(`${API}/update_report_entry.php`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(Object.fromEntries(new FormData(form)))
+          body: JSON.stringify({ ...Object.fromEntries(new FormData(form)),
+            period: currentReportData?.period || '', report_date: currentReportData?.start_date || '' })
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || 'Unable to correct production entry.');

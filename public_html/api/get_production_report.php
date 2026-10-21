@@ -65,6 +65,7 @@ $stmt = $conn->prepare("SELECT
         s.operator_id, s.started_at, s.ended_at, s.status AS shift_status, s.machine_status, s.job_outcome, s.issue_code,
         s.remarks AS shift_remarks,
         s.report_edited_at, s.report_edit_reason, s.report_original_data,
+        EXISTS(SELECT 1 FROM job_shifts next_s WHERE next_s.job_id = s.job_id AND next_s.id > s.id) AS has_next_shift,
         editor.username AS report_edited_by,
         j.id AS job_id, j.planned_qty, j.status AS job_status, j.component, j.drg_no, j.operation,
         j.remarks AS job_remarks,
@@ -136,11 +137,13 @@ while ($record = $result->fetch_assoc()) {
         'remarks' => implode(' | ', $entryRemarks),
         'edited_at' => $record['report_edited_at'], 'edit_reason' => $record['report_edit_reason'],
         'edited_by' => $record['report_edited_by'],
+        'has_next_shift' => (bool)$record['has_next_shift'],
         'original_data' => is_array($originalData) ? $originalData : null,
-        'can_edit' => $record['shift_status'] === 'Ended' && $record['report_edited_at'] === null
+        'can_edit' => $period === 'daily' && $record['shift_status'] === 'Ended' && $record['report_edited_at'] === null
             && (($user['role'] ?? '') === 'Admin'
                 || (($user['role'] ?? '') === 'Operator/Supervisor'
-                    && (int)$user['operator_id'] === (int)$record['operator_id']))
+                    && !(bool)$record['has_next_shift']
+                    && (int)($user['operator_id'] ?? 0) === (int)$record['operator_id']))
     ];
     $machineId = (int)$record['machine_id'];
     if (!isset($machines[$machineId])) {
@@ -208,63 +211,67 @@ foreach ($machines as $machine) {
 $totals['achievement_percent'] = $totals['planned_qty'] > 0
     ? round(($totals['ok_qty'] / $totals['planned_qty']) * 100, 1) : 0;
 
-// Daily reports are a 24-hour view: keep each machine/shift/operator on its own row.
+// Keep every period shift-wise: weekly/monthly rows aggregate the same machine,
+// shift, and operator across the selected dates.
 $shiftRows = [];
-if ($period === 'daily') {
-    foreach ($entries as $entry) {
-        $key = implode('|', [$entry['machine_id'], $entry['shift_date'], $entry['shift'], $entry['operator_id']]);
-        if (!isset($shiftRows[$key])) {
-            $shiftRows[$key] = [
-                'machine_id' => $entry['machine_id'], 'machine_code' => $entry['machine_code'],
-                'machine_name' => $entry['machine_name'], 'operators' => $entry['operator_name'],
-                'shifts' => in_array($entry['shift'], ['1', '2', '3'], true) ? 'Shift ' . $entry['shift'] : $entry['shift'],
-                'parts' => [], 'components' => [], 'statuses' => [], 'remarks' => [], 'entry_ids' => [],
-                'planned_jobs' => [], 'job_count' => 0, 'shift_count' => 1,
-                'planned_qty' => 0, 'total_qty' => 0, 'ok_qty' => 0, 'mc_reject_qty' => 0,
-                'rm_defect_qty' => 0, 'rework_qty' => 0, 'downtime_min' => 0
-            ];
-        }
-        $row =& $shiftRows[$key];
-        $row['entry_ids'][] = $entry['shift_id'];
-        if (!isset($row['planned_jobs'][$entry['job_id']])) {
-            $row['planned_jobs'][$entry['job_id']] = true;
-            $row['planned_qty'] += $entry['planned_qty'];
-            $row['job_count']++;
-        }
-        $row['parts'][$entry['part_name']] = true;
-        if ($entry['component'] !== null && $entry['component'] !== '') $row['components'][$entry['component']] = true;
-        $row['statuses'][$entry['job_status']] = true;
-        if ($entry['remarks'] !== '') $row['remarks'][$entry['remarks']] = true;
-        foreach (['total_qty', 'ok_qty', 'mc_reject_qty', 'rm_defect_qty', 'rework_qty', 'downtime_min'] as $field) {
-            $row[$field] += $entry[$field];
-        }
-        unset($row);
+foreach ($entries as $entry) {
+    $key = implode('|', [$entry['machine_id'], $entry['shift'], $entry['operator_id']]);
+    if (!isset($shiftRows[$key])) {
+        $shiftRows[$key] = [
+            'machine_id' => $entry['machine_id'], 'machine_code' => $entry['machine_code'],
+            'machine_name' => $entry['machine_name'], 'operators' => $entry['operator_name'],
+            'shifts' => in_array($entry['shift'], ['1', '2', '3'], true) ? 'Shift ' . $entry['shift'] : $entry['shift'],
+            'parts' => [], 'components' => [], 'statuses' => [], 'remarks' => [], 'entry_ids' => [],
+            'planned_jobs' => [], 'planned_shift_jobs' => [], 'job_count' => 0, 'shift_count' => 0,
+            'planned_qty' => 0, 'total_qty' => 0, 'ok_qty' => 0, 'mc_reject_qty' => 0,
+            'rm_defect_qty' => 0, 'rework_qty' => 0, 'downtime_min' => 0
+        ];
     }
-    $shiftRows = array_values(array_map(static function ($row) {
-        unset($row['planned_jobs']);
-        foreach (['parts', 'components', 'statuses', 'remarks'] as $field) {
-            $row[$field] = implode(', ', array_keys($row[$field]));
-        }
-        $row['pending_qty'] = max($row['planned_qty'] - $row['ok_qty'], 0);
-        $row['achievement_percent'] = $row['planned_qty'] > 0
-            ? round(($row['ok_qty'] / $row['planned_qty']) * 100, 1) : 0;
-        return $row;
-    }, $shiftRows));
-    $totals = [
-        'machine_count' => count(array_unique(array_column($shiftRows, 'machine_id'))),
-        'job_count' => 0, 'shift_count' => count($shiftRows), 'planned_qty' => 0, 'total_qty' => 0,
-        'ok_qty' => 0, 'mc_reject_qty' => 0, 'rm_defect_qty' => 0, 'rework_qty' => 0,
-        'pending_qty' => 0, 'downtime_min' => 0, 'achievement_percent' => 0
-    ];
-    foreach ($shiftRows as $row) {
-        foreach (['job_count', 'planned_qty', 'total_qty', 'ok_qty', 'mc_reject_qty', 'rm_defect_qty', 'rework_qty', 'pending_qty', 'downtime_min'] as $field) {
-            $totals[$field] += $row[$field];
-        }
+    $row =& $shiftRows[$key];
+    $row['entry_ids'][] = $entry['shift_id'];
+    if (!isset($row['planned_jobs'][$entry['job_id']])) {
+        $row['planned_jobs'][$entry['job_id']] = true;
+        $row['job_count']++;
     }
-    $totals['achievement_percent'] = $totals['planned_qty'] > 0
-        ? round(($totals['ok_qty'] / $totals['planned_qty']) * 100, 1) : 0;
-    $rows = $shiftRows;
+    $plannedShiftJobKey = $entry['shift_date'] . '|' . $entry['job_id'];
+    if (!isset($row['planned_shift_jobs'][$plannedShiftJobKey])) {
+        $row['planned_shift_jobs'][$plannedShiftJobKey] = true;
+        $row['planned_qty'] += $entry['planned_qty'];
+        $row['shift_count']++;
+    }
+    $row['parts'][$entry['part_name']] = true;
+    if ($entry['component'] !== null && $entry['component'] !== '') $row['components'][$entry['component']] = true;
+    $row['statuses'][$entry['job_status']] = true;
+    if ($entry['remarks'] !== '') $row['remarks'][$entry['remarks']] = true;
+    foreach (['total_qty', 'ok_qty', 'mc_reject_qty', 'rm_defect_qty', 'rework_qty', 'downtime_min'] as $field) {
+        $row[$field] += $entry[$field];
+    }
+    unset($row);
 }
+$shiftRows = array_values(array_map(static function ($row) {
+    unset($row['planned_jobs'], $row['planned_shift_jobs']);
+    foreach (['parts', 'components', 'statuses', 'remarks'] as $field) {
+        $row[$field] = implode(', ', array_keys($row[$field]));
+    }
+    $row['pending_qty'] = max($row['planned_qty'] - $row['ok_qty'], 0);
+    $row['achievement_percent'] = $row['planned_qty'] > 0
+        ? round(($row['ok_qty'] / $row['planned_qty']) * 100, 1) : 0;
+    return $row;
+}, $shiftRows));
+$totals = [
+    'machine_count' => count(array_unique(array_column($shiftRows, 'machine_id'))),
+    'job_count' => 0, 'shift_count' => count($shiftRows), 'planned_qty' => 0, 'total_qty' => 0,
+    'ok_qty' => 0, 'mc_reject_qty' => 0, 'rm_defect_qty' => 0, 'rework_qty' => 0,
+    'pending_qty' => 0, 'downtime_min' => 0, 'achievement_percent' => 0
+];
+foreach ($shiftRows as $row) {
+    foreach (['job_count', 'planned_qty', 'total_qty', 'ok_qty', 'mc_reject_qty', 'rm_defect_qty', 'rework_qty', 'pending_qty', 'downtime_min'] as $field) {
+        $totals[$field] += $row[$field];
+    }
+}
+$totals['achievement_percent'] = $totals['planned_qty'] > 0
+    ? round(($totals['ok_qty'] / $totals['planned_qty']) * 100, 1) : 0;
+$rows = $shiftRows;
 
 json_response([
     'period' => $period,
