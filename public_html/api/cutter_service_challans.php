@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if ($challans) {
         $ids = array_map(static fn($row) => (int)$row['id'], $challans);
         $idList = implode(',', $ids);
-        $result = $conn->query("SELECT i.id, i.challan_id, i.cutter_id, c.cutter_num, c.cutter_module,
+        $result = $conn->query("SELECT i.id, i.challan_id, i.cutter_id, c.cutter_num, c.cutter_module, c.cutter_type,
             i.service_type, i.sent_remarks, i.received_at, i.service_done, i.service_date,
             i.return_condition, i.return_remarks, i.service_event_id
             FROM cutter_service_challan_items i JOIN cutters c ON c.id = i.cutter_id
