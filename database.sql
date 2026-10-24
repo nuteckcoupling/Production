@@ -436,6 +436,7 @@ CREATE TABLE IF NOT EXISTS job_shifts (
   ended_at DATETIME DEFAULT NULL,
   status ENUM('Running','Ended') NOT NULL DEFAULT 'Running',
   total_qty INT NOT NULL DEFAULT 0,
+  cycle_time_min_per_piece DECIMAL(10,2) DEFAULT NULL,
   ok_qty INT NOT NULL DEFAULT 0,
   mc_reject_qty INT NOT NULL DEFAULT 0,
   rm_defect_qty INT NOT NULL DEFAULT 0,

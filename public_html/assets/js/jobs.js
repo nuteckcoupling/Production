@@ -329,6 +329,8 @@
           if (job.can_end_shift) {
             document.getElementById('endShiftPanel').reset();
             document.getElementById('end_job_id').value = job.id;
+            endPanel.dataset.shiftHours = Number(job.shift_hours || 0);
+            updateEndShiftMetrics();
             endPanel.classList.remove('hidden');
             readOnly.className = 'banner';
           } else if (job.can_accept_handover) {
@@ -538,12 +540,27 @@
         });
     }
 
+    function updateEndShiftMetrics() {
+      const panel = document.getElementById('endShiftPanel');
+      const qty = Number(document.getElementById('end_total_qty').value || 0);
+      const cycle = Number(document.getElementById('end_cycle_time_min_per_piece').value || 0);
+      const shiftMinutes = Number(panel.dataset.shiftHours || 0) * 60;
+      const mct = cycle * qty;
+      const utilization = shiftMinutes > 0 ? (mct / shiftMinutes) * 100 : 0;
+      document.getElementById('endShiftMetrics').innerText =
+        `Machine Cutting Time (MCT): ${mct.toFixed(2)} min · Shift Utilization: ${utilization.toFixed(1)}%`;
+    }
+
+    document.getElementById('end_total_qty').addEventListener('input', updateEndShiftMetrics);
+    document.getElementById('end_cycle_time_min_per_piece').addEventListener('input', updateEndShiftMetrics);
+
     function handleEndShift(event) {
       event.preventDefault();
       const form = event.target;
       const data = Object.fromEntries(new FormData(form).entries());
       const quantityIds = ['total_qty', 'ok_qty', 'mc_reject_qty', 'rm_defect_qty', 'rework_qty', 'downtime_min'];
       quantityIds.forEach(field => { data[field] = Number(data[field] || 0); });
+      data.cycle_time_min_per_piece = Number(data.cycle_time_min_per_piece || 0);
       const accounted = data.ok_qty + data.mc_reject_qty + data.rm_defect_qty + data.rework_qty;
       const qtyError = document.getElementById('endShiftQtyError');
       if (accounted > data.total_qty) {

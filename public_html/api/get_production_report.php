@@ -60,7 +60,7 @@ if ($shiftFilter !== '') {
     }
 }
 $stmt = $conn->prepare("SELECT
-        s.id AS shift_id, s.shift_date, s.shift, s.shift_hours, s.total_qty, s.ok_qty,
+        s.id AS shift_id, s.shift_date, s.shift, s.shift_hours, s.total_qty, s.cycle_time_min_per_piece, s.ok_qty,
         s.mc_reject_qty, s.rm_defect_qty, s.rework_qty, s.downtime_min,
         s.operator_id, s.started_at, s.ended_at, s.status AS shift_status, s.machine_status, s.job_outcome, s.issue_code,
         s.remarks AS shift_remarks,
@@ -129,6 +129,10 @@ while ($record = $result->fetch_assoc()) {
         'drg_no' => $record['drg_no'], 'operation' => $record['operation'],
         'cutter_num' => $record['cutter_num'], 'planned_qty' => (int)$record['planned_qty'],
         'total_qty' => (int)$record['total_qty'], 'ok_qty' => (int)$record['ok_qty'],
+        'cycle_time_min_per_piece' => $record['cycle_time_min_per_piece'] === null ? null : (float)$record['cycle_time_min_per_piece'],
+        'machine_cutting_time_min' => round((float)($record['cycle_time_min_per_piece'] ?? 0) * (int)$record['total_qty'], 2),
+        'shift_utilization_percent' => (float)$record['shift_hours'] > 0
+            ? round(((float)($record['cycle_time_min_per_piece'] ?? 0) * (int)$record['total_qty']) / ((float)$record['shift_hours'] * 60) * 100, 1) : 0,
         'mc_reject_qty' => (int)$record['mc_reject_qty'],
         'rm_defect_qty' => (int)$record['rm_defect_qty'], 'rework_qty' => (int)$record['rework_qty'],
         'downtime_min' => (int)$record['downtime_min'], 'machine_status' => $record['machine_status'],
@@ -155,7 +159,8 @@ while ($record = $result->fetch_assoc()) {
             'remarks' => [],
             'planned_jobs' => [], 'job_count' => 0, 'shift_count' => 0,
             'planned_qty' => 0, 'total_qty' => 0, 'ok_qty' => 0, 'mc_reject_qty' => 0,
-            'rm_defect_qty' => 0, 'rework_qty' => 0, 'downtime_min' => 0
+            'rm_defect_qty' => 0, 'rework_qty' => 0, 'downtime_min' => 0,
+            'machine_cutting_time_min' => 0, 'cycle_time_qty' => 0, 'shift_minutes' => 0
         ];
     }
     $row =& $machines[$machineId];
@@ -224,7 +229,8 @@ foreach ($entries as $entry) {
             'parts' => [], 'components' => [], 'statuses' => [], 'remarks' => [], 'entry_ids' => [],
             'planned_jobs' => [], 'planned_shift_jobs' => [], 'job_count' => 0, 'shift_count' => 0,
             'planned_qty' => 0, 'total_qty' => 0, 'ok_qty' => 0, 'mc_reject_qty' => 0,
-            'rm_defect_qty' => 0, 'rework_qty' => 0, 'downtime_min' => 0
+            'rm_defect_qty' => 0, 'rework_qty' => 0, 'downtime_min' => 0,
+            'machine_cutting_time_min' => 0, 'cycle_time_qty' => 0, 'shift_minutes' => 0
         ];
     }
     $row =& $shiftRows[$key];
@@ -246,6 +252,9 @@ foreach ($entries as $entry) {
     foreach (['total_qty', 'ok_qty', 'mc_reject_qty', 'rm_defect_qty', 'rework_qty', 'downtime_min'] as $field) {
         $row[$field] += $entry[$field];
     }
+    $row['machine_cutting_time_min'] += $entry['machine_cutting_time_min'];
+    if ($entry['cycle_time_min_per_piece'] !== null) $row['cycle_time_qty'] += $entry['total_qty'];
+    $row['shift_minutes'] += $entry['shift_hours'] * 60;
     unset($row);
 }
 $shiftRows = array_values(array_map(static function ($row) {
@@ -256,19 +265,28 @@ $shiftRows = array_values(array_map(static function ($row) {
     $row['pending_qty'] = max($row['planned_qty'] - $row['ok_qty'], 0);
     $row['achievement_percent'] = $row['planned_qty'] > 0
         ? round(($row['ok_qty'] / $row['planned_qty']) * 100, 1) : 0;
+    $row['shift_utilization_percent'] = $row['shift_minutes'] > 0
+        ? round(($row['machine_cutting_time_min'] / $row['shift_minutes']) * 100, 1) : 0;
+    $row['cycle_time_min_per_piece'] = $row['cycle_time_qty'] > 0
+        ? round($row['machine_cutting_time_min'] / $row['cycle_time_qty'], 2) : null;
     return $row;
 }, $shiftRows));
 $totals = [
     'machine_count' => count(array_unique(array_column($shiftRows, 'machine_id'))),
     'job_count' => 0, 'shift_count' => count($shiftRows), 'planned_qty' => 0, 'total_qty' => 0,
     'ok_qty' => 0, 'mc_reject_qty' => 0, 'rm_defect_qty' => 0, 'rework_qty' => 0,
-    'pending_qty' => 0, 'downtime_min' => 0, 'achievement_percent' => 0
+    'pending_qty' => 0, 'downtime_min' => 0, 'machine_cutting_time_min' => 0,
+    'cycle_time_qty' => 0, 'shift_minutes' => 0, 'shift_utilization_percent' => 0, 'achievement_percent' => 0
 ];
 foreach ($shiftRows as $row) {
-    foreach (['job_count', 'planned_qty', 'total_qty', 'ok_qty', 'mc_reject_qty', 'rm_defect_qty', 'rework_qty', 'pending_qty', 'downtime_min'] as $field) {
+    foreach (['job_count', 'planned_qty', 'total_qty', 'ok_qty', 'mc_reject_qty', 'rm_defect_qty', 'rework_qty', 'pending_qty', 'downtime_min', 'machine_cutting_time_min', 'cycle_time_qty', 'shift_minutes'] as $field) {
         $totals[$field] += $row[$field];
     }
 }
+$totals['cycle_time_min_per_piece'] = $totals['cycle_time_qty'] > 0
+    ? round($totals['machine_cutting_time_min'] / $totals['cycle_time_qty'], 2) : null;
+$totals['shift_utilization_percent'] = $totals['shift_minutes'] > 0
+    ? round(($totals['machine_cutting_time_min'] / $totals['shift_minutes']) * 100, 1) : 0;
 $totals['achievement_percent'] = $totals['planned_qty'] > 0
     ? round(($totals['ok_qty'] / $totals['planned_qty']) * 100, 1) : 0;
 $rows = $shiftRows;

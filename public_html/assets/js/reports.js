@@ -93,7 +93,7 @@
       document.getElementById('reportGeneratedAt').innerText = `Generated: ${formatDashboardTime(data.generated_at)}`;
       const tbody = document.getElementById('reportTableBody');
       if (!data.rows.length) {
-        tbody.innerHTML = '<tr><td colspan="18" class="empty">No production records found for this period.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="20" class="empty">No production records found for this period.</td></tr>';
         closeReportPanels();
         return;
       }
@@ -103,7 +103,9 @@
         <td>${escapeHtml(row.parts || '-')}</td><td>${escapeHtml(row.components || '-')}</td>
         <td>${Number(row.job_count)}</td><td>${Number(row.planned_qty)}</td><td>${Number(row.total_qty)}</td>
         <td>${Number(row.ok_qty)}</td><td>${Number(row.mc_reject_qty)}</td><td>${Number(row.rm_defect_qty)}</td>
-        <td>${Number(row.rework_qty)}</td><td>${Number(row.pending_qty)}</td><td>${Number(row.downtime_min)} min</td>
+        <td>${Number(row.rework_qty)}</td><td>${Number(row.pending_qty)}</td>
+        <td>${row.cycle_time_min_per_piece === null ? '-' : `${Number(row.cycle_time_min_per_piece).toFixed(2)} min`}</td>
+        <td>${Number(row.shift_utilization_percent || 0)}%</td><td>${Number(row.downtime_min)} min</td>
         <td>${Number(row.achievement_percent)}%</td><td>${escapeHtml(row.statuses || '-')}</td>
         <td>${escapeHtml(row.remarks || '-')}</td>
         <td>${renderReportRowActions(row)}</td>
@@ -212,7 +214,7 @@
       if (!currentReportData) return;
       const headers = ['Machine Number', 'Machine Name', 'Operators', 'Shifts', 'Parts', 'Components',
         'Jobs', 'Planned Qty', 'Total Qty', 'OK Qty', 'M.C. Reject', 'R.M. Defect', 'Rework',
-        'Pending Qty', 'Downtime Minutes', 'Achievement %', 'Status', 'Remarks'];
+        'Pending Qty', 'Cycle Time Minutes Per Piece', 'Shift Utilization %', 'Downtime Minutes', 'Achievement %', 'Status', 'Remarks'];
       const lines = [
         [csvCell(`${systemSettings.company_name} — ${systemSettings.report_heading}`)].join(','),
         [csvCell(systemSettings.company_address || '')].join(','),
@@ -223,7 +225,8 @@
         lines.push([
           row.machine_code, row.machine_name, row.operators, row.shifts, row.parts, row.components,
           row.job_count, row.planned_qty, row.total_qty, row.ok_qty, row.mc_reject_qty,
-          row.rm_defect_qty, row.rework_qty, row.pending_qty, row.downtime_min,
+          row.rm_defect_qty, row.rework_qty, row.pending_qty, row.cycle_time_min_per_piece,
+          row.shift_utilization_percent, row.downtime_min,
           row.achievement_percent, row.statuses, row.remarks
         ].map(csvCell).join(','));
       });
@@ -231,7 +234,8 @@
       lines.push([
         'TOTAL', '', '', '', '', '', totals.job_count, totals.planned_qty, totals.total_qty,
         totals.ok_qty, totals.mc_reject_qty, totals.rm_defect_qty, totals.rework_qty,
-        totals.pending_qty, totals.downtime_min, totals.achievement_percent, '', ''
+        totals.pending_qty, totals.cycle_time_min_per_piece, totals.shift_utilization_percent,
+        totals.downtime_min, totals.achievement_percent, '', ''
       ].map(csvCell).join(','));
       const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
       const url = URL.createObjectURL(blob);

@@ -35,6 +35,14 @@ if ($accounted_qty > $values['total_qty']) {
     json_response(['error' => 'OK + Reject + Defect + Rework cannot exceed Total Qty']);
     exit;
 }
+$cycle_time = filter_var($data['cycle_time_min_per_piece'] ?? null, FILTER_VALIDATE_FLOAT);
+if ($cycle_time === false || $cycle_time < 0 || !is_finite((float)$cycle_time)) {
+    json_error('Cycle time must be a valid number of minutes per piece', 400);
+}
+$cycle_time = (float)$cycle_time;
+if ($values['total_qty'] > 0 && $cycle_time <= 0) {
+    json_error('Enter a cycle time greater than zero when production quantity is entered', 400);
+}
 
 $operator_id = (int)$user['operator_id'];
 $issue_code = trim($data['issue_code'] ?? '');
@@ -89,12 +97,12 @@ try {
 
     $updateShift = $conn->prepare("UPDATE job_shifts SET ended_at = NOW(), status = 'Ended',
         total_qty = ?, ok_qty = ?, mc_reject_qty = ?, rm_defect_qty = ?, rework_qty = ?,
-        downtime_min = ?, machine_status = ?, job_outcome = ?, issue_code = ?,
+        downtime_min = ?, cycle_time_min_per_piece = ?, machine_status = ?, job_outcome = ?, issue_code = ?,
         remarks = NULLIF(CONCAT_WS(' | End Shift: ', NULLIF(remarks, ''), ?), '')
         WHERE id = ? AND status = 'Running'");
-    $updateShift->bind_param("iiiiiissssi", $values['total_qty'], $values['ok_qty'],
+    $updateShift->bind_param("iiiiiidssssi", $values['total_qty'], $values['ok_qty'],
         $values['mc_reject_qty'], $values['rm_defect_qty'], $values['rework_qty'],
-        $values['downtime_min'], $machine_status, $job_outcome, $issue_code, $remarks, $shift_id);
+        $values['downtime_min'], $cycle_time, $machine_status, $job_outcome, $issue_code, $remarks, $shift_id);
     $updateShift->execute();
     if ($updateShift->affected_rows !== 1) {
         throw new RuntimeException('Shift was already ended', 409);
@@ -126,7 +134,10 @@ try {
         'Ended shift for Job #' . $job_id . ' — ' . $job_outcome . ', status ' . $new_status .
         ', OK qty ' . $values['ok_qty'], 'production_job', (int)$job_id);
     json_response(['success' => true, 'job_id' => (int)$job_id, 'status' => $new_status,
-        'cumulative_ok_qty' => $new_cumulative, 'planned_qty' => $new_planned_qty]);
+        'cumulative_ok_qty' => $new_cumulative, 'planned_qty' => $new_planned_qty,
+        'machine_cutting_time_min' => round($cycle_time * $values['total_qty'], 2),
+        'shift_utilization_percent' => (float)$shift['shift_hours'] > 0
+            ? round(($cycle_time * $values['total_qty']) / ((float)$shift['shift_hours'] * 60) * 100, 1) : 0]);
 } catch (RuntimeException $error) {
     $conn->rollback();
     $code = $error->getCode();

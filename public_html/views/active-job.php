@@ -249,6 +249,8 @@
         <input type="hidden" name="job_id" id="end_job_id" />
         <div class="grid">
           <label>Total Qty<input type="number" name="total_qty" id="end_total_qty" min="0" value="0" required /></label>
+          <label>Cycle Time (min per piece)<input type="number" name="cycle_time_min_per_piece" id="end_cycle_time_min_per_piece" min="0" step="0.01" value="0" required /></label>
+          <div class="full banner success" id="endShiftMetrics">Machine Cutting Time (MCT): 0 min · Shift Utilization: 0%</div>
           <label>OK Qty<input type="number" name="ok_qty" id="end_ok_qty" min="0" value="0" required /></label>
           <label>M.C. Reject Qty<input type="number" name="mc_reject_qty" id="end_mc_reject_qty" min="0" value="0" required /></label>
           <label>R.M. Defect Qty<input type="number" name="rm_defect_qty" id="end_rm_defect_qty" min="0" value="0" required /></label>
